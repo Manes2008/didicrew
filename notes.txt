@@ -1,6 +1,0 @@
-1. Hiện tại đang có vấn đề khi thực hiện agent lưu ảnh vào local chưa thực hiện được , hiện lên view cũng chưa được
-2. Đó là xử lý hiệu xuất tối ưu hơn 
-3. Tách logics trong app vào enginer hiện tại chưa có cấu trúc rõ ràng 
-4. Tìm kiếm model nào mạnh trong tạo video ảnh clip thay thế
-5. Kiểm ra 5 file editor , image , script , visual , voice nó dùng làm gì ? Phân tích thử luôn 
-6.Viết script run và deploy , thêm vào đó viết script cicd , MIT các file cho tôi 
