@@ -2,3 +2,5 @@ streamlit
 crewai
 langchain-openai
 python-dotenv
+langchain-google-genai
+pyyaml

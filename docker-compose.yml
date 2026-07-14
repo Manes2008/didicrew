@@ -1,0 +1,16 @@
+# MIT License
+# Copyright (c) 2026 Manes2008/didicrew
+
+version: '3.8'
+
+services:
+  videocrew:
+    build: .
+    container_name: videocrew-app
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./generated_images:/app/generated_images
+    env_file:
+      - .env
+    restart: unless-stopped

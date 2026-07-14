@@ -1,0 +1,19 @@
+script_task:
+  description: "Viet kich ban TikTok 25-30s cho y tuong: {idea}"
+  expected_output: "Kich ban day du co hook, loi thoai be gai, timing ro rang"
+
+visual_task:
+  description: "Dua tren kich ban sau, tao prompt chi tiet cho Kling/Leonardo: {previous_result}"
+  expected_output: "Prompt chi tiet, co character reference"
+
+image_task:
+  description: "Dua tren kich ban, tao prompt va generate hinh anh cho be gai bang gpt-image-2: {idea}"
+  expected_output: "Prompt + Link hinh anh duoc tao"
+
+voice_task:
+  description: "Tao text voiceover giong be gai de thuong cho kich ban: {previous_result}"
+  expected_output: "Text voiceover + setting ElevenLabs"
+
+editor_task:
+  description: "Huong dan chi tiet ghep video trong CapCut tu kich ban: {previous_result}"
+  expected_output: "Huong dan tung buoc trong CapCut"
