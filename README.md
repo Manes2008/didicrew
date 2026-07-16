@@ -36,7 +36,105 @@ videocrew/
 ├── run.bat                  # Script khởi chạy nhanh trên Windows
 ├── run.sh                   # Script khởi chạy nhanh trên Linux/macOS
 └── requirements.txt
+```
 
+---
+
+## Kiến trúc Cơ sở Dữ liệu (Database Architecture)
+
+### Cấu hình kết nối
+
+Hệ thống sử dụng **PostgreSQL** kết nối qua SQLAlchemy ORM và quản lý phiên bản cấu trúc bằng **Alembic**. Khai báo `DATABASE_URL` trong file `.env`:
+
+```env
+# Kết nối local PostgreSQL
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/videocrew
+
+# Kết nối Render PostgreSQL (nội bộ - chỉ dùng trên môi trường Render)
+DATABASE_URL=postgresql://user:password@dpg-xxxxxx-a/dbname
+
+# Kết nối Render PostgreSQL (bên ngoài - dùng khi chạy local)
+DATABASE_URL=postgresql://user:password@dpg-xxxxxx-a.singapore-postgres.render.com/dbname
+```
+
+> **Lưu ý**: Hệ thống **tự động phát hiện** môi trường và chuyển đổi Render Internal URL thành External URL khi bạn chạy ở máy local (không cần sửa thủ công).
+
+Khi khởi chạy ứng dụng lần đầu, **các bảng được tạo tự động** thông qua `init_db()` mà không cần chạy lệnh migration thủ công.
+
+---
+
+### Sơ đồ quan hệ các bảng (ERD)
+
+```text
+channels
+├── id (PK)
+├── name (UNIQUE, NOT NULL)        # Tên kênh (ví dụ: Bé Tiểu Thư, Kênh Ẩm Thực...)
+├── description
+├── goal (NOT NULL)
+├── created_at / updated_at
+│
+├──< channel_stage_configs          # Cấu hình Agent riêng cho từng stage của kênh
+│    ├── id (PK)
+│    ├── channel_id (FK → channels)
+│    ├── stage_name                 # script | visual | image | voice | editor
+│    ├── role / goal / backstory    # Nội dung Agent tùy biến theo kênh
+│    └── markdown_template
+│
+└──< projects                       # Mỗi lần tạo video = 1 Project
+     ├── id (PK)
+     ├── channel_id (FK → channels)
+     ├── idea (NOT NULL)            # Ý tưởng video ban đầu
+     ├── provider / model_name      # LLM được chọn (OpenAI / Google Gemini)
+     ├── current_stage              # Stage hiện tại đang chạy
+     ├── status                     # pending | running | completed
+     ├── created_at / updated_at
+     │
+     └──< project_stages            # Kết quả từng stage của project
+          ├── id (PK)
+          ├── project_id (FK → projects)
+          ├── stage_name             # script | visual | image | voice | editor
+          ├── result_content (TEXT)  # Nội dung kết quả đầu ra
+          ├── media_path             # Đường dẫn file media chính (nếu có)
+          ├── status                 # pending | completed | failed
+          ├── created_at / updated_at
+          │
+          └──< media_files          # Thông tin chi tiết file media được tạo ra
+               ├── id (PK)
+               ├── project_stage_id (FK → project_stages)
+               ├── file_name / file_path   # Tên và đường dẫn lưu trữ file
+               ├── mime_type              # image/png | audio/mp3 ...
+               ├── file_size (BIGINT)     # Kích thước file (bytes)
+               ├── duration_seconds       # Thời lượng (dùng cho audio/video)
+               ├── status                 # active | deleted
+               └── created_at
+```
+
+### Mô tả chi tiết các bảng
+
+| Bảng | Mô tả |
+| :--- | :--- |
+| `channels` | Quản lý nhiều kênh nội dung khác nhau. Mỗi kênh có mục tiêu và phong cách riêng. |
+| `channel_stage_configs` | Cấu hình vai trò Agent tùy biến theo từng stage của từng kênh cụ thể. |
+| `projects` | Mỗi lần bấm "Bắt Đầu Quy Trình" = tạo 1 project mới. Lưu lịch sử toàn bộ các lần tạo video. |
+| `project_stages` | Kết quả đầu ra của từng stage (script, visual, image, voice, editor) thuộc một project. |
+| `media_files` | Metadata của file ảnh/âm thanh được tạo ra, liên kết với stage tương ứng. |
+
+### Quản lý Migration (Alembic)
+
+Khi thêm hoặc sửa cột trong models, sinh migration tự động:
+
+```bash
+# Sinh file migration tự động
+.\venv\Scripts\alembic revision --autogenerate -m "Mô tả thay đổi"
+
+# Áp dụng migration lên DB
+.\venv\Scripts\alembic upgrade head
+
+# Xem lịch sử migration
+.\venv\Scripts\alembic history
+```
+
+---
 
 ## Quy trình 5 Stage (Pipeline)
 
