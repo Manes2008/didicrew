@@ -6,6 +6,7 @@ load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+POLLO_API_KEY = os.getenv("POLLO_API_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/videocrew")
 
 # Tự động chuyển đổi Render Internal URL thành External URL khi chạy ở local

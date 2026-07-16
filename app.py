@@ -155,13 +155,13 @@ else:
         )
 
 # ==================== STAGES RUNNER ====================
-stages = ["script", "visual", "image", "voice", "editor"]
+stages = ["script", "visual", "image", "voice", "video"]
 stage_names = {
     "script": "1. Viết Kịch Bản",
     "visual": "2. Tạo Prompt Hình Ảnh",
     "image": "3. Tạo Hình Ảnh",
     "voice": "4. Tạo Voiceover",
-    "editor": "5. Hướng Dẫn Edit Video"
+    "video": "5. Tạo Video AI"
 }
 
 if "stage" in st.session_state:
@@ -178,11 +178,20 @@ if "stage" in st.session_state:
                 ""
             )
             
+            # Tạo context động từ thông tin kênh
+            context = {
+                "channel_name": selected_channel.name,
+                "channel_description": selected_channel.description,
+                "channel_goal": selected_channel.goal
+            }
+            
             result = run_stage(
                 current,
                 st.session_state["idea"],
                 prev,
-                st.session_state["llm"]
+                st.session_state["llm"],
+                all_results=st.session_state.get("results", {}),
+                context=context
             )
             st.session_state["results"][current] = result
             
@@ -224,6 +233,25 @@ if "stage" in st.session_state:
                                 status="active"
                             )
                             db.add(media_file)
+                            
+                    # Nếu là stage 'video', lưu file media vào media_files
+                    if current == "video":
+                        video_path = None
+                        for line in result.split("\n"):
+                            if "generated_videos" in line:
+                                clean_line = line.replace("📁 Đường dẫn video:", "").replace("📁 Đường dẫn video: ", "").strip()
+                                video_path = clean_line
+                                break
+                        if video_path:
+                            stage_rec.media_path = video_path
+                            media_file = MediaFile(
+                                project_stage_id=stage_rec.id,
+                                file_name=os.path.basename(video_path),
+                                file_path=video_path,
+                                mime_type="video/mp4",
+                                status="active"
+                            )
+                            db.add(media_file)
                     
                     # Cập nhật thông tin dự án
                     proj_rec = db.query(Project).filter_by(id=project_id).first()
@@ -257,6 +285,26 @@ if "stage" in st.session_state:
             else:
                 st.warning("Không tìm thấy đường dẫn ảnh cục bộ hợp lệ trong phản hồi. Nội dung gốc:")
                 st.text(result_text)
+                
+        elif current == "video":
+            st.subheader("🎬 Video AI đã tạo")
+            video_path = None
+
+            for line in result_text.split("\n"):
+                if "generated_videos" in line:
+                    clean_line = line.replace("📁 Đường dẫn video:", "").replace("📁 Đường dẫn video: ", "").strip()
+                    video_path = clean_line
+                    break
+
+            if video_path and os.path.exists(video_path):
+                st.video(video_path)
+                st.success(f"✅ Đã tải video cục bộ thành công: {video_path}")
+            else:
+                if "ERROR" in result_text:
+                    st.error(result_text)
+                else:
+                    st.warning("Không tìm thấy đường dẫn video cục bộ hợp lệ trong phản hồi. Nội dung gốc:")
+                    st.text(result_text)
         else:
             st.text_area("Kết quả:", value=result_text, height=350)
 
