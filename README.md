@@ -1,4 +1,4 @@
-﻿# VideoCrew - AI Video Factory
+# VideoCrew - AI Video Factory
 
 > **Hệ thống tự động sản xuất nội dung video ngắn (TikTok/Reel) cho nhân vật Bé Tiểu Thư bằng AI.**
 
@@ -123,6 +123,64 @@ docker-compose up --build
 ```
 
 Truy cập tại: `http://localhost:8501`
+
+---
+
+## Hướng dẫn lập trình (Sử dụng trực tiếp trong Python)
+
+Hệ thống được thiết kế dạng **mô-đun hóa (modular)**, cho phép bạn gọi riêng lẻ từng module chức năng (stage) dựa trên kết quả của module trước đó.
+
+### Khởi tạo môi trường chung
+
+```python
+from src.core.llm_provider import get_llm
+from src.core.engine import run_stage
+
+# Khởi tạo LLM dùng chung cho các module
+llm = get_llm(
+    provider="OpenAI",
+    model_name="gpt-4o-mini",
+    api_key="YOUR_OPENAI_API_KEY"
+)
+idea = "Be gai mac vay hong cam on me"
+```
+
+### Chi tiết cách gọi các Module chức năng
+
+#### 1. Module Viết Kịch Bản (`script`)
+* **Input**: Ý tưởng gốc (`idea`).
+* **Output**: Kịch bản chi tiết gồm phân cảnh và lời thoại nhân vật.
+```python
+script_result = run_stage("script", idea, llm=llm)
+```
+
+#### 2. Module Tạo Prompt Hình Ảnh (`visual`)
+* **Input**: Kịch bản phân cảnh từ module trước (`previous_result`).
+* **Output**: Mô tả hình ảnh (prompts) chi tiết cho từng phân cảnh.
+```python
+visual_result = run_stage("visual", idea, previous_result=script_result, llm=llm)
+```
+
+#### 3. Module Tạo Hình Ảnh (`image`)
+* **Input**: Prompt hình ảnh chi tiết từ module tạo prompt (`previous_result`).
+* **Output**: Đường dẫn tệp ảnh cục bộ đã lưu trên đĩa.
+```python
+image_result = run_stage("image", idea, previous_result=visual_result)
+```
+
+#### 4. Module Tạo Giọng Nói (`voice`)
+* **Input**: Kịch bản lời thoại từ module viết kịch bản (`previous_result`).
+* **Output**: Văn bản kịch bản lồng tiếng kèm tham số giọng đọc.
+```python
+voice_result = run_stage("voice", idea, previous_result=script_result, llm=llm)
+```
+
+#### 5. Module Hướng Dẫn Dựng Video (`editor`)
+* **Input**: Toàn bộ kịch bản và thông tin nguyên liệu từ module tạo giọng nói (`previous_result`).
+* **Output**: Hướng dẫn dựng video chi tiết từng bước trên CapCut.
+```python
+editor_result = run_stage("editor", idea, previous_result=voice_result, llm=llm)
+```
 
 ---
 

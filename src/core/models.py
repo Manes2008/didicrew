@@ -1,0 +1,136 @@
+import datetime
+from sqlalchemy import (
+    create_engine, Column, Integer, String, Text, DateTime, BigInteger, ForeignKey, UniqueConstraint
+)
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship, validates
+import sys
+import os
+# Đảm bảo root directory có trong sys.path để import config.py
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
+
+import config
+DATABASE_URL = config.DATABASE_URL
+
+Base = declarative_base()
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def init_db():
+    Base.metadata.create_all(bind=engine)
+
+def get_db_session():
+    db = SessionLocal()
+    try:
+        return db
+    finally:
+        pass  # Người dùng đóng thủ công hoặc qua try/finally ở nơi gọi
+
+class Channel(Base):
+    __tablename__ = "channels"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), unique=True, nullable=False)
+    description = Column(Text, nullable=True)
+    goal = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    configs = relationship("ChannelStageConfig", back_populates="channel", cascade="all, delete-orphan")
+    projects = relationship("Project", back_populates="channel", cascade="all, delete-orphan")
+
+    @validates("name")
+    def validate_name(self, key, name):
+        if not name or not name.strip():
+            raise ValueError("Tên kênh không được để trống")
+        if len(name) > 50:
+            raise ValueError("Tên kênh không được vượt quá 50 ký tự")
+        return name.strip()
+
+    @validates("goal")
+    def validate_goal(self, key, goal):
+        if not goal or not goal.strip():
+            raise ValueError("Mục tiêu của kênh không được để trống")
+        return goal.strip()
+
+
+class ChannelStageConfig(Base):
+    __tablename__ = "channel_stage_configs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    channel_id = Column(Integer, ForeignKey("channels.id", ondelete="CASCADE"), nullable=False)
+    stage_name = Column(String(20), nullable=False)
+    role = Column(String(255), nullable=False)
+    goal = Column(Text, nullable=False)
+    backstory = Column(Text, nullable=False)
+    markdown_template = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("channel_id", "stage_name", name="uq_channel_stage"),
+    )
+
+    channel = relationship("Channel", back_populates="configs")
+
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    channel_id = Column(Integer, ForeignKey("channels.id", ondelete="CASCADE"), nullable=False)
+    idea = Column(Text, nullable=False)
+    provider = Column(String(50), nullable=False)
+    model_name = Column(String(50), nullable=False)
+    current_stage = Column(String(20), default="script")
+    status = Column(String(20), default="pending")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    channel = relationship("Channel", back_populates="projects")
+    stages = relationship("ProjectStage", back_populates="project", cascade="all, delete-orphan")
+
+    @validates("idea")
+    def validate_idea(self, key, idea):
+        if not idea or not idea.strip():
+            raise ValueError("Ý tưởng video không được để trống")
+        if len(idea.strip()) < 5:
+            raise ValueError("Ý tưởng video quá ngắn (tối thiểu 5 ký tự)")
+        return idea.strip()
+
+
+class ProjectStage(Base):
+    __tablename__ = "project_stages"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    stage_name = Column(String(20), nullable=False)
+    result_content = Column(Text, nullable=True)
+    media_path = Column(String(255), nullable=True)
+    status = Column(String(20), default="pending")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("project_id", "stage_name", name="uq_project_stage"),
+    )
+
+    project = relationship("Project", back_populates="stages")
+    media_files = relationship("MediaFile", back_populates="project_stage", cascade="all, delete-orphan")
+
+
+class MediaFile(Base):
+    __tablename__ = "media_files"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    project_stage_id = Column(Integer, ForeignKey("project_stages.id", ondelete="CASCADE"), nullable=False)
+    file_name = Column(String(255), nullable=False)
+    file_path = Column(String(500), nullable=False)
+    mime_type = Column(String(100), nullable=True)
+    file_size = Column(BigInteger, nullable=True)
+    duration_seconds = Column(Integer, nullable=True)
+    status = Column(String(20), default="active")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    project_stage = relationship("ProjectStage", back_populates="media_files")
