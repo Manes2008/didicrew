@@ -14,6 +14,10 @@ videocrew/
 │   ├── agents.yaml          # Định nghĩa role, goal, backstory cho từng Agent
 │   └── tasks.yaml           # Mô tả nhiệm vụ và đầu ra kỳ vọng cho từng stage
 ├── generated_images/        # Thư mục lưu ảnh được tạo ra (auto-created)
+├── migrations/              # Alembic migration scripts (tự động sinh)
+│   ├── env.py               # Cấu hình Alembic (kết nối DB từ .env)
+│   ├── script.py.mako       # Template sinh migration file
+│   └── versions/            # Các phiên bản migration
 ├── src/
 │   ├── agents/
 │   │   └── factory.py       # AgentFactory: Khởi tạo CrewAI Agent động từ config YAML
@@ -21,18 +25,18 @@ videocrew/
 │   │   └── image_tool.py    # Tool sinh ảnh: gpt-image-2 (fallback: gpt-image-1-mini)
 │   └── core/
 │       ├── engine.py        # WorkflowEngine: Điều phối 5 stage chạy tuần tự
-│       └── llm_provider.py  # Khởi tạo LLM linh hoạt (OpenAI / Google Gemini)
-├── .env                     # API Keys bảo mật (không commit lên git)
+│       ├── llm_provider.py  # Khởi tạo LLM linh hoạt (OpenAI / Google Gemini)
+│       └── models.py        # SQLAlchemy ORM Models + init_db() tự động tạo bảng
+├── .env                     # API Keys & DATABASE_URL bảo mật (không commit lên git)
+├── alembic.ini              # Cấu hình Alembic CLI
 ├── app.py                   # Giao diện Streamlit (UI mỏng, gọi engine, hiển thị kết quả)
-├── config.py                # Load biến môi trường từ .env
+├── config.py                # Load biến môi trường từ .env + tự động chuyển đổi DB URL
 ├── Dockerfile               # Đóng gói Docker
 ├── docker-compose.yml       # Cấu hình Docker Compose
 ├── run.bat                  # Script khởi chạy nhanh trên Windows
 ├── run.sh                   # Script khởi chạy nhanh trên Linux/macOS
 └── requirements.txt
-```
 
----
 
 ## Quy trình 5 Stage (Pipeline)
 
