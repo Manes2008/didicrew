@@ -252,7 +252,7 @@ if "stage" in st.session_state:
                     break
 
             if image_path and os.path.exists(image_path):
-                st.image(image_path, caption=f"Ảnh lưu tại: {image_path}", width=None)
+                st.image(image_path, caption=f"Ảnh lưu tại: {image_path}")
                 st.success(f"✅ Đã tải ảnh cục bộ thành công: {image_path}")
             else:
                 st.warning("Không tìm thấy đường dẫn ảnh cục bộ hợp lệ trong phản hồi. Nội dung gốc:")
