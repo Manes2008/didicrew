@@ -70,16 +70,29 @@ with st.sidebar:
         selected_project = db.query(Project).filter_by(id=project_id).first()
         
         # Đồng bộ trạng thái từ DB sang session_state
+        # Chi sync khi project thay doi (project_id moi != project_id cu)
+        # Tranh ghi de stage khi user dang navigate qua thanh tien trinh
         if selected_project:
+            prev_project_id = st.session_state.get("project_id")
+            project_changed = prev_project_id != selected_project.id
+
             st.session_state["project_id"] = selected_project.id
             st.session_state["idea"] = selected_project.idea
-            st.session_state["stage"] = selected_project.current_stage
-            
-            # Load các kết quả stage đã chạy
-            st.session_state["results"] = {}
-            for stage_rec in selected_project.stages:
-                if stage_rec.result_content:
-                    st.session_state["results"][stage_rec.stage_name] = stage_rec.result_content
+
+            if project_changed:
+                # Chi reset stage va results khi doi sang du an khac
+                st.session_state["stage"] = selected_project.current_stage
+                st.session_state["results"] = {}
+                for stage_rec in selected_project.stages:
+                    if stage_rec.result_content:
+                        st.session_state["results"][stage_rec.stage_name] = stage_rec.result_content
+            else:
+                # Cung du an: dam bao results luon day du (khong reset stage)
+                if "results" not in st.session_state:
+                    st.session_state["results"] = {}
+                for stage_rec in selected_project.stages:
+                    if stage_rec.result_content and stage_rec.stage_name not in st.session_state["results"]:
+                        st.session_state["results"][stage_rec.stage_name] = stage_rec.result_content
 
 # ==================== INPUT FIELD & VALIDATION ====================
 # Nếu đang chọn dự án cũ, hiển thị ý tưởng của dự án cũ (disable sửa đổi)
@@ -166,17 +179,79 @@ stage_names = {
 
 if "stage" in st.session_state:
     current = st.session_state["stage"]
+    completed = set(st.session_state.get("results", {}).keys())
+
+    # ==================== STEP NAVIGATOR ====================
+    st.markdown("""
+    <style>
+    div[data-testid="column"] > div > div > div > button {
+        width: 100%;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.82rem;
+        padding: 0.4rem 0.2rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    nav_cols = st.columns(5)
+    step_labels = {
+        "script": "1\nViết Kịch Bản",
+        "visual": "2\nPrompt Hình Ảnh",
+        "image":  "3\nTạo Hình Ảnh",
+        "voice":  "4\nVoiceover",
+        "video":  "5\nVideo AI",
+    }
+
+    for col, stage_key in zip(nav_cols, stages):
+        with col:
+            is_done    = stage_key in completed
+            is_current = stage_key == current
+            label      = step_labels[stage_key]
+
+            if is_current:
+                icon = "▶"
+                btn_type = "primary"
+                disabled = False
+                help_text = "Đang ở bước này"
+            elif is_done:
+                icon = "✅"
+                btn_type = "secondary"
+                disabled = False
+                help_text = "Đã hoàn thành — Click để xem lại / chỉnh sửa"
+            else:
+                icon = "⏳"
+                btn_type = "secondary"
+                disabled = True
+                prev_idx = stages.index(stage_key) - 1
+                prev_name = stage_names[stages[prev_idx]].split(". ", 1)[-1] if prev_idx >= 0 else ""
+                help_text = f"Chưa mở khóa — Cần hoàn thành '{prev_name}' trước"
+
+            display = f"{icon} {label}"
+            if st.button(display, key=f"nav_{stage_key}", type=btn_type, disabled=disabled,
+                         help=help_text, use_container_width=True):
+                st.session_state["stage"] = stage_key
+                st.rerun()
+
+    st.divider()
+    # =========================================================
+
     st.subheader(stage_names[current])
 
     if st.button(f"▶️ Chạy {stage_names[current]}"):
         with st.spinner(f"Đang chạy {current}..."):
+            if "llm" not in st.session_state:
+                st.error("Phiên làm việc đã hết hạn. Vui lòng chọn lại dự án ở sidebar để khởi tạo lại LLM.")
+                st.stop()
             from src.core.engine import run_stage
             
             # Lấy kết quả của stage trước đó làm ngữ cảnh
-            prev = st.session_state["results"].get(
-                stages[stages.index(current) - 1] if stages.index(current) > 0 else None,
-                ""
-            )
+            current_idx = stages.index(current)
+            prev_stage = stages[current_idx - 1] if current_idx > 0 else None
+            prev = st.session_state["results"].get(prev_stage, "") if prev_stage else ""
             
             # Tạo context động từ thông tin kênh
             context = {
@@ -306,7 +381,10 @@ if "stage" in st.session_state:
                     st.warning("Không tìm thấy đường dẫn video cục bộ hợp lệ trong phản hồi. Nội dung gốc:")
                     st.text(result_text)
         else:
-            st.text_area("Kết quả:", value=result_text, height=350)
+            with st.container(border=True):
+                st.markdown(result_text)
+            with st.expander("Xem raw text / Copy"):
+                st.code(result_text, language="markdown")
 
         # Nút điều khiển chuyển tiếp / quay lại
         col1, col2, col3 = st.columns(3)

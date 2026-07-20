@@ -3,7 +3,7 @@
 
 import os
 import yaml
-from crewai import Task
+from crewai import Task, Crew
 from src.agents.factory import AgentFactory
 
 class WorkflowEngine:
@@ -87,7 +87,9 @@ class WorkflowEngine:
             )
             
             # Thực thi tác vụ bằng agent
-            return agent.execute_task(task)
+            crew = Crew(agents=[agent], tasks=[task], verbose=False)
+            result = crew.kickoff()
+            return str(result)
             
         except Exception as e:
             return f"❌ Lỗi stage {stage_name}: {str(e)}"

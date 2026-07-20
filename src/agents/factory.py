@@ -46,6 +46,6 @@ class AgentFactory:
             verbose=agent_cfg.get("verbose", False),
             max_iter=agent_cfg.get("max_iter", 10),
             allow_delegation=agent_cfg.get("allow_delegation", False),
-            chat_llm=llm,
+            llm=llm,
             tools=tools
         )
