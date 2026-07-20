@@ -1,193 +1,219 @@
-# VideoCrew - AI Video Factory
+﻿# VideoCrew Studio — AI Video Production Platform
 
-> **Hệ thống tự động sản xuất nội dung video ngắn (TikTok/Reel) cho nhân vật Bé Tiểu Thư bằng AI.**
+> **Nền tảng tự động sản xuất nội dung video ngắn (TikTok/Reels) bằng AI — từ ý tưởng đến video hoàn chỉnh.**
 
-Được xây dựng trên nền tảng **CrewAI** + **OpenAI** + **Streamlit**, hệ thống điều phối 5 Agent AI chuyên biệt để thực hiện toàn bộ quy trình từ ý tưởng đến nguyên liệu sản xuất video hoàn chỉnh.
+Được xây dựng trên **CrewAI** + **OpenAI** + **Streamlit**, hệ thống điều phối 5 AI Agent chuyên biệt chạy tuần tự, kết quả của stage trước là đầu vào của stage tiếp theo. Mọi dự án được lưu trữ vào **PostgreSQL**, cho phép tiếp tục công việc bất kỳ lúc nào.
 
 ---
 
-## Kiến trúc hệ thống
+## Tính năng chính
 
-```text
+### Pipeline 5 Stage tự động
+
+| Stage | Tên | AI Agent | Mô tả |
+| :---: | :--- | :--- | :--- |
+| **1** | Viết Kịch Bản | Senior Script Writer | Nhận ý tưởng → Viết kịch bản TikTok 25-30s hoàn chỉnh (hook, lời thoại, timing) |
+| **2** | Tạo Prompt Hình Ảnh | Visual Prompt Engineer | Nhận kịch bản → Tạo prompt hình ảnh chi tiết (phong cách, nhân vật, bối cảnh) |
+| **3** | Tạo Hình Ảnh | Image Generation | Nhận prompt → Gọi API gpt-image-2 → Lưu ảnh local → Hiển thị trực tiếp |
+| **4** | Tạo Voiceover | Voiceover Specialist | Nhận kịch bản → Soạn text voiceover + cấu hình giọng đọc ElevenLabs |
+| **5** | Tạo Video AI | Video Editor | Nhận tất cả nguyên liệu → Gọi API Pollo AI (Minimax Hailuo 02) → Tải video về local |
+
+### Quản lý Kênh & Dự án
+
+- **Đa kênh**: Tạo và quản lý nhiều kênh nội dung (Bé Tiểu Thư, Ẩm thực, Du lịch...), mỗi kênh có mục tiêu, phong cách riêng
+- **Lưu lịch sử**: Mỗi lần bấm "Bắt Đầu" tạo ra 1 Project, toàn bộ kết quả từng stage được lưu vào DB
+- **Tiếp tục dang dở**: Chọn dự án cũ từ sidebar → hệ thống tự động khôi phục đúng stage đang làm
+- **Regenerate**: Bấm lại để tạo kết quả mới cho bất kỳ stage nào
+
+### Thanh tiến trình điều hướng (Step Navigator)
+
+- Hiển thị 5 bước **1 → 2 → 3 → 4 → 5** dạng nút bấm ở đầu màn hình
+- **Click vào stage đã hoàn thành** → nhảy về xem lại / chỉnh sửa ngay lập tức
+- Stage chưa hoàn thành hiển thị tooltip lý do bị khóa
+- Trạng thái trực quan: `▶` Đang chạy | `✅` Đã xong | `⏳` Chưa mở khóa
+
+### Hiển thị kết quả thông minh
+
+- **Script / Visual / Voice**: Render Markdown đầy đủ (bold, header, list) thay vì raw text
+- Nút **"Xem raw text / Copy"** để lấy nội dung gốc khi cần
+- **Image stage**: Hiển thị ảnh trực tiếp trong giao diện, kèm đường dẫn lưu local
+- **Video stage**: Phát video trực tiếp trong giao diện, tải về từ Pollo AI
+
+### Hỗ trợ đa LLM
+
+Chọn nhà cung cấp LLM trực tiếp trên sidebar:
+
+| Nhà cung cấp | Model hỗ trợ |
+| :--- | :--- |
+| **OpenAI** | `gpt-4o-mini`, `gpt-4o`, `gpt-3.5-turbo` |
+| **Google Gemini** | `gemini-1.5-flash`, `gemini-1.5-pro` |
+
+### Sinh ảnh với Fallback tự động
+
+| Model | Ưu tiên | Ghi chú |
+| :--- | :---: | :--- |
+| `gpt-image-2` | Chinh | Chat luong cao nhat |
+| `gpt-image-1-mini` | Fallback | Tu dong dung khi gpt-image-2 khong kha dung |
+
+Nếu cả hai đều lỗi, hệ thống trả về thông báo hướng dẫn chi tiết thay vì crash.
+
+---
+
+## Kien truc he thong
+
+```
 videocrew/
 ├── config/
-│   ├── agents.yaml          # Định nghĩa role, goal, backstory cho từng Agent
-│   └── tasks.yaml           # Mô tả nhiệm vụ và đầu ra kỳ vọng cho từng stage
-├── generated_images/        # Thư mục lưu ảnh được tạo ra (auto-created)
-├── migrations/              # Alembic migration scripts (tự động sinh)
-│   ├── env.py               # Cấu hình Alembic (kết nối DB từ .env)
-│   ├── script.py.mako       # Template sinh migration file
-│   └── versions/            # Các phiên bản migration
+│   ├── agents.yaml          # Dinh nghia role, goal, backstory cho tung Agent
+│   └── tasks.yaml           # Mo ta nhiem vu va dau ra ky vong cho tung stage
+├── generated_images/        # Thu muc luu anh duoc tao (auto-created)
+├── generated_videos/        # Thu muc luu video duoc tao (auto-created)
+├── migrations/              # Alembic migration scripts
 ├── src/
 │   ├── agents/
-│   │   └── factory.py       # AgentFactory: Khởi tạo CrewAI Agent động từ config YAML
+│   │   └── factory.py       # AgentFactory: khoi tao CrewAI Agent dong tu config YAML
 │   ├── tools/
-│   │   └── image_tool.py    # Tool sinh ảnh: gpt-image-2 (fallback: gpt-image-1-mini)
+│   │   ├── image_tool.py    # Sinh anh: gpt-image-2 → fallback gpt-image-1-mini
+│   │   └── video_tool.py    # Sinh video: Pollo AI (Minimax Hailuo 02), polling pattern
 │   └── core/
-│       ├── engine.py        # WorkflowEngine: Điều phối 5 stage chạy tuần tự
-│       ├── llm_provider.py  # Khởi tạo LLM linh hoạt (OpenAI / Google Gemini)
-│       └── models.py        # SQLAlchemy ORM Models + init_db() tự động tạo bảng
-├── .env                     # API Keys & DATABASE_URL bảo mật (không commit lên git)
-├── alembic.ini              # Cấu hình Alembic CLI
-├── app.py                   # Giao diện Streamlit (UI mỏng, gọi engine, hiển thị kết quả)
-├── config.py                # Load biến môi trường từ .env + tự động chuyển đổi DB URL
-├── Dockerfile               # Đóng gói Docker
-├── docker-compose.yml       # Cấu hình Docker Compose
-├── run.bat                  # Script khởi chạy nhanh trên Windows
-├── run.sh                   # Script khởi chạy nhanh trên Linux/macOS
+│       ├── engine.py        # WorkflowEngine: dieu phoi 5 stage, Crew.kickoff()
+│       ├── llm_provider.py  # Khoi tao LLM linh hoat (OpenAI / Google Gemini)
+│       └── models.py        # SQLAlchemy ORM Models + init_db() tu dong tao bang
+├── .env                     # API Keys & DATABASE_URL (khong commit len git)
+├── alembic.ini
+├── app.py                   # Giao dien Streamlit (UI, dieu phoi, hien thi ket qua)
+├── config.py                # Load .env + tu dong chuyen doi Render DB URL
+├── Dockerfile
+├── docker-compose.yml
+├── run.bat                  # Script khoi chay nhanh Windows
+├── run.sh                   # Script khoi chay nhanh Linux/macOS
 └── requirements.txt
 ```
 
 ---
 
-## Kiến trúc Cơ sở Dữ liệu (Database Architecture)
+## Co so Du lieu (Database)
 
-### Cấu hình kết nối
+### So do quan he (ERD)
 
-Hệ thống sử dụng **PostgreSQL** kết nối qua SQLAlchemy ORM và quản lý phiên bản cấu trúc bằng **Alembic**. Khai báo `DATABASE_URL` trong file `.env`:
-
-```env
-# Kết nối local PostgreSQL
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/videocrew
-
-# Kết nối Render PostgreSQL (nội bộ - chỉ dùng trên môi trường Render)
-DATABASE_URL=postgresql://user:password@dpg-xxxxxx-a/dbname
-
-# Kết nối Render PostgreSQL (bên ngoài - dùng khi chạy local)
-DATABASE_URL=postgresql://user:password@dpg-xxxxxx-a.singapore-postgres.render.com/dbname
 ```
-
-> **Lưu ý**: Hệ thống **tự động phát hiện** môi trường và chuyển đổi Render Internal URL thành External URL khi bạn chạy ở máy local (không cần sửa thủ công).
-
-Khi khởi chạy ứng dụng lần đầu, **các bảng được tạo tự động** thông qua `init_db()` mà không cần chạy lệnh migration thủ công.
-
----
-
-### Sơ đồ quan hệ các bảng (ERD)
-
-```text
 channels
 ├── id (PK)
-├── name (UNIQUE, NOT NULL)        # Tên kênh (ví dụ: Bé Tiểu Thư, Kênh Ẩm Thực...)
+├── name (UNIQUE, NOT NULL)
 ├── description
 ├── goal (NOT NULL)
 ├── created_at / updated_at
 │
-├──< channel_stage_configs          # Cấu hình Agent riêng cho từng stage của kênh
+├──< channel_stage_configs
 │    ├── id (PK)
-│    ├── channel_id (FK → channels)
-│    ├── stage_name                 # script | visual | image | voice | editor
-│    ├── role / goal / backstory    # Nội dung Agent tùy biến theo kênh
+│    ├── channel_id (FK)
+│    ├── stage_name            # script | visual | image | voice | video
+│    ├── role / goal / backstory
 │    └── markdown_template
 │
-└──< projects                       # Mỗi lần tạo video = 1 Project
+└──< projects
      ├── id (PK)
-     ├── channel_id (FK → channels)
-     ├── idea (NOT NULL)            # Ý tưởng video ban đầu
-     ├── provider / model_name      # LLM được chọn (OpenAI / Google Gemini)
-     ├── current_stage              # Stage hiện tại đang chạy
-     ├── status                     # pending | running | completed
+     ├── channel_id (FK)
+     ├── idea (NOT NULL)
+     ├── provider / model_name
+     ├── current_stage
+     ├── status                # pending | running | completed
      ├── created_at / updated_at
      │
-     └──< project_stages            # Kết quả từng stage của project
+     └──< project_stages
           ├── id (PK)
-          ├── project_id (FK → projects)
-          ├── stage_name             # script | visual | image | voice | editor
-          ├── result_content (TEXT)  # Nội dung kết quả đầu ra
-          ├── media_path             # Đường dẫn file media chính (nếu có)
-          ├── status                 # pending | completed | failed
+          ├── project_id (FK)
+          ├── stage_name
+          ├── result_content (TEXT)
+          ├── media_path        # Duong dan file anh/video
+          ├── status            # pending | completed | failed
           ├── created_at / updated_at
           │
-          └──< media_files          # Thông tin chi tiết file media được tạo ra
+          └──< media_files
                ├── id (PK)
-               ├── project_stage_id (FK → project_stages)
-               ├── file_name / file_path   # Tên và đường dẫn lưu trữ file
-               ├── mime_type              # image/png | audio/mp3 ...
-               ├── file_size (BIGINT)     # Kích thước file (bytes)
-               ├── duration_seconds       # Thời lượng (dùng cho audio/video)
-               ├── status                 # active | deleted
+               ├── project_stage_id (FK)
+               ├── file_name / file_path
+               ├── mime_type    # image/png | video/mp4
+               ├── file_size (BIGINT)
+               ├── duration_seconds
+               ├── status       # active | deleted
                └── created_at
 ```
 
-### Mô tả chi tiết các bảng
+### Cau hinh ket noi
 
-| Bảng | Mô tả |
-| :--- | :--- |
-| `channels` | Quản lý nhiều kênh nội dung khác nhau. Mỗi kênh có mục tiêu và phong cách riêng. |
-| `channel_stage_configs` | Cấu hình vai trò Agent tùy biến theo từng stage của từng kênh cụ thể. |
-| `projects` | Mỗi lần bấm "Bắt Đầu Quy Trình" = tạo 1 project mới. Lưu lịch sử toàn bộ các lần tạo video. |
-| `project_stages` | Kết quả đầu ra của từng stage (script, visual, image, voice, editor) thuộc một project. |
-| `media_files` | Metadata của file ảnh/âm thanh được tạo ra, liên kết với stage tương ứng. |
+Khai bao trong file `.env`:
 
-### Quản lý Migration (Alembic)
+```env
+# Local PostgreSQL
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/videocrew
 
-Khi thêm hoặc sửa cột trong models, sinh migration tự động:
+# Render PostgreSQL (external)
+DATABASE_URL=postgresql://user:password@dpg-xxxxxx-a.singapore-postgres.render.com/dbname
+```
+
+He thong **tu dong phat hien** va chuyen doi Render Internal URL thanh External URL khi chay local.
+Cac bang duoc **tao tu dong** qua `init_db()` khi khoi chay lan dau.
+
+### Quan ly Migration (Alembic)
 
 ```bash
-# Sinh file migration tự động
-.\venv\Scripts\alembic revision --autogenerate -m "Mô tả thay đổi"
+# Sinh file migration
+.\venv\Scripts\alembic revision --autogenerate -m "Mo ta thay doi"
 
-# Áp dụng migration lên DB
+# Ap dung migration
 .\venv\Scripts\alembic upgrade head
 
-# Xem lịch sử migration
+# Xem lich su
 .\venv\Scripts\alembic history
 ```
 
 ---
 
-## Quy trình 5 Stage (Pipeline)
+## Thiet ke toi uu hoa chi phi
 
-Hệ thống thực thi tuần tự 5 stage, kết quả của stage trước là đầu vào của stage tiếp theo:
+### Stage 3 (Hinh Anh) — Bypass Agent
 
-| Stage | Agent | Mô tả |
-| :---: | :--- | :--- |
-| **1** | Senior Script Writer | Nhận ý tưởng → Viết kịch bản TikTok 25-30s hoàn chỉnh (hook, lời thoại, timing) |
-| **2** | Visual Prompt Engineer | Nhận kịch bản → Tạo prompt hình ảnh chi tiết (phong cách, nhân vật, bối cảnh) |
-| **3** | Image Generation | Nhận prompt → **Gọi trực tiếp API** gpt-image-2 → Lưu ảnh local → Hiển thị |
-| **4** | Voiceover Specialist | Nhận kịch bản → Soạn text voiceover + cấu hình giọng đọc ElevenLabs |
-| **5** | Video Editor | Nhận tất cả nguyên liệu → Hướng dẫn ghép video chi tiết trong CapCut |
-
----
-
-## Thiết kế tối ưu hóa chi phí
-
-### Stage 3 (Tạo Hình Ảnh) - Gọi trực tiếp không qua Agent
-
-Stage sinh ảnh được thiết kế để **bỏ qua CrewAI Agent** và gọi trực tiếp hàm Python:
+Stage sinh anh **bo qua CrewAI Agent**, goi truc tiep Python:
 
 ```python
-# src/core/engine.py
 if stage_name == "image":
     from src.tools.image_tool import generate_gpt_image_func
-    prompt = previous_result if previous_result else idea
     return generate_gpt_image_func(prompt)
 ```
 
-**Lý do**: Sinh ảnh là tác vụ xác định (deterministic), không cần LLM suy luận. Việc gọi trực tiếp giúp:
-- Tiết kiệm **3,000 - 8,000 tokens/lần** (loại bỏ vòng suy luận Agent)
-- Đảm bảo thành công **100%** (tránh lỗi LLM từ chối gọi tool)
-- Tốc độ phản hồi nhanh hơn **5-10 lần**
+Tiet kiem 3,000-8,000 tokens/lan, toc do nhanh hon 5-10 lan, tranh loi LLM tu choi goi tool.
 
-### Cơ chế Fallback tự động cho model sinh ảnh
+### Stage 5 (Video) — Polling pattern
 
-```python
-# src/tools/image_tool.py
-# Uu tien gpt-image-2 (chat luong cao nhat)
-# Neu loi → tu dong ha cap gpt-image-1-mini
-# Neu ca hai loi → tra ve thong bao huong dan khac phuc chi tiet
-```
+1. Submit task → nhan `task_id`
+2. Poll moi 5 giay toi da 60 lan (5 phut)
+3. Khi `status == "success"` → tai file `.mp4` ve `generated_videos/`
+
+Anh dau vao duoc resize + nen JPEG tu dong (base64 < 1MB) truoc khi gui API.
+
+### Stage 1, 2, 4 — CrewAI Crew.kickoff()
+
+Chay qua `Crew([agent], tasks=[task]).kickoff()`, tuong thich moi version CrewAI >= 0.1.
+
+### Bao ve session timeout
+
+Neu phien lam viec het han, he thong hien thong bao than thien thay vi crash:
+> "Phien lam viec da het han. Vui long chon lai du an o sidebar."
 
 ---
 
-## Cài đặt và Chạy
+## Cai dat va Chay
 
-### Yêu cầu
+### Yeu cau
+
 - Python 3.10+
-- OpenAI API Key (có quyền truy cập `gpt-image-2` hoặc `gpt-image-1-mini`)
-- Google Gemini API Key (tùy chọn nếu dùng Gemini làm LLM viết kịch bản)
+- PostgreSQL
+- **OpenAI API Key** — LLM va sinh anh (`gpt-image-2`)
+- **Google Gemini API Key** — tuy chon
+- **Pollo AI API Key** — tao video (Minimax Hailuo 02)
 
-### 1. Cài đặt thủ công
+### 1. Cai dat thu cong
 
 ```bash
 git clone https://github.com/Manes2008/didicrew.git
@@ -197,26 +223,28 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Tạo file `.env`:
+Tao file `.env`:
 
 ```env
 OPENAI_API_KEY=sk-proj-...
 GEMINI_API_KEY=AIza...
+POLLO_API_KEY=...
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/videocrew
 ```
 
-Khởi chạy:
+Khoi chay:
 
 ```bash
 streamlit run app.py
 ```
 
-### 2. Khởi chạy nhanh (Windows)
+### 2. Khoi chay nhanh (Windows)
 
 ```bat
 .\run.bat
 ```
 
-Script tự động: kiểm tra Python → kích hoạt venv → cài đặt thư viện → chạy Streamlit.
+Script tu dong: kiem tra Python → kich hoat venv → cai thu vien → chay Streamlit.
 
 ### 3. Docker
 
@@ -224,90 +252,50 @@ Script tự động: kiểm tra Python → kích hoạt venv → cài đặt th�
 docker-compose up --build
 ```
 
-Truy cập tại: `http://localhost:8501`
+Truy cap tai: `http://localhost:8501`
 
 ---
 
-## Hướng dẫn lập trình (Sử dụng trực tiếp trong Python)
+## Huong dan su dung
 
-Hệ thống được thiết kế dạng **mô-đun hóa (modular)**, cho phép bạn gọi riêng lẻ từng module chức năng (stage) dựa trên kết quả của module trước đó.
+### Tao du an moi
 
-### Khởi tạo môi trường chung
+1. Sidebar → chon **Nha cung cap LLM** va **Model**
+2. Sidebar → chon **Kenh**
+3. Sidebar → chon **"-- Tao du an moi --"**
+4. Nhap **y tuong video** vao o text area
+5. Bam **"Bat Dau Quy Trinh"**
+6. Lan luot bam **"Chay ..."** cho tung stage
+7. Sau moi stage: **Approve & Tiep tuc** | **Regenerate** | **Quay lai**
+
+### Tiep tuc du an cu
+
+1. Sidebar → chon du an tu danh sach
+2. He thong tu khoi phuc stage + ket qua da co
+3. Thanh tien trinh **1→5** — **click de xem lai bat ky stage nao da xong**
+
+---
+
+## Huong dan lap trinh (Goi truc tiep tu Python)
 
 ```python
 from src.core.llm_provider import get_llm
 from src.core.engine import run_stage
 
-# Khởi tạo LLM dùng chung cho các module
-llm = get_llm(
-    provider="OpenAI",
-    model_name="gpt-4o-mini",
-    api_key="YOUR_OPENAI_API_KEY"
-)
+llm = get_llm(provider="OpenAI", model_name="gpt-4o-mini", api_key="YOUR_KEY")
 idea = "Be gai mac vay hong cam on me"
+
+script_result  = run_stage("script", idea, llm=llm)
+visual_result  = run_stage("visual", idea, previous_result=script_result, llm=llm)
+image_result   = run_stage("image",  idea, previous_result=visual_result)
+voice_result   = run_stage("voice",  idea, previous_result=script_result, llm=llm)
+
+all_results = {"script": script_result, "visual": visual_result, "image": image_result}
+video_result   = run_stage("video",  idea, all_results=all_results)
 ```
-
-### Chi tiết cách gọi các Module chức năng
-
-#### 1. Module Viết Kịch Bản (`script`)
-* **Input**: Ý tưởng gốc (`idea`).
-* **Output**: Kịch bản chi tiết gồm phân cảnh và lời thoại nhân vật.
-```python
-script_result = run_stage("script", idea, llm=llm)
-```
-
-#### 2. Module Tạo Prompt Hình Ảnh (`visual`)
-* **Input**: Kịch bản phân cảnh từ module trước (`previous_result`).
-* **Output**: Mô tả hình ảnh (prompts) chi tiết cho từng phân cảnh.
-```python
-visual_result = run_stage("visual", idea, previous_result=script_result, llm=llm)
-```
-
-#### 3. Module Tạo Hình Ảnh (`image`)
-* **Input**: Prompt hình ảnh chi tiết từ module tạo prompt (`previous_result`).
-* **Output**: Đường dẫn tệp ảnh cục bộ đã lưu trên đĩa.
-```python
-image_result = run_stage("image", idea, previous_result=visual_result)
-```
-
-#### 4. Module Tạo Giọng Nói (`voice`)
-* **Input**: Kịch bản lời thoại từ module viết kịch bản (`previous_result`).
-* **Output**: Văn bản kịch bản lồng tiếng kèm tham số giọng đọc.
-```python
-voice_result = run_stage("voice", idea, previous_result=script_result, llm=llm)
-```
-
-#### 5. Module Hướng Dẫn Dựng Video (`editor`)
-* **Input**: Toàn bộ kịch bản và thông tin nguyên liệu từ module tạo giọng nói (`previous_result`).
-* **Output**: Hướng dẫn dựng video chi tiết từng bước trên CapCut.
-```python
-editor_result = run_stage("editor", idea, previous_result=voice_result, llm=llm)
-```
-
----
-
-## Hỗ trợ LLM
-
-Chọn nhà cung cấp LLM trực tiếp trên giao diện Streamlit:
-
-| Nhà cung cấp | Model hỗ trợ |
-| :--- | :--- |
-| **OpenAI** | `gpt-4o-mini`, `gpt-4o`, `gpt-3.5-turbo` |
-| **Google Gemini** | `gemini-1.5-flash`, `gemini-1.5-pro` |
-
----
-
-## Các model sinh ảnh được hỗ trợ
-
-| Model | Ưu tiên | Ghi chú |
-| :--- | :---: | :--- |
-| `gpt-image-2` | Chính | Mới nhất, chất lượng cao nhất |
-| `gpt-image-1-mini` | Fallback | Nhanh hơn, dùng khi gpt-image-2 không khả dụng |
-
-Hệ thống tự động phát hiện model khả dụng trong tài khoản và chọn model phù hợp.
 
 ---
 
 ## License
 
-MIT License - Copyright (c) 2026 Manes2008/didicrew
+MIT License — Copyright (c) 2026 Manes2008/didicrew
