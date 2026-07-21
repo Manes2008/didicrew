@@ -3,4 +3,9 @@ crewai
 langchain-openai
 python-dotenv
 langchain-google-genai
-pyyaml
+pyyaml
+sqlalchemy
+alembic
+psycopg2-binary
+Pillow
+requests

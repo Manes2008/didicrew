@@ -3,7 +3,7 @@
 
 import os
 import yaml
-from crewai import Task
+from crewai import Task, Crew
 from src.agents.factory import AgentFactory
 
 class WorkflowEngine:
@@ -25,10 +25,10 @@ class WorkflowEngine:
             "visual": ("visual_prompt_engineer", "visual_task"),
             "image": ("image_generation_specialist", "image_task"),
             "voice": ("voiceover_specialist", "voice_task"),
-            "editor": ("video_editor", "editor_task")
+            "video": ("video_editor", "editor_task")  # Tạm giữ agent cho tương thích nếu cần, nhưng sẽ bị đè bởi code Python thuần
         }
 
-    def run_stage(self, stage_name: str, idea: str, previous_result: str = None, llm=None) -> str:
+    def run_stage(self, stage_name: str, idea: str, previous_result: str = None, llm=None, all_results: dict = None, context: dict = None) -> str:
         """
         Thực thi một stage cụ thể trong Workflow.
         """
@@ -38,14 +38,36 @@ class WorkflowEngine:
                 from src.tools.image_tool import generate_gpt_image_func
                 prompt = previous_result if previous_result else idea
                 return generate_gpt_image_func(prompt)
+                
+            # Chạy trực tiếp sinh video
+            if stage_name == "video":
+                from src.tools.video_tool import generate_video_func
+                
+                # Ưu tiên lấy kịch bản chi tiết (visual prompt) thay vì chỉ câu ý tưởng ban đầu
+                visual_result = all_results.get("visual", "") if all_results else ""
+                script_result = all_results.get("script", "") if all_results else ""
+                
+                # Trích xuất đường dẫn ảnh từ kết quả bước 3
+                image_result = all_results.get("image", "") if all_results else ""
+                image_path = None
+                if image_result:
+                    for line in image_result.split("\n"):
+                        if "generated_images" in line:
+                            image_path = line.replace("📁 Đường dẫn ảnh:", "").replace("📁 Đường dẫn ảnh: ", "").strip()
+                            break
+                            
+                # Nếu có visual prompt thì dùng, nếu không thì dùng kịch bản, hoặc cuối cùng là idea gốc
+                prompt = visual_result if visual_result else (script_result if script_result else idea)
+                
+                return generate_video_func(prompt, image_path)
 
             if stage_name not in self.stage_mapping:
                 return f"Stage '{stage_name}' chưa được hỗ trợ."
                 
             agent_id, task_id = self.stage_mapping[stage_name]
             
-            # Khởi tạo Agent từ Factory
-            agent = self.agent_factory.create_agent(agent_id, llm)
+            # Khởi tạo Agent từ Factory và truyền ngữ cảnh động
+            agent = self.agent_factory.create_agent(agent_id, llm, context)
             
             # Đọc cấu hình Task tương ứng
             task_cfg = self.tasks_config[task_id]
@@ -65,12 +87,14 @@ class WorkflowEngine:
             )
             
             # Thực thi tác vụ bằng agent
-            return agent.execute_task(task)
+            crew = Crew(agents=[agent], tasks=[task], verbose=False)
+            result = crew.kickoff()
+            return str(result)
             
         except Exception as e:
             return f"❌ Lỗi stage {stage_name}: {str(e)}"
 
 # Hàm bao (wrapper) để giữ tương thích ngược với luồng gọi cũ
-def run_stage(stage_name: str, idea: str, previous_result: str = None, llm=None) -> str:
+def run_stage(stage_name: str, idea: str, previous_result: str = None, llm=None, all_results: dict = None, context: dict = None) -> str:
     engine = WorkflowEngine()
-    return engine.run_stage(stage_name, idea, previous_result, llm)
+    return engine.run_stage(stage_name, idea, previous_result, llm, all_results, context)
