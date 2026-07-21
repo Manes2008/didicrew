@@ -45,6 +45,10 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
         if not torch.cuda.is_available():
             return "ERROR: WAN 2.1 Local yeu cau GPU NVIDIA voi CUDA. Khong tim thấy GPU phu hop tren may hien tai."
             
+        device_props = torch.cuda.get_device_properties(0)
+        total_vram_gb = device_props.total_memory / (1024 ** 3)
+        print(f"[LOG] Nhan dien GPU: {device_props.name} | VRAM: {total_vram_gb:.2f} GB")
+            
         os.makedirs("generated_videos", exist_ok=True)
         file_name = f"wan21_video_{int(time.time())}.mp4"
         file_path = os.path.join("generated_videos", file_name)
@@ -52,9 +56,18 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
         try:
             from diffusers import WanPipeline, AutoencoderKLWan
             model_id = "Wan-AI/Wan2.1-T2V-1.3B-Diffusers"
+            dtype = torch.float16
             vae = AutoencoderKLWan.from_pretrained(model_id, subfolder="vae", torch_dtype=torch.float32)
-            pipe = WanPipeline.from_pretrained(model_id, vae=vae, torch_dtype=torch.bfloat16)
-            pipe.to("cuda")
+            pipe = WanPipeline.from_pretrained(model_id, vae=vae, torch_dtype=dtype)
+            
+            # Toi uu hoa Low VRAM cho GPU < 6GB VRAM (nhu RTX 3050 4GB)
+            if hasattr(pipe, "enable_model_cpu_offload"):
+                pipe.enable_model_cpu_offload()
+            else:
+                pipe.to("cuda")
+                
+            if hasattr(pipe, "enable_attention_slicing"):
+                pipe.enable_attention_slicing()
             
             output = pipe(
                 prompt=prompt[:1000],
