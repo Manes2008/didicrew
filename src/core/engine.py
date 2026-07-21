@@ -55,11 +55,20 @@ class WorkflowEngine:
                         if "generated_images" in line:
                             image_path = line.replace("📁 Đường dẫn ảnh:", "").replace("📁 Đường dẫn ảnh: ", "").strip()
                             break
-                            
-                # Nếu có visual prompt thì dùng, nếu không thì dùng kịch bản, hoặc cuối cùng là idea gốc
+
+                # Trích xuất đường dẫn voiceover tu kết quả bước 4
+                voice_result = all_results.get("voice", "") if all_results else ""
+                voice_path = None
+                if voice_result:
+                    for line in voice_result.split("\n"):
+                        if ".mp3" in line or ".wav" in line:
+                            voice_path = line.strip()
+                            break
+
+                video_engine = context.get("video_engine", "wan2.1_local") if context else "wan2.1_local"
                 prompt = visual_result if visual_result else (script_result if script_result else idea)
                 
-                return generate_video_func(prompt, image_path)
+                return generate_video_func(prompt, image_path=image_path, voice_path=voice_path, engine=video_engine)
 
             if stage_name not in self.stage_mapping:
                 return f"Stage '{stage_name}' chưa được hỗ trợ."

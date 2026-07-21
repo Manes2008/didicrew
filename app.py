@@ -39,6 +39,15 @@ with st.sidebar:
         api_key = config.GEMINI_API_KEY
 
     st.divider()
+    st.header("Cấu hình Video Engine")
+    video_engine_option = st.selectbox(
+        "Engine sinh Video",
+        ["Wan 2.1 Local", "Pollo AI (Cloud API)"],
+        index=0
+    )
+    st.session_state["video_engine"] = "wan2.1_local" if video_engine_option == "Wan 2.1 Local" else "pollo_api"
+
+    st.divider()
     st.header("Quản lý Kênh & Dự án")
     
     db = get_db_session()
@@ -253,11 +262,12 @@ if "stage" in st.session_state:
             prev_stage = stages[current_idx - 1] if current_idx > 0 else None
             prev = st.session_state["results"].get(prev_stage, "") if prev_stage else ""
             
-            # Tạo context động từ thông tin kênh
+            # Tạo context động từ thông tin kênh và video engine
             context = {
                 "channel_name": selected_channel.name,
                 "channel_description": selected_channel.description,
-                "channel_goal": selected_channel.goal
+                "channel_goal": selected_channel.goal,
+                "video_engine": st.session_state.get("video_engine", "wan2.1_local")
             }
             
             result = run_stage(
@@ -313,8 +323,8 @@ if "stage" in st.session_state:
                     if current == "video":
                         video_path = None
                         for line in result.split("\n"):
-                            if "generated_videos" in line:
-                                clean_line = line.replace("📁 Đường dẫn video:", "").replace("📁 Đường dẫn video: ", "").strip()
+                            if "generated_videos" in line or ".mp4" in line:
+                                clean_line = line.replace("📁 Đường dẫn video:", "").replace("📁 Đường dẫn video: ", "").replace("Duong dan video:", "").replace("Duong dan video: ", "").strip()
                                 video_path = clean_line
                                 break
                         if video_path:
@@ -366,8 +376,8 @@ if "stage" in st.session_state:
             video_path = None
 
             for line in result_text.split("\n"):
-                if "generated_videos" in line:
-                    clean_line = line.replace("📁 Đường dẫn video:", "").replace("📁 Đường dẫn video: ", "").strip()
+                if "generated_videos" in line or ".mp4" in line:
+                    clean_line = line.replace("📁 Đường dẫn video:", "").replace("📁 Đường dẫn video: ", "").replace("Duong dan video:", "").replace("Duong dan video: ", "").strip()
                     video_path = clean_line
                     break
 
