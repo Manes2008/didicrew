@@ -8,6 +8,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 POLLO_API_KEY = os.getenv("POLLO_API_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/videocrew")
+ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY", "changeme-secret-2026")
 
 # Tự động chuyển đổi Render Internal URL thành External URL khi chạy ở local
 if DATABASE_URL and "@dpg-" in DATABASE_URL and ".render.com" not in DATABASE_URL:

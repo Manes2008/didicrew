@@ -4,18 +4,76 @@
 import streamlit as st
 import os
 import re
+import datetime
 import config
 from src.core.llm_provider import get_llm
-from src.core.models import init_db, get_db_session, Channel, Project, ProjectStage, MediaFile
+from src.core.models import init_db, get_db_session, Channel, Project, ProjectStage, MediaFile, AllowedIP
 
 st.set_page_config(page_title="VideoCrew Studio - AI Video Production Platform", layout="wide")
 st.title("VideoCrew Studio - AI Video Production Platform")
 
-# Khởi tạo database
+# Khoi tao database
 try:
     init_db()
 except Exception as e:
-    st.error(f"Không thể kết nối hoặc khởi tạo Database: {e}")
+    st.error(f"Khong the ket noi hoac khoi tao Database: {e}")
+    st.stop()
+
+# ==================== IP AUTHENTICATION GATE ====================
+def get_client_ip() -> str:
+    """Lay IP that cua client tu headers proxy hoac fallback."""
+    headers = st.context.headers
+    for header in ["X-Forwarded-For", "X-Real-Ip", "CF-Connecting-IP", "True-Client-Ip"]:
+        ip_val = headers.get(header)
+        if ip_val:
+            # X-Forwarded-For co the chua nhieu IP: 'client, proxy1, proxy2'
+            return ip_val.split(",")[0].strip()
+    # Fallback khi chay local (khong qua proxy)
+    return "127.0.0.1"
+
+
+def register_and_block_ip(client_ip: str):
+    """Dang ky IP moi vao DB voi status=pending va hien thi thong bao cho."""
+    db = get_db_session()
+    try:
+        existing = db.query(AllowedIP).filter_by(ip_address=client_ip).first()
+        if not existing:
+            new_entry = AllowedIP(ip_address=client_ip, status="pending")
+            db.add(new_entry)
+            db.commit()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
+
+    st.set_page_config(page_title="Thiet bi chua duoc phe duyet", layout="centered")
+    st.error("Thiet bi chua duoc phe duyet")
+    st.markdown("""
+    ### Thiet bi cua ban chua duoc cap quyen truy cap
+
+    IP cua ban da duoc ghi nhan va gui den quan tri vien de phe duyet.
+    Vui long lien he admin de duoc cap quyen.
+
+    | Thong tin | Gia tri |
+    |---|---|
+    | IP cua ban | `{ip}` |
+    | Trang thai | Cho phe duyet |
+    """.format(ip=client_ip))
+    st.info("Reload trang sau khi admin da phe duyet IP cua ban.")
+    st.stop()
+
+
+# Kiem tra IP truoc khi render bat ky noi dung nao
+_client_ip = get_client_ip()
+
+_db_check = get_db_session()
+try:
+    _ip_record = _db_check.query(AllowedIP).filter_by(ip_address=_client_ip).first()
+finally:
+    _db_check.close()
+
+if _ip_record is None or _ip_record.status != "approved":
+    register_and_block_ip(_client_ip)
 
 # ==================== SIDEBAR CONFIGURATION ====================
 with st.sidebar:
@@ -441,10 +499,17 @@ if "stage" in st.session_state:
                             db.commit()
                 st.rerun()
 
-# ==================== TIẾN TRÌNH SIDEBAR/FOOTER ====================
+# ==================== TIEN TRINH SIDEBAR/FOOTER ====================
 if "results" in st.session_state and st.session_state["results"]:
     st.divider()
-    st.subheader("Tiến trình thực hiện")
+    st.subheader("Tien trinh thuc hien")
     for s in stages:
-        status = "✅" if s in st.session_state["results"] else "⏳"
+        status = "OK" if s in st.session_state["results"] else "..."
         st.write(f"{status} {stage_names[s]}")
+
+# ==================== ADMIN PANEL LINK (SIDEBAR) ====================
+with st.sidebar:
+    st.divider()
+    st.page_link("pages/Admin_IP_Manager.py", label="Quan ly IP Thiet bi (Admin)", icon=":material/shield:")
+
+

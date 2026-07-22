@@ -1,6 +1,6 @@
 import datetime
 from sqlalchemy import (
-    create_engine, Column, Integer, String, Text, DateTime, BigInteger, ForeignKey, UniqueConstraint
+    create_engine, Column, Integer, String, Text, DateTime, BigInteger, ForeignKey, UniqueConstraint, Boolean
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, validates
 import sys
@@ -134,3 +134,33 @@ class MediaFile(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     project_stage = relationship("ProjectStage", back_populates="media_files")
+
+
+class AllowedIP(Base):
+    __tablename__ = "allowed_ips"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ip_address = Column(String(45), unique=True, nullable=False)
+    label = Column(String(100), nullable=True)  # Ten thiet bi hoac ghi chu
+    status = Column(String(20), default="pending", nullable=False)  # pending/approved/rejected
+    is_admin_ip = Column(Boolean, default=False, nullable=False)  # IP duoc phep vao admin panel
+    approved_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    @validates("ip_address")
+    def validate_ip(self, key, ip):
+        import re
+        if not ip or not ip.strip():
+            raise ValueError("IP address khong duoc de trong")
+        pattern = r'^(\d{1,3}\.){3}\d{1,3}$|^([0-9a-fA-F:]+)$'
+        if not re.match(pattern, ip.strip()):
+            raise ValueError(f"IP address khong hop le: {ip}")
+        return ip.strip()
+
+    @validates("status")
+    def validate_status(self, key, status):
+        allowed = {"pending", "approved", "rejected"}
+        if status not in allowed:
+            raise ValueError(f"Status phai la mot trong: {allowed}")
+        return status
