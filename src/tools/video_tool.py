@@ -45,9 +45,12 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
         if not torch.cuda.is_available():
             return "ERROR: WAN 2.1 Local yeu cau GPU NVIDIA voi CUDA. Khong tim thấy GPU phu hop tren may hien tai."
             
+        import gc
         device_props = torch.cuda.get_device_properties(0)
         total_vram_gb = device_props.total_memory / (1024 ** 3)
-        print(f"[LOG] Nhan dien GPU: {device_props.name} | VRAM: {total_vram_gb:.2f} GB")
+        alloc_vram = torch.cuda.memory_allocated(0) / (1024 ** 3)
+        res_vram = torch.cuda.memory_reserved(0) / (1024 ** 3)
+        print(f"[LOG] GPU: {device_props.name} | Tong VRAM: {total_vram_gb:.2f} GB | Dang dung: {alloc_vram:.2f} GB (Allocated) / {res_vram:.2f} GB (Reserved)")
             
         os.makedirs("generated_videos", exist_ok=True)
         file_name = f"wan21_video_{int(time.time())}.mp4"
@@ -69,22 +72,53 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
             if hasattr(pipe, "enable_attention_slicing"):
                 pipe.enable_attention_slicing()
             
+            # Log VRAM truoc khi chay inference
+            post_alloc = torch.cuda.memory_allocated(0) / (1024 ** 3)
+            print(f"[LOG] VRAM sau khi nap pipeline: {post_alloc:.2f} GB / {total_vram_gb:.2f} GB")
+
+            # Reset thong ke VRAM va do thoi gian sinh
+            torch.cuda.reset_peak_memory_stats(0)
+            gen_start_time = time.time()
+            
+            num_frames = 81
+            height = 480
+            width = 832
+            guidance_scale = 5.0
+
             output = pipe(
                 prompt=prompt[:1000],
-                height=480,
-                width=832,
-                num_frames=81,
-                guidance_scale=5.0
+                height=height,
+                width=width,
+                num_frames=num_frames,
+                guidance_scale=guidance_scale
             ).frames[0]
+            
+            gen_elapsed = time.time() - gen_start_time
+            sec_per_frame = gen_elapsed / num_frames if num_frames > 0 else 0
+            peak_vram = torch.cuda.max_memory_allocated(0) / (1024 ** 3)
+            
+            print(f"[LOG METRICS] Thoi gian sinh: {gen_elapsed:.2f}s | Toc do: {sec_per_frame:.2f}s/frame | VRAM Dinh: {peak_vram:.2f} GB | Do phan giai: {width}x{height} | Frames: {num_frames} | CFG: {guidance_scale}")
             
             # Luu file video
             output.save(file_path)
+            
+            # Don dep cache GPU sau khi sinh xong
+            torch.cuda.empty_cache()
+            gc.collect()
             return file_path
+
+        except torch.cuda.OutOfMemoryError as oom_err:
+            torch.cuda.empty_cache()
+            gc.collect()
+            print(f"[WARNING] Tran VRAM GPU: {oom_err}")
+            return f"ERROR: Tran VRAM GPU (CUDA Out of Memory)! VRAM da cap phat qua muc cho phep. Vui long dong cac ung dung khac hoac dung engine Cloud."
         except ImportError as imp_err:
             return f"ERROR: Thieu thu vien diffusers hoac phu thuoc: {str(imp_err)}. Vui long chay: pip install -r requirements.txt"
         except Exception as model_err:
-            # Fallback thong bao cho nguoi dung neu weights chua duoc tai
-            return f"ERROR: Khong the khoi tao pipeline Wan 2.1 Local: {str(model_err)}. Vui long kiem tra lai thu vien diffusers va VRAM."
+            err_str = str(model_err)
+            if "File reconstruction error" in err_str or "Background writer channel closed" in err_str:
+                return "ERROR: File cache weights bi hong do ngat tai giua chung. Vui long chay: Remove-Item -Recurse -Force \"$env:USERPROFILE\\.cache\\huggingface\\hub\\models--Wan-AI--Wan2.1-T2V-1.3B-Diffusers\""
+            return f"ERROR: Khong the khoi tao pipeline Wan 2.1 Local: {err_str}. Vui long kiem tra lai thu vien diffusers va VRAM."
 
     except ImportError:
         return "ERROR: Chưa cai dat thu vien torch / diffusers cho Wan 2.1 Local. Vui long chay: pip install torch diffusers transformers"
