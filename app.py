@@ -5,9 +5,11 @@ import streamlit as st
 import os
 import re
 import datetime
+import hashlib
+import binascii
 import config
 from src.core.llm_provider import get_llm
-from src.core.models import init_db, get_db_session, Channel, Project, ProjectStage, MediaFile, AllowedIP
+from src.core.models import init_db, get_db_session, Channel, Project, ProjectStage, MediaFile, AllowedIP, User
 
 st.set_page_config(page_title="VideoCrew Studio - AI Video Production Platform", layout="wide")
 st.title("VideoCrew Studio - AI Video Production Platform")
@@ -19,6 +21,26 @@ except Exception as e:
     st.error(f"Khong the ket noi hoac khoi tao Database: {e}")
     st.stop()
 
+# ==================== PASSWORD HASHING ====================
+def hash_password(password: str) -> str:
+    """Bam mat khau bang PBKDF2-SHA256 voi salt ngau nhien."""
+    salt = os.urandom(16)
+    db_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+    return binascii.hexlify(salt).decode('utf-8') + ":" + binascii.hexlify(db_hash).decode('utf-8')
+
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    """Xac thuc mat khau voi salt da luu."""
+    try:
+        salt_hex, hash_hex = stored_hash.split(":")
+        salt = binascii.unhexlify(salt_hex)
+        stored_db_hash = binascii.unhexlify(hash_hex)
+        test_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+        return test_hash == stored_db_hash
+    except Exception:
+        return False
+
+
 # ==================== IP AUTHENTICATION GATE ====================
 def get_client_ip() -> str:
     """Lay IP that cua client tu headers proxy hoac fallback."""
@@ -26,40 +48,112 @@ def get_client_ip() -> str:
     for header in ["X-Forwarded-For", "X-Real-Ip", "CF-Connecting-IP", "True-Client-Ip"]:
         ip_val = headers.get(header)
         if ip_val:
-            # X-Forwarded-For co the chua nhieu IP: 'client, proxy1, proxy2'
             return ip_val.split(",")[0].strip()
-    # Fallback khi chay local (khong qua proxy)
     return "127.0.0.1"
 
 
-def register_and_block_ip(client_ip: str):
-    """Dang ky IP moi vao DB voi status=pending va hien thi thong bao cho."""
+def show_login_register_gate(client_ip: str):
+    """Hiển thị form đăng nhập / đăng ký."""
+    st.set_page_config(page_title="Xác thực | VideoCrew Studio", layout="centered")
+    st.markdown("<h2 style='text-align: center;'>🛡️ Cổng Xác Thực VideoCrew Studio</h2>", unsafe_allow_html=True)
+    st.info(f"Thiết bị hiện tại (IP: {client_ip}) chưa được phê duyệt. Vui lòng đăng nhập để tiếp tục.")
+
+    auth_mode = st.radio("Chọn hành động", ["Đăng nhập", "Đăng ký tài khoản"], horizontal=True)
+
     db = get_db_session()
     try:
-        existing = db.query(AllowedIP).filter_by(ip_address=client_ip).first()
-        if not existing:
-            new_entry = AllowedIP(ip_address=client_ip, status="pending")
-            db.add(new_entry)
-            db.commit()
-    except Exception:
+        if auth_mode == "Đăng nhập":
+            with st.form("login_form"):
+                username = st.text_input("Tên đăng nhập")
+                password = st.text_input("Mật khẩu", type="password")
+                submitted = st.form_submit_button("Đăng nhập", use_container_width=True, type="primary")
+
+                if submitted:
+                    if not username or not password:
+                        st.error("Vui lòng nhập đầy đủ thông tin")
+                    else:
+                        user = db.query(User).filter_by(username=username.strip().lower()).first()
+                        if user and verify_password(password, user.password_hash):
+                            if not user.is_active:
+                                st.error("Tài khoản này đã bị khóa.")
+                            else:
+                                # Auto approve IP thiet bi cho user
+                                existing = db.query(AllowedIP).filter_by(ip_address=client_ip).first()
+                                if existing:
+                                    existing.status = "approved"
+                                    existing.user_id = user.id
+                                    existing.approved_at = datetime.datetime.utcnow()
+                                else:
+                                    new_entry = AllowedIP(
+                                        ip_address=client_ip,
+                                        label=f"Tự động duyệt: {user.username}",
+                                        status="approved",
+                                        user_id=user.id,
+                                        approved_at=datetime.datetime.utcnow()
+                                    )
+                                    db.add(new_entry)
+                                db.commit()
+                                st.success("Đăng nhập thành công! Vui lòng đợi...")
+                                st.rerun()
+                        else:
+                            st.error("Tên đăng nhập hoặc mật khẩu không chính xác.")
+
+        else: # Dang ky
+            with st.form("register_form"):
+                new_username = st.text_input("Tên đăng nhập")
+                new_password = st.text_input("Mật khẩu", type="password")
+                confirm_password = st.text_input("Xác nhận mật khẩu", type="password")
+                reg_submitted = st.form_submit_button("Đăng ký", use_container_width=True, type="primary")
+
+                if reg_submitted:
+                    if not new_username or not new_password or not confirm_password:
+                        st.error("Vui lòng nhập đầy đủ thông tin")
+                    elif len(new_username.strip()) < 3:
+                        st.error("Tên đăng nhập phải có ít nhất 3 ký tự")
+                    elif len(new_password) < 6:
+                        st.error("Mật khẩu phải có ít nhất 6 ký tự")
+                    elif new_password != confirm_password:
+                        st.error("Mật khẩu xác nhận không khớp")
+                    else:
+                        existing = db.query(User).filter_by(username=new_username.strip().lower()).first()
+                        if existing:
+                            st.error("Tên đăng nhập đã được sử dụng")
+                        else:
+                            user_count = db.query(User).count()
+                            role_val = "admin" if user_count == 0 else "user"
+                            hashed = hash_password(new_password)
+                            user = User(
+                                username=new_username.strip().lower(),
+                                password_hash=hashed,
+                                role=role_val
+                            )
+                            db.add(user)
+                            db.flush()
+
+                            # Auto approve IP luon
+                            existing_ip = db.query(AllowedIP).filter_by(ip_address=client_ip).first()
+                            if existing_ip:
+                                existing_ip.status = "approved"
+                                existing_ip.user_id = user.id
+                                existing_ip.approved_at = datetime.datetime.utcnow()
+                            else:
+                                new_ip = AllowedIP(
+                                    ip_address=client_ip,
+                                    label=f"Tự động duyệt: {user.username}",
+                                    status="approved",
+                                    user_id=user.id,
+                                    approved_at=datetime.datetime.utcnow()
+                                )
+                                db.add(new_ip)
+                            
+                            db.commit()
+                            st.success("Đăng ký thành công!")
+                            st.rerun()
+    except Exception as e:
         db.rollback()
+        st.error(f"Lỗi hệ thống: {e}")
     finally:
         db.close()
-
-    st.set_page_config(page_title="Thiet bi chua duoc phe duyet", layout="centered")
-    st.error("Thiet bi chua duoc phe duyet")
-    st.markdown("""
-    ### Thiet bi cua ban chua duoc cap quyen truy cap
-
-    IP cua ban da duoc ghi nhan va gui den quan tri vien de phe duyet.
-    Vui long lien he admin de duoc cap quyen.
-
-    | Thong tin | Gia tri |
-    |---|---|
-    | IP cua ban | `{ip}` |
-    | Trang thai | Cho phe duyet |
-    """.format(ip=client_ip))
-    st.info("Reload trang sau khi admin da phe duyet IP cua ban.")
     st.stop()
 
 
@@ -69,15 +163,53 @@ _client_ip = get_client_ip()
 _db_check = get_db_session()
 try:
     _ip_record = _db_check.query(AllowedIP).filter_by(ip_address=_client_ip).first()
+    if _ip_record and _ip_record.status == "approved":
+        if _ip_record.user_id:
+            _user = _db_check.query(User).filter_by(id=_ip_record.user_id).first()
+            if _user:
+                if not _user.is_active:
+                    st.set_page_config(page_title="Tài khoản bị khóa", layout="centered")
+                    st.error("Tài khoản của bạn đã bị khóa! Vui lòng liên hệ quản trị viên.")
+                    st.stop()
+
+                st.session_state["current_user"] = {
+                    "id": _user.id,
+                    "username": _user.username,
+                    "role": _user.role
+                }
+            else:
+                st.session_state["current_user"] = {
+                    "id": None,
+                    "username": f"Guest ({_client_ip})",
+                    "role": "user"
+                }
+        else:
+            st.session_state["current_user"] = {
+                "id": None,
+                "username": f"Guest ({_client_ip})",
+                "role": "user"
+            }
 finally:
     _db_check.close()
 
 if _ip_record is None or _ip_record.status != "approved":
-    register_and_block_ip(_client_ip)
+    show_login_register_gate(_client_ip)
+
+
 
 # ==================== SIDEBAR CONFIGURATION ====================
 with st.sidebar:
+    if "current_user" in st.session_state:
+        u_info = st.session_state["current_user"]
+        with st.container(border=True):
+            st.markdown(f"👤 **Tài khoản**: `{u_info['username']}`")
+            st.markdown(f"🔑 **Vai trò**: `{u_info['role'].upper()}`")
+            st.markdown(f"🌐 **IP**: `{_client_ip}`")
+        st.divider()
+
+
     st.header("Cấu hình AI Model")
+
     
     # 1. Chọn Nhà cung cấp LLM
     provider = st.selectbox(
@@ -123,8 +255,59 @@ with st.sidebar:
         channels = [default_channel]
         
     channel_names = [c.name for c in channels]
-    selected_channel_name = st.selectbox("Chọn Kênh", channel_names)
-    selected_channel = next(c for c in channels if c.name == selected_channel_name)
+    channel_options = channel_names + ["-- Tạo kênh mới --"]
+    
+    # Quản lý kênh hiện tại bằng session_state
+    if "selected_channel_name" not in st.session_state or st.session_state["selected_channel_name"] not in channel_options:
+        st.session_state["selected_channel_name"] = channel_names[0]
+        
+    # Lấy index của kênh hiện tại trong danh sách options
+    try:
+        current_index = channel_options.index(st.session_state["selected_channel_name"])
+    except ValueError:
+        current_index = 0
+        
+    selected_channel_opt = st.selectbox("Chọn Kênh", channel_options, index=current_index)
+    st.session_state["selected_channel_name"] = selected_channel_opt
+    
+    if selected_channel_opt == "-- Tạo kênh mới --":
+        st.markdown("### 🆕 Tạo Kênh Mới")
+        with st.form("create_channel_form"):
+            new_name = st.text_input("Tên kênh", placeholder="Vd: Kênh Công Nghệ")
+            new_desc = st.text_input("Mô tả kênh (tùy chọn)", placeholder="Mô tả ngắn về kênh...")
+            new_goal = st.text_area("Mục tiêu của kênh", value="Tạo video Reels/TikTok thu hút người xem")
+            
+            btn_create_channel = st.form_submit_button("Lưu Kênh Mới", use_container_width=True, type="primary")
+            
+            if btn_create_channel:
+                if not new_name.strip():
+                    st.error("Tên kênh không được để trống")
+                elif not new_goal.strip():
+                    st.error("Mục tiêu của kênh không được để trống")
+                else:
+                    # Kiểm tra trùng tên
+                    dup = db.query(Channel).filter_by(name=new_name.strip()).first()
+                    if dup:
+                        st.error("Tên kênh này đã tồn tại! Vui lòng chọn tên khác.")
+                    else:
+                        try:
+                            new_chan = Channel(
+                                name=new_name.strip(),
+                                description=new_desc.strip() if new_desc else None,
+                                goal=new_goal.strip()
+                            )
+                            db.add(new_chan)
+                            db.commit()
+                            st.success(f"Đã tạo kênh '{new_name.strip()}' thành công!")
+                            st.session_state["selected_channel_name"] = new_name.strip()
+                            st.rerun()
+                        except Exception as ex:
+                            db.rollback()
+                            st.error(f"Lỗi: {ex}")
+        st.stop()
+        
+    selected_channel = next(c for c in channels if c.name == selected_channel_opt)
+
     
     # Lấy danh sách dự án trong kênh
     projects = db.query(Project).filter_by(channel_id=selected_channel.id).order_by(Project.id.desc()).all()
@@ -507,9 +690,30 @@ if "results" in st.session_state and st.session_state["results"]:
         status = "OK" if s in st.session_state["results"] else "..."
         st.write(f"{status} {stage_names[s]}")
 
-# ==================== ADMIN PANEL LINK (SIDEBAR) ====================
+# ==================== ADMIN PANEL LINK & LOGOUT (SIDEBAR) ====================
 with st.sidebar:
     st.divider()
-    st.page_link("pages/Admin_IP_Manager.py", label="Quan ly IP Thiet bi (Admin)", icon=":material/shield:")
+    if "current_user" in st.session_state and st.session_state["current_user"]["role"] == "admin":
+        st.page_link("pages/Admin_IP_Manager.py", label="Quan ly IP Thiet bi (Admin)", icon=":material/shield:")
+        st.divider()
+    
+    if st.button("Đăng xuất 🔓", type="secondary", use_container_width=True):
+        db = get_db_session()
+        try:
+            if _client_ip != "127.0.0.1":
+                ip_rec = db.query(AllowedIP).filter_by(ip_address=_client_ip).first()
+                if ip_rec and not ip_rec.is_admin_ip:
+                    ip_rec.status = "pending"
+                    ip_rec.approved_at = None
+                    db.commit()
+        except Exception:
+            db.rollback()
+        finally:
+            db.close()
+        
+        if "current_user" in st.session_state:
+            del st.session_state["current_user"]
+        st.rerun()
+
 
 

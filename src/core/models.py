@@ -144,23 +144,50 @@ class AllowedIP(Base):
     label = Column(String(100), nullable=True)  # Ten thiet bi hoac ghi chu
     status = Column(String(20), default="pending", nullable=False)  # pending/approved/rejected
     is_admin_ip = Column(Boolean, default=False, nullable=False)  # IP duoc phep vao admin panel
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    user = relationship("User", back_populates="allowed_ips")
 
     @validates("ip_address")
     def validate_ip(self, key, ip):
         import re
         if not ip or not ip.strip():
-            raise ValueError("IP address khong duoc de trong")
+            raise ValueError("Địa chỉ IP không được để trống")
         pattern = r'^(\d{1,3}\.){3}\d{1,3}$|^([0-9a-fA-F:]+)$'
         if not re.match(pattern, ip.strip()):
-            raise ValueError(f"IP address khong hop le: {ip}")
+            raise ValueError(f"Địa chỉ IP không hợp lệ: {ip}")
         return ip.strip()
 
     @validates("status")
     def validate_status(self, key, status):
         allowed = {"pending", "approved", "rejected"}
         if status not in allowed:
-            raise ValueError(f"Status phai la mot trong: {allowed}")
+            raise ValueError(f"Trạng thái phải là một trong: {allowed}")
         return status
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), unique=True, nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    role = Column(String(20), default="user", nullable=False)  # user/admin
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    allowed_ips = relationship("AllowedIP", back_populates="user", cascade="all, delete-orphan")
+
+    @validates("username")
+    def validate_username(self, key, username):
+        if not username or not username.strip():
+            raise ValueError("Tên đăng nhập không được để trống")
+        if len(username.strip()) < 3:
+            raise ValueError("Tên đăng nhập phải có ít nhất 3 ký tự")
+
+        return username.strip().lower()
+
