@@ -208,6 +208,38 @@ def concat_video_clips_func(clip_paths: list) -> str:
 
     return clip_paths[0]
 
+def extract_scene_prompts(prompt_text: str, num_scenes: int) -> list:
+    """
+    Trích xuất prompt chi tiết cho từng phân cảnh dựa trên cấu trúc Scene từ Bước 2.
+    """
+    import re
+    pattern = r"(?:Scene|Cảnh)\s*(\d+)[\s*:\-–\.]+(.*?)(?=(?:Scene|Cảnh)\s*\d+[\s*:\-–\.]+|\Z)"
+    matches = re.findall(pattern, prompt_text, re.DOTALL | re.IGNORECASE)
+    
+    prompts = []
+    if matches:
+        sorted_matches = sorted(matches, key=lambda x: int(x[0]))
+        for _, content in sorted_matches:
+            clean_content = content.strip().replace("\n", " ")
+            if clean_content:
+                prompts.append(clean_content)
+    
+    if not prompts:
+        lines = [line.strip() for line in prompt_text.split("\n") if line.strip() and not line.strip().startswith("#")]
+        prompts = [l for l in lines if len(l) > 10]
+        
+    if not prompts:
+        prompts = [s.strip() for s in prompt_text.split(".") if s.strip() and len(s.strip()) > 5]
+        
+    if not prompts:
+        prompts = [prompt_text]
+        
+    while len(prompts) < num_scenes:
+        prompts.append(prompts[-1])
+        
+    return prompts[:num_scenes]
+
+
 def generate_video_func(prompt: str, image_path: str = None, voice_path: str = None, engine: str = "wan2.1_local") -> str:
     """
     Ham tao video chinh ho tro sinh multi-scene dua tren do dai Voiceover.
@@ -219,16 +251,14 @@ def generate_video_func(prompt: str, image_path: str = None, voice_path: str = N
     frames_per_scene = 81 if engine == "wan2.1_local" else 125
     total_frames = num_scenes * frames_per_scene
 
-    # Tach prompt thanh cac cau tuong ung so canh
-    prompt_sentences = [s.strip() for s in prompt.split(".") if s.strip()]
-    if not prompt_sentences:
-        prompt_sentences = [prompt]
+    # Trích xuất prompt tương ứng từng phân cảnh một cách nhất quán
+    prompt_sentences = extract_scene_prompts(prompt, num_scenes)
 
     clip_paths = []
     
     for i in range(num_scenes):
         scene_prompt = prompt_sentences[i % len(prompt_sentences)]
-        full_scene_prompt = f"Scene {i+1}/{num_scenes}: {scene_prompt}"
+        full_scene_prompt = scene_prompt
         print(f"[LOG] Dang tao phan canh {i+1}/{num_scenes} ({frames_per_scene} frames)...")
         
         if engine == "wan2.1_local":
