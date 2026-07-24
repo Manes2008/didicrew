@@ -41,9 +41,12 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
     Tao video local su dung Wan 2.1 qua PyTorch / Hugging Face diffusers.
     """
     try:
+        import os
+        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+        
         import torch
         if not torch.cuda.is_available():
-            return "ERROR: WAN 2.1 Local yeu cau GPU NVIDIA voi CUDA. Khong tim thấy GPU phu hop tren may hien tai."
+            return "ERROR: WAN 2.1 Local yeu cau GPU NVIDIA voi CUDA. Khong tim thay GPU phu hop tren may hien tai."
             
         import gc
         device_props = torch.cuda.get_device_properties(0)
@@ -63,8 +66,25 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
             vae = AutoencoderKLWan.from_pretrained(model_id, subfolder="vae", torch_dtype=torch.float32)
             pipe = WanPipeline.from_pretrained(model_id, vae=vae, torch_dtype=dtype)
             
-            # Toi uu hoa Low VRAM cho GPU < 6GB VRAM (nhu RTX 3050 4GB)
-            if hasattr(pipe, "enable_model_cpu_offload"):
+            # Kich hoat VAE tiling va slicing de giam VRAM luc decode video
+            if hasattr(pipe, "vae") and pipe.vae is not None:
+                try:
+                    pipe.vae.enable_tiling()
+                    print("[LOG] Da bat VAE Tiling de tiet kiem VRAM.")
+                except Exception as e:
+                    print(f"[WARN] Khong the bat VAE Tiling: {e}")
+                try:
+                    pipe.vae.enable_slicing()
+                    print("[LOG] Da bat VAE Slicing de tiet kiem VRAM.")
+                except Exception as e:
+                    print(f"[WARN] Khong the bat VAE Slicing: {e}")
+            
+            # Toi uu hoa tai model dua tren dung luong VRAM
+            if total_vram_gb >= 10.0:
+                print("[LOG] GPU co VRAM >= 10GB. Tai truc tiep model len GPU de tang toc do sinh video.")
+                pipe.to("cuda")
+            elif hasattr(pipe, "enable_model_cpu_offload"):
+                print("[LOG] GPU co VRAM < 10GB. Bat CPU offload de tiet kiem VRAM.")
                 pipe.enable_model_cpu_offload()
             else:
                 pipe.to("cuda")
@@ -102,14 +122,20 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
             # Luu file video
             output.save(file_path)
             
-            # Don dep cache GPU sau khi sinh xong
-            torch.cuda.empty_cache()
+            # Don dep pipeline va cache de giai phong VRAM triet de
+            del pipe
+            del vae
             gc.collect()
+            torch.cuda.empty_cache()
             return file_path
-
+            
         except torch.cuda.OutOfMemoryError as oom_err:
-            torch.cuda.empty_cache()
+            if "pipe" in locals():
+                del pipe
+            if "vae" in locals():
+                del vae
             gc.collect()
+            torch.cuda.empty_cache()
             print(f"[WARNING] Tran VRAM GPU: {oom_err}")
             return f"ERROR: Tran VRAM GPU (CUDA Out of Memory)! VRAM da cap phat qua muc cho phep. Vui long dong cac ung dung khac hoac dung engine Cloud."
         except ImportError as imp_err:
