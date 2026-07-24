@@ -63,8 +63,8 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
             from diffusers import WanPipeline, AutoencoderKLWan
             model_id = "Wan-AI/Wan2.1-T2V-1.3B-Diffusers"
             dtype = torch.float16
-            vae = AutoencoderKLWan.from_pretrained(model_id, subfolder="vae", torch_dtype=torch.float32)
-            pipe = WanPipeline.from_pretrained(model_id, vae=vae, torch_dtype=dtype)
+            vae = AutoencoderKLWan.from_pretrained(model_id, subfolder="vae", torch_dtype=torch.float32, low_cpu_mem_usage=True)
+            pipe = WanPipeline.from_pretrained(model_id, vae=vae, torch_dtype=dtype, low_cpu_mem_usage=True)
             
             # Kich hoat VAE tiling va slicing de giam VRAM luc decode video
             if hasattr(pipe, "vae") and pipe.vae is not None:
