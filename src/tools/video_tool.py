@@ -42,7 +42,7 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
     """
     try:
         import os
-        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:256"
         
         import torch
         if not torch.cuda.is_available():
@@ -80,11 +80,11 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
                     print(f"[WARN] Khong the bat VAE Slicing: {e}")
             
             # Toi uu hoa tai model dua tren dung luong VRAM
-            if total_vram_gb >= 10.0:
-                print("[LOG] GPU co VRAM >= 10GB. Tai truc tiep model len GPU de tang toc do sinh video.")
+            if total_vram_gb >= 16.0:
+                print("[LOG] GPU co VRAM >= 16GB. Tai truc tiep model len GPU de tang toc do sinh video.")
                 pipe.to("cuda")
             elif hasattr(pipe, "enable_model_cpu_offload"):
-                print("[LOG] GPU co VRAM < 10GB. Bat CPU offload de tiet kiem VRAM.")
+                print("[LOG] GPU co VRAM < 16GB. Bat CPU offload de tiet kiem VRAM.")
                 pipe.enable_model_cpu_offload()
             else:
                 pipe.to("cuda")

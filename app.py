@@ -543,22 +543,25 @@ if "stage" in st.session_state:
                     
                     # Nếu là stage 'image', lưu file media vào media_files
                     if current == "image":
-                        image_path = None
+                        image_paths = []
                         for line in result.split("\n"):
                             if "generated_images" in line:
                                 clean_line = line.replace("📁 Đường dẫn ảnh:", "").replace("📁 Đường dẫn ảnh: ", "").strip()
-                                image_path = clean_line
-                                break
-                        if image_path:
-                            stage_rec.media_path = image_path
-                            media_file = MediaFile(
-                                project_stage_id=stage_rec.id,
-                                file_name=os.path.basename(image_path),
-                                file_path=image_path,
-                                mime_type="image/png",
-                                status="active"
-                            )
-                            db.add(media_file)
+                                if os.path.exists(clean_line):
+                                    image_paths.append(clean_line)
+                        if image_paths:
+                            stage_rec.media_path = image_paths[0]
+                            for img_p in image_paths:
+                                exists = db.query(MediaFile).filter_by(project_stage_id=stage_rec.id, file_path=img_p).first()
+                                if not exists:
+                                    media_file = MediaFile(
+                                        project_stage_id=stage_rec.id,
+                                        file_name=os.path.basename(img_p),
+                                        file_path=img_p,
+                                        mime_type="image/png",
+                                        status="active"
+                                    )
+                                    db.add(media_file)
                             
                     # Nếu là stage 'video', lưu file media vào media_files
                     if current == "video":
@@ -597,17 +600,20 @@ if "stage" in st.session_state:
 
         if current == "image":
             st.subheader("🖼️ Hình ảnh đã tạo")
-            image_path = None
+            image_paths = []
 
             for line in result_text.split("\n"):
                 if "generated_images" in line:
                     clean_line = line.replace("📁 Đường dẫn ảnh:", "").replace("📁 Đường dẫn ảnh: ", "").strip()
-                    image_path = clean_line
-                    break
+                    if os.path.exists(clean_line):
+                        image_paths.append(clean_line)
 
-            if image_path and os.path.exists(image_path):
-                st.image(image_path, caption=f"Ảnh lưu tại: {image_path}")
-                st.success(f"✅ Đã tải ảnh cục bộ thành công: {image_path}")
+            if image_paths:
+                cols = st.columns(2) if len(image_paths) >= 2 else [st]
+                for idx, img_path in enumerate(image_paths):
+                    col_to_use = cols[idx % 2] if len(image_paths) >= 2 else st
+                    col_to_use.image(img_path, caption=f"Lựa chọn {idx+1} | {os.path.basename(img_path)}")
+                st.success(f"✅ Đã tải thành công {len(image_paths)} hình ảnh cục bộ.")
             else:
                 st.warning("Không tìm thấy đường dẫn ảnh cục bộ hợp lệ trong phản hồi. Nội dung gốc:")
                 st.text(result_text)
