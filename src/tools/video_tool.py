@@ -42,15 +42,28 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
     """
     try:
         import os
-        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:256"
+        # Chia nhỏ tối đa các khối nhớ để tránh bị driver Windows từ chối
+        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
         
         import torch
+        import gc
+        
+        # Giải phóng cache CUDA chủ động trước khi tải mô hình
+        gc.collect()
+        torch.cuda.empty_cache()
+        
         if not torch.cuda.is_available():
             return "ERROR: WAN 2.1 Local yeu cau GPU NVIDIA voi CUDA. Khong tim thay GPU phu hop tren may hien tai."
             
-        import gc
         device_props = torch.cuda.get_device_properties(0)
         total_vram_gb = device_props.total_memory / (1024 ** 3)
+        
+        # Giới hạn PyTorch chỉ sử dụng tối đa 80% VRAM khả dụng để tránh bị Windows chặn
+        try:
+            torch.cuda.set_per_process_memory_fraction(0.8, 0)
+        except Exception as e:
+            print(f"[WARN] Khong the set memory fraction: {e}")
+            
         alloc_vram = torch.cuda.memory_allocated(0) / (1024 ** 3)
         res_vram = torch.cuda.memory_reserved(0) / (1024 ** 3)
         print(f"[LOG] GPU: {device_props.name} | Tong VRAM: {total_vram_gb:.2f} GB | Dang dung: {alloc_vram:.2f} GB (Allocated) / {res_vram:.2f} GB (Reserved)")
