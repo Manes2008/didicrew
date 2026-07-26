@@ -1,4 +1,5 @@
 streamlit
+streamlit-option-menu
 crewai
 langchain-openai
 python-dotenv
