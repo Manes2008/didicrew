@@ -1,14 +1,31 @@
 script_task:
-  description: "Viet kich ban TikTok 25-30s cho y tuong: {idea}"
-  expected_output: "Kich ban day du co hook, loi thoai be gai, timing ro rang"
+  description: |
+    Dựa trên ý tưởng: "{idea}", hãy viết một kịch bản video ngắn (TikTok/Reels/Shorts, thời lượng 25-30s).
+    Kịch bản bắt buộc phải được chia thành các phân cảnh chi tiết (Scene 1, Scene 2, Scene 3...) theo cấu trúc nghiêm ngặt sau cho từng phân cảnh:
+    - Phân cảnh [Số thứ tự]:
+      + Mô tả hình ảnh (Visual): Chi tiết bối cảnh, hoạt động của nhân vật chính, góc máy, ánh sáng.
+      + Lời thoại/Thuyết minh (Voiceover): Lời thoại tương ứng bằng tiếng Việt.
+      + Thời lượng (Duration): Số giây (ví dụ: 5s, 6s...).
+    Yêu cầu kịch bản phải hấp dẫn, có phần mở đầu (hook) lôi cuốn và nội dung nhất quán bám sát ý tưởng.
+  expected_output: "Kịch bản chi tiết chia theo từng phân cảnh (Scene) có mô tả hình ảnh, lời thoại thuyết minh tiếng Việt và thời lượng rõ ràng cho từng cảnh."
 
 visual_task:
-  description: "Dua tren kich ban sau, tao prompt chi tiet cho Kling/Leonardo: {previous_result}"
-  expected_output: "Prompt chi tiet, co character reference"
+  description: |
+    Dựa trên kịch bản chi tiết ở bước trước: "{previous_result}", bạn hãy đóng vai trò là một Visual Prompt Engineer xuất sắc.
+    Nhiệm vụ của bạn là tạo các prompt sinh ảnh/video chất lượng cao và đồng nhất:
+    1. Định nghĩa hồ sơ nhân vật cố định (Character Profile): Mô tả cụ thể ngoại hình nhân vật chính (ví dụ: bé gái, độ tuổi, kiểu tóc, màu tóc, trang phục, biểu cảm đặc trưng) để giữ tính đồng nhất (Character Consistency).
+    2. Định nghĩa phong cách nghệ thuật cố định (Art Style): Ví dụ: "3D animation, Pixar style, cute, vivid colors, detailed, high resolution, 8k".
+    3. Tạo Visual Prompt cho từng phân cảnh: Với mỗi Scene trong kịch bản, hãy kết hợp [Art Style] + [Character Profile] + [Mô tả chi tiết bối cảnh, chuyển động của cảnh đó].
+    Lưu ý: Các prompt viết bằng tiếng Anh để công cụ tạo ảnh/video hiểu tốt nhất. Định dạng đầu ra nghiêm ngặt cho mỗi cảnh:
+    Scene [Số]: [Nội dung prompt tiếng Anh của cảnh đó]
+  expected_output: "Hồ sơ nhân vật, phong cách nghệ thuật và danh sách Visual Prompt chi tiết (bằng tiếng Anh) cho từng phân cảnh để đảm bảo tính đồng nhất tối đa."
 
 image_task:
-  description: "Dua tren kich ban, tao prompt va generate hinh anh cho be gai bang gpt-image-2: {idea}"
-  expected_output: "Prompt + Link hinh anh duoc tao"
+  description: |
+    Dựa trên danh sách prompt hình ảnh từ bước trước: "{previous_result}", hãy lấy prompt của Scene 1 (hoặc tạo một prompt đại diện cho nhân vật chính) để sinh hình ảnh chính (Character Reference).
+    Hãy gọi công cụ generate_gpt_image để tạo ảnh.
+    Lưu ý: Prompt gửi đi phải được tối ưu hóa chất lượng, bổ sung phong cách nghệ thuật và chỉ thị phủ định để triệt tiêu chữ.
+  expected_output: "Đường dẫn ảnh cục bộ được tạo cho nhân vật chính từ Scene 1."
 
 voice_task:
   description: "Tao text voiceover giong be gai de thuong cho kich ban: {previous_result}"

@@ -7,11 +7,307 @@ from urllib.parse import urlparse
 from PIL import Image
 import io
 import config
+import subprocess
 
-def generate_video_func(prompt: str, image_path: str = None) -> str:
+def merge_video_audio_func(video_path: str, voice_path: str) -> str:
     """
-    Tạo video bằng Pollo AI (Minimax Hailuo 02) và tải về máy local.
-    Ảnh đầu vào sẽ được resize và nén để đảm bảo kích thước base64 < 1MB.
+    Ghep file am thanh voiceover tu Buc 4 vao file video mp4 bang FFmpeg.
+    """
+    if not voice_path or not os.path.exists(voice_path):
+        return video_path
+
+    try:
+        output_path = video_path.replace(".mp4", "_with_voice.mp4")
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", video_path,
+            "-i", voice_path,
+            "-c:v", "copy",
+            "-c:a", "aac",
+            "-shortest",
+            output_path
+        ]
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode == 0 and os.path.exists(output_path):
+            return output_path
+        else:
+            return video_path
+    except Exception as ex:
+        print(f"[WARN] Khong the ghep audio bang FFmpeg: {ex}")
+        return video_path
+
+def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
+    """
+    Tao video local su dung Wan 2.1 qua PyTorch / Hugging Face diffusers.
+    """
+    try:
+        import os
+        # Chia nhỏ tối đa các khối nhớ để tránh bị driver Windows từ chối
+        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
+        
+        import torch
+        import gc
+        
+        # Giải phóng cache CUDA chủ động trước khi tải mô hình
+        gc.collect()
+        torch.cuda.empty_cache()
+        
+        if not torch.cuda.is_available():
+            return "ERROR: WAN 2.1 Local yeu cau GPU NVIDIA voi CUDA. Khong tim thay GPU phu hop tren may hien tai."
+            
+        device_props = torch.cuda.get_device_properties(0)
+        total_vram_gb = device_props.total_memory / (1024 ** 3)
+        
+        # Giới hạn PyTorch chỉ sử dụng tối đa 80% VRAM khả dụng để tránh bị Windows chặn
+        try:
+            torch.cuda.set_per_process_memory_fraction(0.8, 0)
+        except Exception as e:
+            print(f"[WARN] Khong the set memory fraction: {e}")
+            
+        alloc_vram = torch.cuda.memory_allocated(0) / (1024 ** 3)
+        res_vram = torch.cuda.memory_reserved(0) / (1024 ** 3)
+        print(f"[LOG] GPU: {device_props.name} | Tong VRAM: {total_vram_gb:.2f} GB | Dang dung: {alloc_vram:.2f} GB (Allocated) / {res_vram:.2f} GB (Reserved)")
+            
+        os.makedirs("generated_videos", exist_ok=True)
+        file_name = f"wan21_video_{int(time.time())}.mp4"
+        file_path = os.path.join("generated_videos", file_name)
+        
+        try:
+            from diffusers import WanPipeline, AutoencoderKLWan
+            model_id = "Wan-AI/Wan2.1-T2V-1.3B-Diffusers"
+            dtype = torch.float16
+            vae = AutoencoderKLWan.from_pretrained(model_id, subfolder="vae", torch_dtype=torch.float32, low_cpu_mem_usage=True)
+            pipe = WanPipeline.from_pretrained(model_id, vae=vae, torch_dtype=dtype, low_cpu_mem_usage=True)
+            
+            # Kich hoat VAE tiling va slicing de giam VRAM luc decode video
+            if hasattr(pipe, "vae") and pipe.vae is not None:
+                try:
+                    pipe.vae.enable_tiling()
+                    print("[LOG] Da bat VAE Tiling de tiet kiem VRAM.")
+                except Exception as e:
+                    print(f"[WARN] Khong the bat VAE Tiling: {e}")
+                try:
+                    pipe.vae.enable_slicing()
+                    print("[LOG] Da bat VAE Slicing de tiet kiem VRAM.")
+                except Exception as e:
+                    print(f"[WARN] Khong the bat VAE Slicing: {e}")
+            
+            # Toi uu hoa tai model dua tren dung luong VRAM
+            if total_vram_gb >= 16.0:
+                print("[LOG] GPU co VRAM >= 16GB. Tai truc tiep model len GPU de tang toc do sinh video.")
+                pipe.to("cuda")
+            elif hasattr(pipe, "enable_model_cpu_offload"):
+                print("[LOG] GPU co VRAM < 16GB. Bat CPU offload de tiet kiem VRAM.")
+                pipe.enable_model_cpu_offload()
+            else:
+                pipe.to("cuda")
+                
+            if hasattr(pipe, "enable_attention_slicing"):
+                pipe.enable_attention_slicing()
+            
+            # Log VRAM truoc khi chay inference
+            post_alloc = torch.cuda.memory_allocated(0) / (1024 ** 3)
+            print(f"[LOG] VRAM sau khi nap pipeline: {post_alloc:.2f} GB / {total_vram_gb:.2f} GB")
+
+            # Reset thong ke VRAM va do thoi gian sinh
+            torch.cuda.reset_peak_memory_stats(0)
+            gen_start_time = time.time()
+            
+            num_frames = 81
+            height = 480
+            width = 832
+            guidance_scale = 5.0
+
+            output = pipe(
+                prompt=prompt[:1000],
+                height=height,
+                width=width,
+                num_frames=num_frames,
+                guidance_scale=guidance_scale
+            ).frames[0]
+            
+            gen_elapsed = time.time() - gen_start_time
+            sec_per_frame = gen_elapsed / num_frames if num_frames > 0 else 0
+            peak_vram = torch.cuda.max_memory_allocated(0) / (1024 ** 3)
+            
+            print(f"[LOG METRICS] Thoi gian sinh: {gen_elapsed:.2f}s | Toc do: {sec_per_frame:.2f}s/frame | VRAM Dinh: {peak_vram:.2f} GB | Do phan giai: {width}x{height} | Frames: {num_frames} | CFG: {guidance_scale}")
+            
+            # Luu file video
+            output.save(file_path)
+            
+            # Don dep pipeline va cache de giai phong VRAM triet de
+            del pipe
+            del vae
+            gc.collect()
+            torch.cuda.empty_cache()
+            return file_path
+            
+        except torch.cuda.OutOfMemoryError as oom_err:
+            if "pipe" in locals():
+                del pipe
+            if "vae" in locals():
+                del vae
+            gc.collect()
+            torch.cuda.empty_cache()
+            print(f"[WARNING] Tran VRAM GPU: {oom_err}")
+            return f"ERROR: Tran VRAM GPU (CUDA Out of Memory)! VRAM da cap phat qua muc cho phep. Vui long dong cac ung dung khac hoac dung engine Cloud."
+        except ImportError as imp_err:
+            return f"ERROR: Thieu thu vien diffusers hoac phu thuoc: {str(imp_err)}. Vui long chay: pip install -r requirements.txt"
+        except Exception as model_err:
+            err_str = str(model_err)
+            if "File reconstruction error" in err_str or "Background writer channel closed" in err_str:
+                return "ERROR: File cache weights bi hong do ngat tai giua chung. Vui long chay: Remove-Item -Recurse -Force \"$env:USERPROFILE\\.cache\\huggingface\\hub\\models--Wan-AI--Wan2.1-T2V-1.3B-Diffusers\""
+            return f"ERROR: Khong the khoi tao pipeline Wan 2.1 Local: {err_str}. Vui long kiem tra lai thu vien diffusers va VRAM."
+
+    except ImportError:
+        return "ERROR: Chưa cai dat thu vien torch / diffusers cho Wan 2.1 Local. Vui long chay: pip install torch diffusers transformers"
+    except Exception as e:
+        return f"ERROR: Loi khi chay Wan 2.1 Local: {str(e)}"
+
+import math
+
+def get_audio_duration_func(voice_path: str) -> float:
+    """
+    Do thoi luong file am thanh voiceover tu Buc 4.
+    """
+    if not voice_path or not os.path.exists(voice_path):
+        return 5.0
+    try:
+        cmd = [
+            "ffprobe", "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1",
+            voice_path
+        ]
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode == 0 and result.stdout.strip():
+            return float(result.stdout.strip())
+    except Exception as ex:
+        print(f"[WARN] Khong the do duration audio bang ffprobe: {ex}")
+    return 5.0
+
+def concat_video_clips_func(clip_paths: list) -> str:
+    """
+    Noi nhieu clip mp4 thanh 1 video dai bang FFmpeg concat.
+    """
+    if not clip_paths:
+        return ""
+    if len(clip_paths) == 1:
+        return clip_paths[0]
+
+    os.makedirs("generated_videos", exist_ok=True)
+    list_file = os.path.join("generated_videos", f"concat_list_{int(time.time())}.txt")
+    output_path = os.path.join("generated_videos", f"full_video_{int(time.time())}.mp4")
+
+    with open(list_file, "w", encoding="utf-8") as f:
+        for path in clip_paths:
+            abs_p = os.path.abspath(path).replace("\\", "/")
+            f.write(f"file '{abs_p}'\n")
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-f", "concat",
+        "-safe", "0",
+        "-i", list_file,
+        "-c", "copy",
+        output_path
+    ]
+    try:
+        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if res.returncode == 0 and os.path.exists(output_path):
+            return output_path
+    except Exception as ex:
+        print(f"[WARN] Loi khi concat video clips: {ex}")
+
+    return clip_paths[0]
+
+def extract_scene_prompts(prompt_text: str, num_scenes: int) -> list:
+    """
+    Trích xuất prompt chi tiết cho từng phân cảnh dựa trên cấu trúc Scene từ Bước 2.
+    """
+    import re
+    pattern = r"(?:Scene|Cảnh)\s*(\d+)[\s*:\-–\.]+(.*?)(?=(?:Scene|Cảnh)\s*\d+[\s*:\-–\.]+|\Z)"
+    matches = re.findall(pattern, prompt_text, re.DOTALL | re.IGNORECASE)
+    
+    prompts = []
+    if matches:
+        sorted_matches = sorted(matches, key=lambda x: int(x[0]))
+        for _, content in sorted_matches:
+            clean_content = content.strip().replace("\n", " ")
+            if clean_content:
+                prompts.append(clean_content)
+    
+    if not prompts:
+        lines = [line.strip() for line in prompt_text.split("\n") if line.strip() and not line.strip().startswith("#")]
+        prompts = [l for l in lines if len(l) > 10]
+        
+    if not prompts:
+        prompts = [s.strip() for s in prompt_text.split(".") if s.strip() and len(s.strip()) > 5]
+        
+    if not prompts:
+        prompts = [prompt_text]
+        
+    while len(prompts) < num_scenes:
+        prompts.append(prompts[-1])
+        
+    return prompts[:num_scenes]
+
+
+def generate_video_func(prompt: str, image_path: str = None, voice_path: str = None, engine: str = "wan2.1_local") -> str:
+    """
+    Ham tao video chinh ho tro sinh multi-scene dua tren do dai Voiceover.
+    """
+    start_time = time.time()
+    # 1. Do thoi luong voiceover de tinh so luong phan canh (scenes)
+    duration = get_audio_duration_func(voice_path) if voice_path else 5.0
+    num_scenes = max(1, math.ceil(duration / 5.0))
+    frames_per_scene = 81 if engine == "wan2.1_local" else 125
+    total_frames = num_scenes * frames_per_scene
+
+    # Trích xuất prompt tương ứng từng phân cảnh một cách nhất quán
+    prompt_sentences = extract_scene_prompts(prompt, num_scenes)
+
+    clip_paths = []
+    
+    for i in range(num_scenes):
+        scene_prompt = prompt_sentences[i % len(prompt_sentences)]
+        full_scene_prompt = scene_prompt
+        print(f"[LOG] Dang tao phan canh {i+1}/{num_scenes} ({frames_per_scene} frames)...")
+        
+        if engine == "wan2.1_local":
+            res = generate_wan21_local_video(full_scene_prompt, image_path)
+        else:
+            res = _generate_pollo_video(full_scene_prompt, image_path)
+
+        if res.startswith("ERROR"):
+            # Neu loi o canh dau tien thi tra ve loi
+            if i == 0:
+                return res
+            break
+        clip_paths.append(res)
+
+    if not clip_paths:
+        return "ERROR: Khong sinh duoc phan canh video nao."
+
+    # 2. Noi tat ca clip lai thanh video dai
+    merged_video_path = concat_video_clips_func(clip_paths)
+
+    # 3. Ghep Voiceover audio tu Buc 4 neu co
+    if voice_path and os.path.exists(voice_path):
+        final_path = merge_video_audio_func(merged_video_path, voice_path)
+        video_result_path = final_path
+    else:
+        video_result_path = merged_video_path
+
+    elapsed_time = time.time() - start_time
+    log_info = f"[LOG] Thoi gian thuc hien: {elapsed_time:.2f}s | Frame/canh: {frames_per_scene} | Tong so frames: {total_frames} | So phan canh: {num_scenes}"
+    print(log_info)
+
+    return f"Duong dan video: {video_result_path}\n{log_info}"
+
+def _generate_pollo_video(prompt: str, image_path: str = None) -> str:
+    """
+    Tao video bang Pollo AI (Minimax Hailuo 02) qua API.
     """
     try:
         api_key = config.POLLO_API_KEY
@@ -113,7 +409,7 @@ def generate_video_func(prompt: str, image_path: str = None) -> str:
                         with open(file_path, "wb") as f:
                             for chunk in vid_response.iter_content(chunk_size=8192):
                                 f.write(chunk)
-                        return f"📁 Đường dẫn video: {file_path}"
+                        return file_path
                     else:
                         return f"ERROR: Không thể tải video từ URL: {video_url}"
                 

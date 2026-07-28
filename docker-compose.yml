@@ -4,6 +4,24 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: videocrew-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_DB: didicrew
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d didicrew"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   videocrew:
     build: .
     container_name: videocrew-app
@@ -11,6 +29,15 @@ services:
       - "8501:8501"
     volumes:
       - ./generated_images:/app/generated_images
+      - ./generated_videos:/app/generated_videos
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://postgres:123456@db:5432/didicrew
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
+
+volumes:
+  postgres_data:

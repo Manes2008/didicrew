@@ -37,6 +37,21 @@ class WorkflowEngine:
             if stage_name == "image":
                 from src.tools.image_tool import generate_gpt_image_func
                 prompt = previous_result if previous_result else idea
+                
+                # Trích xuất prompt của Scene 1 và hồ sơ nhân vật/phong cách để sinh ảnh tối ưu
+                import re
+                scene1_match = re.search(r"(?:Scene|Cảnh)\s*1[\s*:\-–\.]+(.*?)(?=(?:Scene|Cảnh)\s*2[\s*:\-–\.]+|\Z)", prompt, re.DOTALL | re.IGNORECASE)
+                if scene1_match:
+                    profile_match = re.search(r"(?:Character Profile|Hồ sơ nhân vật|Profile|Nhân vật)[\s*:\-–\.]+(.*?)(?=(?:Art Style|Phong cách|Scene)\s*|\Z)", prompt, re.DOTALL | re.IGNORECASE)
+                    style_match = re.search(r"(?:Art Style|Phong cách nghệ thuật|Style)[\s*:\-–\.]+(.*?)(?=(?:Scene|Nhân vật|Profile)\s*|\Z)", prompt, re.DOTALL | re.IGNORECASE)
+                    
+                    profile_text = profile_match.group(1).strip() if profile_match else ""
+                    style_text = style_match.group(1).strip() if style_match else ""
+                    scene1_text = scene1_match.group(1).strip()
+                    
+                    prompt = f"{style_text} {profile_text} {scene1_text}"
+                    prompt = prompt.replace("\n", " ").strip()
+
                 return generate_gpt_image_func(prompt)
                 
             # Chạy trực tiếp sinh video
@@ -55,11 +70,20 @@ class WorkflowEngine:
                         if "generated_images" in line:
                             image_path = line.replace("📁 Đường dẫn ảnh:", "").replace("📁 Đường dẫn ảnh: ", "").strip()
                             break
-                            
-                # Nếu có visual prompt thì dùng, nếu không thì dùng kịch bản, hoặc cuối cùng là idea gốc
+
+                # Trích xuất đường dẫn voiceover tu kết quả bước 4
+                voice_result = all_results.get("voice", "") if all_results else ""
+                voice_path = None
+                if voice_result:
+                    for line in voice_result.split("\n"):
+                        if ".mp3" in line or ".wav" in line:
+                            voice_path = line.strip()
+                            break
+
+                video_engine = context.get("video_engine", "wan2.1_local") if context else "wan2.1_local"
                 prompt = visual_result if visual_result else (script_result if script_result else idea)
                 
-                return generate_video_func(prompt, image_path)
+                return generate_video_func(prompt, image_path=image_path, voice_path=voice_path, engine=video_engine)
 
             if stage_name not in self.stage_mapping:
                 return f"Stage '{stage_name}' chưa được hỗ trợ."

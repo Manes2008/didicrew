@@ -1,23 +1,24 @@
 # MIT License
 # Copyright (c) 2026 Manes2008/didicrew
 
-from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
+from crewai import LLM
 
 def get_llm(provider: str, model_name: str, api_key: str, temperature: float = 0.75):
     """
-    Khởi tạo đối tượng Chat LLM tương ứng dựa trên provider và model name.
+    Khoi tao doi tuong Chat LLM tuong ung dua tren provider va model name su dung Native CrewAI LLM.
     """
     if provider == "OpenAI":
-        return ChatOpenAI(
-            model=model_name,
+        model_str = f"openai/{model_name}" if not model_name.startswith("openai/") else model_name
+        return LLM(
+            model=model_str,
             temperature=temperature,
             api_key=api_key
         )
     elif provider == "Google Gemini":
-        return ChatGoogleGenerativeAI(
-            model=model_name,
+        model_str = f"gemini/{model_name}" if not model_name.startswith("gemini/") else model_name
+        return LLM(
+            model=model_str,
             temperature=temperature,
-            google_api_key=api_key
+            api_key=api_key
         )
-    raise ValueError(f"Không hỗ trợ nhà cung cấp LLM: {provider}")
+    raise ValueError(f"Khong ho tro nha cung cap LLM: {provider}")

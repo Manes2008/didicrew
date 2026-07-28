@@ -1,4 +1,5 @@
 streamlit
+streamlit-option-menu
 crewai
 langchain-openai
 python-dotenv
@@ -9,3 +10,9 @@ alembic
 psycopg2-binary
 Pillow
 requests
+torch>=2.4.0
+torchvision>=0.19.0
+diffusers>=0.31.0
+transformers
+accelerate
+ffmpeg-python
