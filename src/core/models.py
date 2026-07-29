@@ -1,6 +1,6 @@
 import datetime
 from sqlalchemy import (
-    create_engine, Column, Integer, String, Text, DateTime, BigInteger, ForeignKey, UniqueConstraint, Boolean
+    create_engine, Column, Integer, String, Text, DateTime, BigInteger, ForeignKey, UniqueConstraint, Boolean, LargeBinary
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, validates
 import sys
@@ -131,6 +131,7 @@ class MediaFile(Base):
     file_size = Column(BigInteger, nullable=True)
     duration_seconds = Column(Integer, nullable=True)
     status = Column(String(20), default="active")
+    file_data = Column(LargeBinary, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     project_stage = relationship("ProjectStage", back_populates="media_files")

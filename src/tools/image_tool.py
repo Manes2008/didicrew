@@ -97,3 +97,74 @@ def generate_gpt_image_func(prompt: str) -> str:
 def generate_gpt_image(prompt: str) -> str:
     """Tạo hình ảnh bằng dall-e-3, tự động tải về máy local và trả về đường dẫn file."""
     return generate_gpt_image_func(prompt)
+
+
+def generate_local_image_sd_func(prompt: str, use_gpu: bool = None) -> str:
+    """
+    Sinh anh local su dung Stable Diffusion v1.5 qua diffusers.
+    Neu use_gpu la None, tu dong phat hien GPU qua torch.cuda.is_available().
+    """
+    try:
+        import os
+        import time
+        import torch
+        from diffusers import StableDiffusionPipeline
+        import gc
+        
+        # Phat hien GPU neu khong chi dinh
+        if use_gpu is None:
+            use_gpu = torch.cuda.is_available()
+            
+        device = "cuda" if use_gpu else "cpu"
+        # GPU thi dung float16 de tiet kiem VRAM, CPU thi bat buoc dung float32
+        dtype = torch.float16 if use_gpu else torch.float32
+        
+        print(f"[LOG] Khoi tao Stable Diffusion v1.5 tren thiet bi: {device} | dtype: {dtype}")
+        
+        # Giai phong cache CUDA truoc khi chay
+        if use_gpu:
+            gc.collect()
+            torch.cuda.empty_cache()
+            
+        model_id = "runwayml/stable-diffusion-v1-5"
+        
+        # Tải pipeline SD v1.5
+        pipe = StableDiffusionPipeline.from_pretrained(
+            model_id, 
+            torch_dtype=dtype,
+            low_cpu_mem_usage=True
+        )
+        
+        # Cau hinh thiet bi va cac buoc toi uu hoa
+        if use_gpu:
+            pipe.to("cuda")
+            if hasattr(pipe, "enable_attention_slicing"):
+                pipe.enable_attention_slicing()
+        else:
+            pipe.to("cpu")
+            
+        # Tao thu muc luu tru
+        os.makedirs("generated_images", exist_ok=True)
+        
+        # So buoc lay mau (steps): CPU chay 15 steps cho nhanh, GPU chay 30 steps chat luong tot hon
+        num_inference_steps = 30 if use_gpu else 15
+        
+        # Sinh 1 anh chat luong cao de tranh tran bo nho
+        image = pipe(prompt=prompt[:1024], num_inference_steps=num_inference_steps).images[0]
+        
+        file_path = f"generated_images/sd_image_{int(time.time())}.png"
+        image.save(file_path)
+        
+        # Giai phong bo nho
+        del pipe
+        if use_gpu:
+            gc.collect()
+            torch.cuda.empty_cache()
+            
+        return f"📁 Đường dẫn ảnh: {file_path}"
+        
+    except ImportError:
+        return "ERROR: Chưa cài đặt thư viện diffusers / transformers / torch. Vui lòng chạy: pip install diffusers transformers torch"
+    except Exception as e:
+        return f"ERROR: Lỗi khi sinh ảnh bằng Stable Diffusion local: {str(e)}"
+
