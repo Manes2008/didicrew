@@ -5,13 +5,18 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Cai dat build-essential cho cac package can bien dich neu co
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
+
+# Copy Docker CLI và Docker Compose phục vụ Docker-out-of-Docker
+COPY --from=docker:latest /usr/local/bin/docker /usr/local/bin/docker
+COPY --from=docker/compose:latest /usr/local/bin/docker-compose /usr/local/bin/docker-compose
+RUN mkdir -p /usr/local/lib/docker/cli-plugins && \
+    ln -s /usr/local/bin/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
 
 COPY requirements.txt .
 
