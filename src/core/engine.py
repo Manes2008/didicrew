@@ -35,7 +35,6 @@ class WorkflowEngine:
         try:
             # Chạy trực tiếp sinh ảnh bằng code Python thuần túy không qua Agent
             if stage_name == "image":
-                from src.tools.image_tool import generate_gpt_image_func
                 prompt = previous_result if previous_result else idea
                 
                 # Trích xuất prompt của Scene 1 và hồ sơ nhân vật/phong cách để sinh ảnh tối ưu
@@ -52,7 +51,16 @@ class WorkflowEngine:
                     prompt = f"{style_text} {profile_text} {scene1_text}"
                     prompt = prompt.replace("\n", " ").strip()
 
-                return generate_gpt_image_func(prompt)
+                image_engine = context.get("image_engine", "openai") if context else "openai"
+                if image_engine == "sd1.5_local":
+                    from src.tools.image_tool import generate_local_image_sd_func
+                    return generate_local_image_sd_func(prompt, use_gpu=False)
+                elif image_engine == "markl_local":
+                    from src.tools.image_tool import generate_local_image_sd_func
+                    return generate_local_image_sd_func(prompt, use_gpu=True)
+                else:
+                    from src.tools.image_tool import generate_gpt_image_func
+                    return generate_gpt_image_func(prompt)
                 
             # Chạy trực tiếp sinh video
             if stage_name == "video":

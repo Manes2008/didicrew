@@ -42,8 +42,8 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
     """
     try:
         import os
-        # Chia nhỏ tối đa các khối nhớ để tránh bị driver Windows từ chối
-        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
+        # Chống phân mảnh bộ nhớ trên Windows bằng cách kích hoạt expandable_segments
+        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
         
         import torch
         import gc
@@ -58,9 +58,9 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
         device_props = torch.cuda.get_device_properties(0)
         total_vram_gb = device_props.total_memory / (1024 ** 3)
         
-        # Giới hạn PyTorch chỉ sử dụng tối đa 80% VRAM khả dụng để tránh bị Windows chặn
+        # Tăng giới hạn sử dụng VRAM của PyTorch lên 95% để tránh OOM ảo trên Windows
         try:
-            torch.cuda.set_per_process_memory_fraction(0.8, 0)
+            torch.cuda.set_per_process_memory_fraction(0.95, 0)
         except Exception as e:
             print(f"[WARN] Khong the set memory fraction: {e}")
             
@@ -76,7 +76,8 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
             from diffusers import WanPipeline, AutoencoderKLWan
             model_id = "Wan-AI/Wan2.1-T2V-1.3B-Diffusers"
             dtype = torch.float16
-            vae = AutoencoderKLWan.from_pretrained(model_id, subfolder="vae", torch_dtype=torch.float32, low_cpu_mem_usage=True)
+            # Sử dụng torch.float16 cho VAE thay vì float32 để giảm thiểu tối đa tiêu thụ VRAM lúc decode video
+            vae = AutoencoderKLWan.from_pretrained(model_id, subfolder="vae", torch_dtype=torch.float16, low_cpu_mem_usage=True)
             pipe = WanPipeline.from_pretrained(model_id, vae=vae, torch_dtype=dtype, low_cpu_mem_usage=True)
             
             # Kich hoat VAE tiling va slicing de giam VRAM luc decode video

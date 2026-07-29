@@ -1,0 +1,72 @@
+Prompt cho công cụ tạo hình ảnh/video (Kling/Leonardo) theo phong cách kênh Kênh Mặc Định – VideoCrew, dành cho video TikTok/Reels 25-30 giây với kịch bản chàng trai IT và mô hình AI:
+
+---
+
+**PROMPT TẠO HÌNH ẢNH/VIDEO CHO TỪNG CẢNH**
+
+---
+
+### 1. Cảnh mở đầu – 0:00-0:05: Chàng trai IT đang tập trung trước máy tính, ánh sáng màn hình xanh tỏa sáng lên mặt
+
+- **Mô tả nhân vật:** Nam, 23-28 tuổi, dáng người gầy vừa, kiểu tóc ngắn nhẹ nhàng, mặc áo hoodie hoặc áo thun đơn sắc màu xanh đậm hoặc đen, đeo tai nghe nhạc kiểu đơn giản. Gương mặt tập trung, ánh mắt dán vào màn hình máy tính.
+- **Bối cảnh:** Phòng làm việc công nghệ hiện đại, tối nhẹ, ánh sáng chủ đạo là ánh sáng màn hình máy tính toả ra xanh dương, làm nổi bật gương mặt nhân vật. Có thể có mảng ánh sáng led ánh xanh hoặc tím ở phía sau tạo chiều sâu.
+- **Text overlay:** "Chàng IT đang xây dựng AI thế hệ mới... nhưng..." — sử dụng font dạng sans-serif năng động, màu trắng có viền mờ hoặc màu neon xanh để nổi bật trên nền tối.
+- **Hiệu ứng hình ảnh:** Zoom cận cảnh mặt, ánh sáng thay đổi nhẹ tạo cảm giác nhấp nháy từ màn hình.
+- **Âm nhạc:** Nhạc nền tốc độ nhanh, có nhịp điệu điện tử nhẹ, tạo căng thẳng và thu hút.
+
+---
+
+### 2. Cảnh hook – 0:05-0:08: Cô gái trẻ bước vào phòng cầm ly cà phê, tò mò hỏi
+
+- **Mô tả nhân vật nữ:** Nữ, khoảng 20-25 tuổi, kiểu tóc dài buông tự nhiên, mặc áo sơ mi trắng hoặc áo thun sáng màu, phong cách trẻ trung, năng động. Tay cầm ly cà phê giấy hoặc pha lê đơn giản.
+- **Cử chỉ/biểu cảm:** Bước đi nhẹ nhàng, ánh mắt tò mò, nụ cười nhẹ nhàng mở miệng hỏi. Giọng nói mềm mại, nhẹ nhàng.
+- **Bối cảnh:** Tiếp tục trong phòng làm việc, ánh sáng vẫn tương tự, có thể bắt được ánh sáng cửa sổ yếu ớt phía sau.
+- **Text overlay:** Không cần text, tập trung vào câu thoại CI - “Anh làm gì mà liên tục nhìn màn hình thế, AI hay là... tạo phép màu?”
+- **Góc quay:** Góc trung cảnh hoặc cận trung cảnh để thấy rõ biểu cảm khuôn mặt cô gái và phần môi mở lời.
+
+---
+
+### 3. Cảnh phát triển – 0:08-0:22: Chàng trai cười, ngồi lại giải thích về AI bằng niềm đam mê
+
+- **Mô tả nhân vật nam:** Biểu cảm tự hào và nhiệt huyết, cười nhẹ, chuyển từ gương mặt căng thẳng sang thân thiện.
+- **Cử chỉ:** Dừng tay gõ phím máy tính, quay người nhẹ sang cô gái, mở lòng chia sẻ.
+- **Text/Voiceover:** "Đây không phải phép màu đâu, mà là AI! Mình đang dạy máy tính 'suy nghĩ' theo cách của con người. Từ những dòng code nhỏ, sẽ tạo ra một trí tuệ giúp thay đổi thế giới."
+- **Hiệu ứng đa cảnh:** Cắt nhanh chuyển sang màn hình máy tính (POV), hiển thị dòng code chạy nhanh, biểu đồ tăng trưởng màu xanh lá hoặc xanh dương dần dần lên cao, thể hiện sự phát triển AI.
+- **Màu sắc:** Tươi sáng hơn, chuyển ánh sáng màn hình sang xanh lá để tạo cảm giác đổi mới và phát triển.
+- **Cảm xúc:** Nhiệt huyết, cảm hứng, trẻ trung, đậm chất khám phá công nghệ.
+
+---
+
+### 4. Cảnh kết thúc – 0:22-0:30: Cô gái mỉm cười đùa vui, chàng trai đồng ý gọi “Phù thủy công nghệ”
+
+- **Cảnh nữ:** Cô gái đặt ly cà phê xuống bàn, ánh mắt thân thiện, cười tươi vui, tạo cảm giác gần gũi và động viên.
+- **Câu thoại:**  
+  - Cô gái: "Vậy mình có thể gọi anh là 'Phù thủy số' rồi đấy!" (giọng đùa vui, nhẹ nhàng)
+  - Chàng trai: "Phù thủy công nghệ đây!" (nở nụ cười tự tin, gật đầu)
+- **Góc quay:** Trung cảnh hoặc cận trung cảnh thể hiện tương tác chân thực, ánh sáng ấm áp hơn (vàng nhẹ), tạo sức sống tích cực.
+- **Text cuối video:**  
+  - "AI không chỉ là công nghệ, mà là tương lai do chính bạn tạo nên."  
+  - Hashtags: #ChuyenIT #AI #CongNghe  
+  - Font chữ hiện đại, nổi bật, màu trắng hoặc xanh neon trên nền hơi tối/mờ.
+- **Hiệu ứng:** Logo kênh Kênh Mặc Định xuất hiện cuối video với hiệu ứng fade-in, kèm lời kêu gọi follow kiểu: "Follow để khám phá công nghệ mỗi ngày!"
+- **Âm nhạc:** Nhạc nền chuyển sang giai điệu tích cực, tươi sáng, thúc đẩy cảm hứng.
+
+---
+
+### CHARACTER REFERENCE (Tham khảo tạo hình nhân vật cho AI):
+
+- **Chàng trai IT:** Gương mặt nam thanh lịch, phong thái chuyên nghiệp nhưng trẻ trung, kiểu giống diễn viên công nghệ trẻ trung như Timothée Chalamet, mặc áo hoodie công nghệ, đeo kính cận nhẹ (tuỳ chọn), biểu cảm thân thiện, tập trung.
+- **Cô gái trẻ:** Phong cách tươi tắn, hiện đại, mái tóc dài thẳng hoặc uốn sóng nhẹ, kiểu như Emma Mackey hoặc nữ diễn viên trẻ châu Á hiện đại với nụ cười tươi, thời trang casual-chic.
+
+---
+
+### TỔNG QUÁT PHONG CÁCH
+
+- Tông màu chủ đạo: xanh dương neon, xanh lá, đen, trắng - toát lên sự hiện đại, công nghệ, trẻ trung.
+- Ánh sáng và bố cục: Ánh sáng tập trung, tạo chiều sâu, làm nổi bật nhân vật và công nghệ (màn hình, code).
+- Tốc độ video nhanh, chuyển cảnh mượt mà, hiệu ứng chữ và âm nhạc phối hợp hài hòa.
+- Phong cách truyền cảm hứng, thân thiện, hướng đến giới trẻ yêu công nghệ, năng động.
+
+---
+
+**Bạn có thể copy toàn bộ nội dung prompt trên để nhập vào công cụ tạo hình ảnh/video AI Kling/Leonardo nhằm tạo ra các cảnh video chi tiết, phù hợp với phong cách Kênh Mặc Định – VideoCrew, chuẩn TikTok/Reels, giữ đúng đặc trưng kênh.**

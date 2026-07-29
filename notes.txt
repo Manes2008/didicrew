@@ -1,0 +1,8 @@
+Thêm 1 field lưu imgae và video vào local
+thiết lập docker bổ sung db postgree vào local
+Chỉnh sửa thêm video nữa
+bổ sung engine thay thế để thực hiện tự động hòa đẩy image vào tool bên ngoài
+Chọn Mark‑L làm engine chính vì chạy trực tiếp trên Windows, dễ modify src.
+Hướng: “Nếu không có GPU → dùng Stable Diffusion v1.5 (local), có GPU → dùng Mark‑L (local).”
+
+
