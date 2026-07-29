@@ -18,3 +18,4 @@ accelerate
 ffmpeg-python
 pyautogui
 pyperclip
+watchdog
