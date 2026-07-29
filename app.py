@@ -104,5 +104,9 @@ try:
         from src.ui.pages.ip_manager import render_ip_manager_page
         render_ip_manager_page(db)
 
+    elif selected_nav == "Cấu hình RustDesk":
+        from src.ui.pages.rustdesk_page import render_rustdesk_page
+        render_rustdesk_page()
+
 finally:
     db.close()

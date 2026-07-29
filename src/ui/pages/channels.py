@@ -197,7 +197,7 @@ def render_channels_page(db):
                     c3.markdown(f'<span class="vc-stage-goal">{cfg.goal}</span>', unsafe_allow_html=True)
                     
                     # Nút Sửa vai trò
-                    if c4.button("Sửa", key=f"btn_edit_stage_{cfg.id}", size="small", use_container_width=True):
+                    if c4.button("Sửa", key=f"btn_edit_stage_{cfg.id}", use_container_width=True):
                         st.session_state["editing_config_id"] = cfg.id
                         st.session_state["show_add_config"] = True
                         st.rerun()
