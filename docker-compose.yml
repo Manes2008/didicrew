@@ -30,6 +30,8 @@ services:
     volumes:
       - ./generated_images:/app/generated_images
       - ./generated_videos:/app/generated_videos
+      - ./rustdesk:/app/rustdesk
+      - /var/run/docker.sock:/var/run/docker.sock
     env_file:
       - .env
     environment:
