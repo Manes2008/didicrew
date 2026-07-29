@@ -237,16 +237,27 @@ def inject_custom_css(logged_in=True):
     }
     hr { margin: 1rem 0 !important; }
     
-    /* Login Form styling */
-    .vc-login-card {
-        max-width: 480px;
-        margin: 100px auto;
-        padding: 2.5rem;
-        border: 1px solid var(--vc-border);
-        border-radius: var(--vc-radius-lg);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        background-color: rgba(255, 255, 255, 0.02);
-        backdrop-filter: blur(10px);
+    /* Login Form styling & animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(24px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    div:has(#login-gate) div[data-testid="stVerticalBlockBorderWrapper"] {
+        border: 1px solid var(--vc-border) !important;
+        border-radius: var(--vc-radius-lg) !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.22) !important;
+        background-color: rgba(255, 255, 255, 0.02) !important;
+        backdrop-filter: blur(12px) !important;
+        padding: 2.4rem !important;
+        margin-top: 80px !important;
+        animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 </style>
 """, unsafe_allow_html=True)
