@@ -1,0 +1,14 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git/
+.github/
+.gitignore
+generated_images/
+generated_videos/
+exports/
+.codegraph/
+.qodo/
