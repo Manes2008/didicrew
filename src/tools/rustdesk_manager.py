@@ -81,8 +81,7 @@ def start_docker_services(relay_host: str) -> tuple[bool, str]:
             cmd,
             cwd=str(RUSTDESK_DIR),
             capture_output=True,
-            text=True,
-            shell=True
+            text=True
         )
         if res.returncode == 0:
             return True, "Khởi động RustDesk Server thành công."
@@ -101,8 +100,7 @@ def stop_docker_services() -> tuple[bool, str]:
             cmd,
             cwd=str(RUSTDESK_DIR),
             capture_output=True,
-            text=True,
-            shell=True
+            text=True
         )
         if res.returncode == 0:
             return True, "Đã dừng RustDesk Server thành công."
@@ -123,8 +121,7 @@ def get_services_status() -> dict:
             cmd,
             cwd=str(RUSTDESK_DIR),
             capture_output=True,
-            text=True,
-            shell=True
+            text=True
         )
         if res.returncode == 0 and res.stdout:
             lines = res.stdout.strip().split("\n")
@@ -164,8 +161,7 @@ def get_container_logs(container_name: str, tail: int = 30) -> str:
             cmd,
             cwd=str(RUSTDESK_DIR),
             capture_output=True,
-            text=True,
-            shell=True
+            text=True
         )
         # docker logs in ra stderr nhiều hơn stdout nên ta lấy cả hai
         logs = (res.stderr or "") + (res.stdout or "")
