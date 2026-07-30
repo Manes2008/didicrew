@@ -20,7 +20,7 @@ docker compose down
 echo [VideoCrew Docker] Dang build va khoi chay cac container moi (Streamlit + PostgreSQL)...
 docker compose up -d --build --force-recreate
 
-if %errorlevel% eq 0 (
+if %errorlevel% == 0 (
     echo [VideoCrew Docker] Khoi chay thanh cong!
     echo [VideoCrew Docker] Ung dung Streamlit dang chay tai: http://localhost:8501
     echo [VideoCrew Docker] PostgreSQL dang chay tai port 5432

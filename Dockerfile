@@ -12,11 +12,21 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Cài đặt Docker CLI và Docker Compose chính chủ (tương thích glibc trên Debian)
+# Copy Docker CLI và Docker Compose phục vụ Docker-out-of-Docker
+COPY --from=docker:latest /usr/local/bin/docker /usr/local/bin/docker
+COPY --from=docker/compose:latest /usr/local/bin/docker-compose /usr/local/bin/docker-compose
+
+# Cài đặt thư viện musl tương thích để chạy file nhị phân musl-linked trên Debian glibc
 RUN apt-get update && apt-get install -y \
-    docker.io \
-    docker-compose-v2 \
+    musl \
     && rm -rf /var/lib/apt/lists/*
+
+# Cấu hình plugin cho docker compose
+RUN mkdir -p /usr/local/lib/docker/cli-plugins /usr/lib/docker/cli-plugins /usr/local/libexec/docker/cli-plugins /usr/libexec/docker/cli-plugins && \
+    ln -s /usr/local/bin/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose && \
+    ln -s /usr/local/bin/docker-compose /usr/lib/docker/cli-plugins/docker-compose && \
+    ln -s /usr/local/bin/docker-compose /usr/local/libexec/docker/cli-plugins/docker-compose && \
+    ln -s /usr/local/bin/docker-compose /usr/libexec/docker/cli-plugins/docker-compose
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip
