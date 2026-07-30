@@ -15,8 +15,11 @@ RUN apt-get update && apt-get install -y \
 # Copy Docker CLI và Docker Compose phục vụ Docker-out-of-Docker
 COPY --from=docker:latest /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=docker/compose:latest /usr/local/bin/docker-compose /usr/local/bin/docker-compose
-RUN mkdir -p /usr/local/lib/docker/cli-plugins && \
-    ln -s /usr/local/bin/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
+RUN mkdir -p /usr/local/lib/docker/cli-plugins /usr/lib/docker/cli-plugins /usr/local/libexec/docker/cli-plugins /usr/libexec/docker/cli-plugins && \
+    ln -s /usr/local/bin/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose && \
+    ln -s /usr/local/bin/docker-compose /usr/lib/docker/cli-plugins/docker-compose && \
+    ln -s /usr/local/bin/docker-compose /usr/local/libexec/docker/cli-plugins/docker-compose && \
+    ln -s /usr/local/bin/docker-compose /usr/libexec/docker/cli-plugins/docker-compose
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip
