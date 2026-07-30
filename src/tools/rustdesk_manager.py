@@ -71,7 +71,7 @@ def start_docker_services(relay_host: str) -> tuple[bool, str]:
         
         # 2. Chạy docker compose up -d
         # Trên Windows, subprocess có thể cần shell=True để chạy đúng command hoặc sử dụng creationflags
-        cmd = ["docker", "compose", "up", "-d"]
+        cmd = ["docker-compose", "up", "-d"]
         
         # Tạo thư mục data trước để tránh docker tự tạo thư mục data của root sở hữu
         data_dir = RUSTDESK_DIR / "data"
@@ -95,7 +95,7 @@ def stop_docker_services() -> tuple[bool, str]:
     if not check_docker_installed():
         return False, "Docker không được cài đặt hoặc daemon không hoạt động."
     try:
-        cmd = ["docker", "compose", "down"]
+        cmd = ["docker-compose", "down"]
         res = subprocess.run(
             cmd,
             cwd=str(RUSTDESK_DIR),
