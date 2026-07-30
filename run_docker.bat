@@ -15,8 +15,10 @@ if not exist .env (
     echo [WARN] Khong tim thay file .env. Vui long kiem tra lai cau hinh moi truong.
 )
 
-echo [VideoCrew Docker] Dang build va khoi chay cac container (Streamlit + PostgreSQL)...
-docker-compose up -d --build
+echo [VideoCrew Docker] Dang dung va don dep container cu de tranh xung dot...
+docker-compose down
+echo [VideoCrew Docker] Dang build va khoi chay cac container moi (Streamlit + PostgreSQL)...
+docker-compose up -d --build --force-recreate
 
 if %errorlevel% eq 0 (
     echo [VideoCrew Docker] Khoi chay thanh cong!

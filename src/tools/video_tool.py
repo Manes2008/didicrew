@@ -254,13 +254,115 @@ def extract_scene_prompts(prompt_text: str, num_scenes: int) -> list:
     return prompts[:num_scenes]
 
 
-def generate_video_func(prompt: str, image_path: str = None, voice_path: str = None, engine: str = "wan2.1_local") -> str:
+def scale_video_speed_ffmpeg(video_path: str, target_duration: float, system_ratio_multiplier: float = 1.0) -> str:
     """
-    Ham tao video chinh ho tro sinh multi-scene dua tren do dai Voiceover.
+    Sử dụng FFmpeg để co giãn (tăng/giảm tốc độ) của video gốc cho khớp chính xác với target_duration.
+    """
+    if not video_path or not os.path.exists(video_path):
+        return video_path
+    
+    # Đo thời lượng hiện tại của video bằng ffprobe
+    current_duration = 5.0
+    try:
+        cmd_probe = [
+            "ffprobe", "-v", "error", "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1", video_path
+        ]
+        res = subprocess.run(cmd_probe, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if res.returncode == 0 and res.stdout.strip():
+            current_duration = float(res.stdout.strip())
+    except Exception as ex:
+        print(f"[WARN] Khong the do thoi luong video bang ffprobe: {ex}")
+        
+    if current_duration <= 0 or target_duration <= 0:
+        return video_path
+
+    # Tính toán hệ số nhân tốc độ: setpts = target_duration / current_duration
+    setpts_factor = target_duration / current_duration
+    if system_ratio_multiplier and system_ratio_multiplier != 1.0:
+        setpts_factor = setpts_factor / system_ratio_multiplier
+    
+    output_path = video_path.replace(".mp4", f"_scaled_{int(time.time())}.mp4")
+    
+    # Sử dụng bộ lọc video setpts để thay đổi tốc độ phát
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", video_path,
+        "-filter:v", f"setpts={setpts_factor}*PTS",
+        "-an", # Bỏ âm thanh của video gốc để chuẩn bị ghép voiceover sau
+        output_path
+    ]
+    
+    try:
+        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if res.returncode == 0 and os.path.exists(output_path):
+            return output_path
+    except Exception as ex:
+        print(f"[WARN] Loi khi co gian video bang FFmpeg: {ex}")
+        
+    return video_path
+
+
+def generate_video_func(prompt: str, image_path: str = None, voice_path: str = None, engine: str = "wan2.1_local", project_id: str = None) -> str:
+    """
+    Ham tao video chinh ho tro sinh multi-scene dua tren do dai Voiceover va VideoDurationConfig.
     """
     start_time = time.time()
-    # 1. Do thoi luong voiceover de tinh so luong phan canh (scenes)
-    duration = get_audio_duration_func(voice_path) if voice_path else 5.0
+    
+    # Cấu hình mặc định từ DB
+    duration_type = "system_generated"
+    target_duration = 0
+    min_duration = 0
+    max_duration = 0
+    video_source_path = None
+    system_ratio_multiplier = 1.0
+
+    if project_id:
+        from src.core.models import get_db_session, VideoDurationConfig
+        db = get_db_session()
+        try:
+            cfg = db.query(VideoDurationConfig).filter_by(project_id=int(project_id)).first()
+            if cfg:
+                duration_type = cfg.duration_type
+                target_duration = cfg.target_duration or 0
+                min_duration = cfg.min_duration or 0
+                max_duration = cfg.max_duration or 0
+                video_source_path = cfg.video_source_path
+                system_ratio_multiplier = float(cfg.system_ratio_multiplier or 1.0)
+        except Exception as e_db:
+            print(f"[WARN] Loi doc VideoDurationConfig tu DB: {e_db}")
+        finally:
+            db.close()
+
+    # 1. Đo thời lượng voiceover để làm cơ sở căn chỉnh
+    audio_duration = get_audio_duration_func(voice_path) if voice_path else 0.0
+    
+    # Tính toán thời lượng video mục tiêu
+    duration = audio_duration if audio_duration > 0 else 5.0
+    if target_duration > 0:
+        duration = target_duration
+        
+    if min_duration > 0:
+        duration = max(duration, min_duration)
+    if max_duration > 0:
+        duration = min(duration, max_duration)
+
+    # XỬ LÝ CHẾ ĐỘ UPLOADED_VIDEO
+    if duration_type == "uploaded_video" and video_source_path and os.path.exists(video_source_path):
+        print(f"[LOG] Dang xu ly che do uploaded_video voi file nguon: {video_source_path}")
+        scaled_video = scale_video_speed_ffmpeg(video_source_path, duration, system_ratio_multiplier)
+        
+        # Ghép âm thanh thuyết minh nếu có
+        if voice_path and os.path.exists(voice_path):
+            video_result_path = merge_video_audio_func(scaled_video, voice_path)
+        else:
+            video_result_path = scaled_video
+            
+        elapsed_time = time.time() - start_time
+        log_info = f"[LOG] Hoan thanh co gian video nguon (uploaded_video) | Thoi gian: {elapsed_time:.2f}s | Target duration: {duration}s"
+        return f"Duong dan video: {video_result_path}\n{log_info}"
+
+    # XỬ LÝ CHẾ ĐỘ SYSTEM_GENERATED (Tự sinh clip)
     num_scenes = max(1, math.ceil(duration / 5.0))
     frames_per_scene = 81 if engine == "wan2.1_local" else 125
     total_frames = num_scenes * frames_per_scene
@@ -301,18 +403,22 @@ def generate_video_func(prompt: str, image_path: str = None, voice_path: str = N
     if not clip_paths:
         return "ERROR: Khong sinh duoc phan canh video nao."
 
-    # 2. Noi tat ca clip lai thanh video dai
+    # 2. Nối tất cả clip lại thành video dài
     merged_video_path = concat_video_clips_func(clip_paths)
 
-    # 3. Ghep Voiceover audio tu Buc 4 neu co
+    # Co giãn video đã nối cho khớp chính xác với thời lượng âm thanh
+    print(f"[LOG] Dang co gian video da noi cho khop thoi luong target: {duration}s")
+    scaled_merged_video = scale_video_speed_ffmpeg(merged_video_path, duration, system_ratio_multiplier)
+
+    # 3. Ghép Voiceover audio từ Bước 4 nếu có
     if voice_path and os.path.exists(voice_path):
-        final_path = merge_video_audio_func(merged_video_path, voice_path)
+        final_path = merge_video_audio_func(scaled_merged_video, voice_path)
         video_result_path = final_path
     else:
-        video_result_path = merged_video_path
+        video_result_path = scaled_merged_video
 
     elapsed_time = time.time() - start_time
-    log_info = f"[LOG] Thoi gian thuc hien: {elapsed_time:.2f}s | Frame/canh: {frames_per_scene} | Tong so frames: {total_frames} | So phan canh: {num_scenes}"
+    log_info = f"[LOG] Thoi gian thuc hien: {elapsed_time:.2f}s | Frame/canh: {frames_per_scene} | Tong so frames: {total_frames} | So phan canh: {num_scenes} | Target duration: {duration}s"
     print(log_info)
 
     return f"Duong dan video: {video_result_path}\n{log_info}"

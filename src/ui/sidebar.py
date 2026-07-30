@@ -27,8 +27,10 @@ def render_sidebar(client_ip):
         nav_options = ["Sản xuất Video", "Quản lý Kênh", "Cấu hình AI"]
         nav_icons = ["camera-reels", "folder2-open", "sliders"]
 
-        # Nếu là ADMIN thì bổ sung mục Quản lý IP Admin và Cấu hình RustDesk
+        # Nếu là ADMIN thì bổ sung mục Quản lý IP Admin, Phân tích hiệu quả và Cấu hình RustDesk
         if user_role == "ADMIN":
+            nav_options.append("Phân tích hiệu quả")
+            nav_icons.append("graph-up")
             nav_options.append("Quản lý IP Admin")
             nav_icons.append("shield-lock")
             nav_options.append("Cấu hình RustDesk")

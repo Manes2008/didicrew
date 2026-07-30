@@ -13,8 +13,10 @@ if [ ! -f .env ]; then
     echo "[WARN] Khong tim thay file .env. Vui long kiem tra lai cau hinh."
 fi
 
-echo "[VideoCrew Docker] Dang build va khoi chay cac container (Streamlit + PostgreSQL)..."
-docker-compose up -d --build
+echo "[VideoCrew Docker] Dang dung va don dep container cu de tranh xung dot..."
+docker-compose down
+echo "[VideoCrew Docker] Dang build va khoi chay cac container moi (Streamlit + PostgreSQL)..."
+docker-compose up -d --build --force-recreate
 
 if [ $? -eq 0 ]; then
     echo "[VideoCrew Docker] Khoi chay thanh cong!"

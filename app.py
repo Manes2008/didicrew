@@ -98,7 +98,11 @@ try:
 
     elif selected_nav == "Cấu hình AI":
         from src.ui.pages.config import render_config_page
-        render_config_page()
+        render_config_page(db, selected_channel)
+
+    elif selected_nav == "Phân tích hiệu quả":
+        from src.ui.pages.analytics import render_analytics_page
+        render_analytics_page(db, selected_channel)
 
     elif selected_nav == "Quản lý IP Admin":
         from src.ui.pages.ip_manager import render_ip_manager_page
