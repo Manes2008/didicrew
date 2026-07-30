@@ -265,6 +265,14 @@ def generate_video_func(prompt: str, image_path: str = None, voice_path: str = N
     frames_per_scene = 81 if engine == "wan2.1_local" else 125
     total_frames = num_scenes * frames_per_scene
 
+    # Phân tách danh sách ảnh nếu truyền dạng danh sách hoặc chuỗi phân tách
+    image_paths_list = []
+    if image_path:
+        if isinstance(image_path, list):
+            image_paths_list = image_path
+        elif isinstance(image_path, str):
+            image_paths_list = [img.strip() for img in image_path.replace("\n", ",").split(",") if img.strip()]
+
     # Trích xuất prompt tương ứng từng phân cảnh một cách nhất quán
     prompt_sentences = extract_scene_prompts(prompt, num_scenes)
 
@@ -275,10 +283,13 @@ def generate_video_func(prompt: str, image_path: str = None, voice_path: str = N
         full_scene_prompt = scene_prompt
         print(f"[LOG] Dang tao phan canh {i+1}/{num_scenes} ({frames_per_scene} frames)...")
         
+        # Chọn ảnh tương ứng cho phân cảnh hiện tại
+        current_image = image_paths_list[i % len(image_paths_list)] if image_paths_list else None
+        
         if engine == "wan2.1_local":
-            res = generate_wan21_local_video(full_scene_prompt, image_path)
+            res = generate_wan21_local_video(full_scene_prompt, current_image)
         else:
-            res = _generate_pollo_video(full_scene_prompt, image_path)
+            res = _generate_pollo_video(full_scene_prompt, current_image)
 
         if res.startswith("ERROR"):
             # Neu loi o canh dau tien thi tra ve loi
