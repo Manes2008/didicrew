@@ -19,3 +19,4 @@ ffmpeg-python
 pyautogui
 pyperclip
 watchdog
+yt-dlp

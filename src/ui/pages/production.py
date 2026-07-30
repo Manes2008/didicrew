@@ -18,6 +18,28 @@ STAGE_ICONS = ["file-earmark-text", "eye", "image", "mic", "film"]
 DISPLAY_TO_TECH = {v: k for k, v in STAGE_DISPLAY_NAMES.items()}
 TECH_TO_DISPLAY = STAGE_DISPLAY_NAMES
 
+def render_text_output(result_text: str):
+    """
+    Hiển thị giao diện 2 chế độ:
+    1. Xem trực quan: Loại bỏ backticks thô và render Markdown đẹp.
+    2. Sao chép (Raw Markdown): Dùng st.code để copy dễ dàng.
+    """
+    def clean_markdown_for_display(text: str) -> str:
+        cleaned = text.strip()
+        if cleaned.startswith("```markdown"):
+            cleaned = cleaned[11:]
+        elif cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        return cleaned.strip()
+
+    tab_visual, tab_copy = st.tabs(["Xem trực quan", "Sao chép (Raw Markdown)"])
+    with tab_visual:
+        st.markdown(clean_markdown_for_display(result_text))
+    with tab_copy:
+        st.code(result_text, language="markdown")
+
 def render_production_page(db, api_key, provider, model_name, selected_channel):
     # Workspace Dự Án hiện tại
     with st.expander("Workspace Dự Án hiện tại", icon=":material/folder_open:", expanded=True):
@@ -44,6 +66,74 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     for stage_rec in selected_project.stages:
                         if stage_rec.result_content:
                             st.session_state["results"][stage_rec.stage_name] = stage_rec.result_content
+
+                # Cấu hình thời lượng video (Bước 5)
+                st.markdown('<div class="vc-eyebrow" style="margin-top: 1rem;"><i class="bi bi-clock-history"></i> Cấu hình thời lượng video (Bước 5)</div>', unsafe_allow_html=True)
+                from src.core.models import VideoDurationConfig
+                duration_cfg = db.query(VideoDurationConfig).filter_by(project_id=selected_project.id).first()
+                if not duration_cfg:
+                    duration_cfg = VideoDurationConfig(
+                        project_id=selected_project.id,
+                        duration_type="system_generated",
+                        target_duration=0,
+                        min_duration=0,
+                        max_duration=0,
+                        system_ratio_multiplier=1.0
+                    )
+                    db.add(duration_cfg)
+                    db.commit()
+                    
+                with st.container(border=True):
+                    col_dur1, col_dur2 = st.columns(2)
+                    with col_dur1:
+                        dur_type = st.selectbox(
+                            "Chế độ thời lượng",
+                            ["system_generated", "uploaded_video"],
+                            index=0 if duration_cfg.duration_type == "system_generated" else 1,
+                            key=f"dur_type_{selected_project.id}"
+                        )
+                        tgt_dur = st.number_input(
+                            "Thời lượng mong muốn (giây, 0 = theo âm thanh)",
+                            min_value=0,
+                            value=int(duration_cfg.target_duration or 0),
+                            key=f"tgt_dur_{selected_project.id}"
+                        )
+                        min_dur = st.number_input(
+                            "Thời lượng tối thiểu (giây)",
+                            min_value=0,
+                            value=int(duration_cfg.min_duration or 0),
+                            key=f"min_dur_{selected_project.id}"
+                        )
+                    with col_dur2:
+                        max_dur = st.number_input(
+                            "Thời lượng tối đa (giây, 0 = không giới hạn)",
+                            min_value=0,
+                            value=int(duration_cfg.max_duration or 0),
+                            key=f"max_dur_{selected_project.id}"
+                        )
+                        src_path = st.text_input(
+                            "Đường dẫn video nguồn (chế độ uploaded_video)",
+                            value=duration_cfg.video_source_path or "",
+                            key=f"src_path_{selected_project.id}"
+                        )
+                        ratio_mult = st.slider(
+                            "Hệ số co giãn (Speed multiplier)",
+                            min_value=0.5,
+                            max_value=3.0,
+                            value=float(duration_cfg.system_ratio_multiplier or 1.0),
+                            step=0.1,
+                            key=f"ratio_mult_{selected_project.id}"
+                        )
+                    
+                    if st.button("Lưu cấu hình thời lượng", key=f"save_dur_{selected_project.id}", type="secondary", use_container_width=True):
+                        duration_cfg.duration_type = dur_type
+                        duration_cfg.target_duration = tgt_dur
+                        duration_cfg.min_duration = min_dur
+                        duration_cfg.max_duration = max_dur
+                        duration_cfg.video_source_path = src_path.strip() if src_path.strip() else None
+                        duration_cfg.system_ratio_multiplier = ratio_mult
+                        db.commit()
+                        st.success("Đã lưu cấu hình thời lượng video thành công!")
 
     # Nhập Ý Tưởng
     is_new = selected_project is None
@@ -287,7 +377,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                             for idx, img_path in enumerate(image_paths):
                                 cols[idx % len(cols)].image(img_path, caption=f"Ảnh {idx+1}")
                         else:
-                            st.info(result_text)
+                            render_text_output(result_text)
 
                 elif current == "video":
                     project_id = st.session_state.get("project_id")
@@ -311,7 +401,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                             video_shown = True
                             
                     if not video_shown:
-                        st.info(result_text)
+                        render_text_output(result_text)
                         
                     # Hiển thị tích hợp Veo3
                     st.markdown("---")
@@ -450,7 +540,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                 except Exception as ex:
                                     st.error(f"Không thể gọi module tự động hóa của Mark-L: {ex}")
                 else:
-                    st.markdown(result_text)
+                    render_text_output(result_text)
 
             # Nút điều hướng
             c_next, c_retry, c_back = st.columns([2, 1, 1])
@@ -483,3 +573,56 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     if idx > 0:
                         st.session_state["stage"] = STAGES_ORDER[idx - 1]
                     st.rerun()
+
+    # ---------------------------------------------
+    # BO PHAN TICH HIEU SUAT & LOG TOI UU PROMPT (CHI ADMIN)
+    # ---------------------------------------------
+    if st.session_state.get("user_role") == "ADMIN" and selected_project:
+        st.markdown("---")
+        with st.expander("[ADMIN ONLY] Bo Phan Tich Hieu Suat & Toi Uu Prompt", expanded=False):
+            st.markdown("### Lich su Tu toi uu Prompt & Phan tich chat luong kịch ban")
+            
+            from src.core.models import PromptOptimizationLog
+            import json
+            
+            logs = db.query(PromptOptimizationLog).filter_by(project_id=selected_project.id).order_by(PromptOptimizationLog.created_at.desc()).all()
+            
+            if not logs:
+                st.info("Chua co du lieu phan tich hieu suat cho du an nay.")
+            else:
+                for log in logs:
+                    step_title = "Buoc 1: Phan tich Y tuong" if log.step_name == "step_1_analysis" else "Buoc 2: Viet Kich ban chi tiet"
+                    status_badge = "[Dat chuan]" if log.is_standardized else "[Can toi uu]"
+                    
+                    with st.container(border=True):
+                        st.markdown(f"**{step_title}** -- {status_badge} -- *{log.created_at.strftime('%Y-%m-%d %H:%M:%S')}*")
+                        
+                        st.markdown("**Dau vao ban dau (Original input):**")
+                        st.code(log.user_input_content, language="text")
+                        
+                        st.markdown("**Ket qua da toi uu / sua doi (Adjusted prompt / result):**")
+                        st.code(log.adjusted_prompt, language="text")
+                        
+                        if log.analysis_metrics:
+                            try:
+                                metrics = json.loads(log.analysis_metrics)
+                                st.markdown("**Chi so phan tich hieu suat:**")
+                                col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+                                with col_m1:
+                                    st.metric("Tone / Tong giong", metrics.get("tone", "N/A"))
+                                with col_m2:
+                                    st.metric("Mat do tu khoa", metrics.get("keyword_density", "N/A"))
+                                with col_m3:
+                                    st.metric("Thoi luong du kien", metrics.get("estimated_duration", "N/A"))
+                                with col_m4:
+                                    if "transition_score" in metrics:
+                                        st.metric("Diem lien mach", f"{metrics['transition_score']}/10")
+                                    else:
+                                        st.metric("Trang thai", "Da phan tich")
+                                        
+                                if "feedback" in metrics and metrics["feedback"]:
+                                    st.markdown(f"**Y kien phan hoi:** *{metrics['feedback']}*")
+                                if "attempts" in metrics:
+                                    st.markdown(f"**So lan viet lai tu dong:** `{metrics['attempts']}`")
+                            except Exception:
+                                st.text(f"Raw Metrics: {log.analysis_metrics}")

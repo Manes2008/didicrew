@@ -1,6 +1,6 @@
 import datetime
 from sqlalchemy import (
-    create_engine, Column, Integer, String, Text, DateTime, BigInteger, ForeignKey, UniqueConstraint, Boolean, LargeBinary
+    create_engine, Column, Integer, String, Text, DateTime, BigInteger, ForeignKey, UniqueConstraint, Boolean, LargeBinary, Float, Numeric
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, validates
 import sys
@@ -90,6 +90,9 @@ class Project(Base):
 
     channel = relationship("Channel", back_populates="projects")
     stages = relationship("ProjectStage", back_populates="project", cascade="all, delete-orphan")
+    duration_config = relationship("VideoDurationConfig", uselist=False, back_populates="project", cascade="all, delete-orphan")
+    prompt_logs = relationship("PromptOptimizationLog", back_populates="project", cascade="all, delete-orphan")
+    video_analysis_logs = relationship("VideoAnalysisLog", back_populates="project", cascade="all, delete-orphan")
 
     @validates("idea")
     def validate_idea(self, key, idea):
@@ -191,4 +194,56 @@ class User(Base):
             raise ValueError("Tên đăng nhập phải có ít nhất 3 ký tự")
 
         return username.strip().lower()
+
+
+class VideoDurationConfig(Base):
+    __tablename__ = "video_duration_configs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    duration_type = Column(String(20), nullable=False)  # system_generated, uploaded_video
+    target_duration = Column(Integer, default=0)
+    min_duration = Column(Integer, default=0)
+    max_duration = Column(Integer, default=0)
+    video_source_id = Column(String(100), nullable=True)
+    video_source_path = Column(Text, nullable=True)
+    system_ratio_multiplier = Column(Numeric(3, 2), default=1.0)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    project = relationship("Project", back_populates="duration_config")
+
+
+class PromptOptimizationLog(Base):
+    __tablename__ = "prompt_optimization_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    step_name = Column(String(30), nullable=False)  # step_1_analysis, step_2_scripting
+    user_input_content = Column(Text, nullable=False)
+    original_prompt = Column(Text, nullable=False)
+    adjusted_prompt = Column(Text, nullable=False)
+    analysis_metrics = Column(Text, nullable=True)  # Chuoi JSON text
+    is_standardized = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    project = relationship("Project", back_populates="prompt_logs")
+
+
+class VideoAnalysisLog(Base):
+    __tablename__ = "video_analysis_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    video_url = Column(Text, nullable=False)
+    platform = Column(String(20), nullable=False)  # youtube, tiktok
+    step_1_idea_metrics = Column(Text, nullable=True)  # JSON text
+    step_2_script_metrics = Column(Text, nullable=True)  # JSON text
+    step_3_visual_metrics = Column(Text, nullable=True)  # JSON text
+    step_4_audio_metrics = Column(Text, nullable=True)  # JSON text
+    step_5_render_metrics = Column(Text, nullable=True)  # JSON text
+    overall_viral_score = Column(Float, default=0.0)
+    analysis_report = Column(Text, nullable=False)  # Markdown text
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    project = relationship("Project", back_populates="video_analysis_logs")
 
