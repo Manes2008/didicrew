@@ -1,8 +1,13 @@
 import os
+import sys
 import subprocess
 import requests
 import re
 from pathlib import Path
+
+def get_docker_cmd() -> str:
+    """Trả về lệnh docker phù hợp với hệ điều hành (thêm .exe trên Windows)."""
+    return "docker.exe" if sys.platform == "win32" else "docker"
 
 # Thư mục gốc chứa docker-compose.yml của rustdesk
 RUSTDESK_DIR = Path(__file__).resolve().parent.parent.parent / "rustdesk"
@@ -12,7 +17,7 @@ def check_docker_installed() -> bool:
     """Kiểm tra Docker đã được cài đặt và đang chạy hay chưa."""
     try:
         # Chạy thử docker --version để xem có cài lệnh docker không
-        res = subprocess.run(["docker", "--version"], capture_output=True, text=True, check=True)
+        res = subprocess.run([get_docker_cmd(), "--version"], capture_output=True, text=True, check=True)
         return "docker" in res.stdout.lower()
     except Exception:
         return False
@@ -59,9 +64,10 @@ def write_env_file(relay_host: str):
 
 def run_docker_compose(args: list[str], cwd: str) -> subprocess.CompletedProcess:
     """Chạy lệnh docker compose, tự động fallback giữa 'docker compose' và 'docker-compose'."""
+    docker_bin = get_docker_cmd()
     # Thử cách 1: docker compose (chuẩn Docker v2)
     try:
-        res = subprocess.run(["docker", "compose"] + args, cwd=cwd, capture_output=True, text=True)
+        res = subprocess.run([docker_bin, "compose"] + args, cwd=cwd, capture_output=True, text=True)
         if res.returncode == 0 or "unknown shorthand flag" not in (res.stderr or ""):
             return res
     except FileNotFoundError:
@@ -71,7 +77,9 @@ def run_docker_compose(args: list[str], cwd: str) -> subprocess.CompletedProcess
 
     # Thử cách 2: docker-compose (chuẩn cũ hoặc fallback cho môi trường container chưa cài xong plugin)
     try:
-        return subprocess.run(["docker-compose"] + args, cwd=cwd, capture_output=True, text=True)
+        # Sử dụng shell=True trên Windows để hệ điều hành có thể phân giải các file shim không đuôi của docker-compose
+        use_shell = sys.platform == "win32"
+        return subprocess.run(["docker-compose"] + args, cwd=cwd, capture_output=True, text=True, shell=use_shell)
     except Exception as e:
         raise e
 
@@ -121,7 +129,7 @@ def get_services_status() -> dict:
         return status
     try:
         # Lấy danh sách các container đang chạy
-        cmd = ["docker", "ps", "--filter", "name=rustdesk", "--format", "{{.Names}}:{{.Status}}"]
+        cmd = [get_docker_cmd(), "ps", "--filter", "name=rustdesk", "--format", "{{.Names}}:{{.Status}}"]
         res = subprocess.run(
             cmd,
             cwd=str(RUSTDESK_DIR),
@@ -161,7 +169,7 @@ def get_container_logs(container_name: str, tail: int = 30) -> str:
     if not check_docker_installed():
         return "Docker chưa sẵn sàng."
     try:
-        cmd = ["docker", "logs", "--tail", str(tail), container_name]
+        cmd = [get_docker_cmd(), "logs", "--tail", str(tail), container_name]
         res = subprocess.run(
             cmd,
             cwd=str(RUSTDESK_DIR),
