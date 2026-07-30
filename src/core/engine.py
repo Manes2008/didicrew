@@ -110,9 +110,13 @@ class WorkflowEngine:
             description_template = task_cfg["description"]
             
             # Xây dựng bộ tham số định dạng an toàn
+            stage_cfg = context.get("stage_config") if context else None
+            markdown_template = stage_cfg.get("markdown_template") if stage_cfg else None
+            
             format_kwargs = {
                 "idea": idea,
                 "previous_result": previous_result if previous_result else "",
+                "markdown_template": f"\n[CẤU TRÚC ĐẦU RA BẮT BUỘC - MARKDOWN TEMPLATE]:\nHãy viết nội dung và trả về kết quả tuân thủ CHÍNH XÁC theo cấu trúc template sau:\n{markdown_template}\n" if markdown_template and markdown_template.strip() else "",
                 "script": "",
                 "visual": "",
                 "image": "",
