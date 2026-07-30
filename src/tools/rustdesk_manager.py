@@ -57,6 +57,24 @@ def write_env_file(relay_host: str):
     env_content = f"RELAY_HOST={relay_host.strip()}\n"
     env_path.write_text(env_content, encoding="utf-8")
 
+def run_docker_compose(args: list[str], cwd: str) -> subprocess.CompletedProcess:
+    """Chạy lệnh docker compose, tự động fallback giữa 'docker compose' và 'docker-compose'."""
+    # Thử cách 1: docker compose (chuẩn Docker v2)
+    try:
+        res = subprocess.run(["docker", "compose"] + args, cwd=cwd, capture_output=True, text=True)
+        if res.returncode == 0 or "unknown shorthand flag" not in (res.stderr or ""):
+            return res
+    except FileNotFoundError:
+        pass
+    except Exception:
+        pass
+
+    # Thử cách 2: docker-compose (chuẩn cũ hoặc fallback cho môi trường container chưa cài xong plugin)
+    try:
+        return subprocess.run(["docker-compose"] + args, cwd=cwd, capture_output=True, text=True)
+    except Exception as e:
+        raise e
+
 def start_docker_services(relay_host: str) -> tuple[bool, str]:
     """Khởi chạy các container của RustDesk Server."""
     if not check_docker_installed():
@@ -69,20 +87,13 @@ def start_docker_services(relay_host: str) -> tuple[bool, str]:
         # 1. Ghi cấu hình vào .env
         write_env_file(relay_host)
         
-        # 2. Chạy docker compose up -d
-        # Trên Windows, subprocess có thể cần shell=True để chạy đúng command hoặc sử dụng creationflags
-        cmd = ["docker-compose", "up", "-d"]
-        
         # Tạo thư mục data trước để tránh docker tự tạo thư mục data của root sở hữu
         data_dir = RUSTDESK_DIR / "data"
         data_dir.mkdir(parents=True, exist_ok=True)
         
-        res = subprocess.run(
-            cmd,
-            cwd=str(RUSTDESK_DIR),
-            capture_output=True,
-            text=True
-        )
+        # 2. Chạy docker compose up -d qua helper
+        res = run_docker_compose(["up", "-d"], cwd=str(RUSTDESK_DIR))
+        
         if res.returncode == 0:
             return True, "Khởi động RustDesk Server thành công."
         else:
@@ -95,13 +106,7 @@ def stop_docker_services() -> tuple[bool, str]:
     if not check_docker_installed():
         return False, "Docker không được cài đặt hoặc daemon không hoạt động."
     try:
-        cmd = ["docker-compose", "down"]
-        res = subprocess.run(
-            cmd,
-            cwd=str(RUSTDESK_DIR),
-            capture_output=True,
-            text=True
-        )
+        res = run_docker_compose(["down"], cwd=str(RUSTDESK_DIR))
         if res.returncode == 0:
             return True, "Đã dừng RustDesk Server thành công."
         else:
