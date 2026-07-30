@@ -28,9 +28,9 @@ image_task:
   expected_output: "Đường dẫn ảnh cục bộ được tạo cho nhân vật chính từ Scene 1."
 
 voice_task:
-  description: "Tao text voiceover giong be gai de thuong cho kich ban: {previous_result}"
-  expected_output: "Text voiceover + setting ElevenLabs"
+  description: "Tạo văn bản thuyết minh (voiceover) hoàn chỉnh từ kịch bản gốc: {script}. Hãy trích xuất và kết hợp toàn bộ phần Lời thoại/Thuyết minh (Voiceover) của các phân cảnh thành một đoạn văn bản thuyết minh liền mạch để đọc, bỏ qua các mô tả hình ảnh hoặc ký hiệu phân cảnh."
+  expected_output: "Văn bản voiceover hoàn chỉnh liền mạch bằng tiếng Việt + cấu hình giọng đọc ElevenLabs đề xuất"
 
 editor_task:
-  description: "Huong dan chi tiet ghep video trong CapCut tu kich ban: {previous_result}"
-  expected_output: "Huong dan tung buoc trong CapCut"
+  description: "Hướng dẫn chi tiết ghép video trong CapCut từ kịch bản gốc: {script} và các hình ảnh đã tạo."
+  expected_output: "Hướng dẫn từng bước chi tiết cách dựng phim trong CapCut"

@@ -70,14 +70,15 @@ class WorkflowEngine:
                 visual_result = all_results.get("visual", "") if all_results else ""
                 script_result = all_results.get("script", "") if all_results else ""
                 
-                # Trích xuất đường dẫn ảnh từ kết quả bước 3
+                # Trích xuất toàn bộ danh sách đường dẫn ảnh từ kết quả bước 3
                 image_result = all_results.get("image", "") if all_results else ""
-                image_path = None
+                image_paths = []
                 if image_result:
                     for line in image_result.split("\n"):
                         if "generated_images" in line:
-                            image_path = line.replace("📁 Đường dẫn ảnh:", "").replace("📁 Đường dẫn ảnh: ", "").strip()
-                            break
+                            path = line.replace("📁 Đường dẫn ảnh:", "").replace("📁 Đường dẫn ảnh: ", "").strip()
+                            if path:
+                                image_paths.append(path)
 
                 # Trích xuất đường dẫn voiceover tu kết quả bước 4
                 voice_result = all_results.get("voice", "") if all_results else ""
@@ -91,7 +92,8 @@ class WorkflowEngine:
                 video_engine = context.get("video_engine", "wan2.1_local") if context else "wan2.1_local"
                 prompt = visual_result if visual_result else (script_result if script_result else idea)
                 
-                return generate_video_func(prompt, image_path=image_path, voice_path=voice_path, engine=video_engine)
+                # Truyền danh sách ảnh vào để mỗi phân cảnh sử dụng ảnh tương ứng
+                return generate_video_func(prompt, image_path=image_paths, voice_path=voice_path, engine=video_engine)
 
             if stage_name not in self.stage_mapping:
                 return f"Stage '{stage_name}' chưa được hỗ trợ."
@@ -104,12 +106,24 @@ class WorkflowEngine:
             # Đọc cấu hình Task tương ứng
             task_cfg = self.tasks_config[task_id]
             
-            # Thay thế biến động {idea} hoặc {previous_result} vào mô tả task
+            # Thay thế biến động vào mô tả task
             description_template = task_cfg["description"]
-            formatted_description = description_template.format(
-                idea=idea,
-                previous_result=previous_result if previous_result else ""
-            )
+            
+            # Xây dựng bộ tham số định dạng an toàn
+            format_kwargs = {
+                "idea": idea,
+                "previous_result": previous_result if previous_result else "",
+                "script": "",
+                "visual": "",
+                "image": "",
+                "voice": "",
+                "video": ""
+            }
+            if all_results:
+                for k, v in all_results.items():
+                    format_kwargs[k] = v if v else ""
+            
+            formatted_description = description_template.format(**format_kwargs)
             
             # Khởi tạo Task
             task = Task(
