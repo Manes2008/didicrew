@@ -1,36 +1,62 @@
 script_task:
   description: |
-    Dựa trên ý tưởng: "{idea}", hãy viết một kịch bản video ngắn (TikTok/Reels/Shorts, thời lượng 25-30s).
-    Kịch bản bắt buộc phải được chia thành các phân cảnh chi tiết (Scene 1, Scene 2, Scene 3...) theo cấu trúc nghiêm ngặt sau cho từng phân cảnh:
-    - Phân cảnh [Số thứ tự]:
-      + Mô tả hình ảnh (Visual): Chi tiết bối cảnh, hoạt động của nhân vật chính, góc máy, ánh sáng.
-      + Lời thoại/Thuyết minh (Voiceover): Lời thoại tương ứng bằng tiếng Việt.
-      + Thời lượng (Duration): Số giây (ví dụ: 5s, 6s...).
-    Yêu cầu kịch bản phải hấp dẫn, có phần mở đầu (hook) lôi cuốn và nội dung nhất quán bám sát ý tưởng.
-  expected_output: "Kịch bản chi tiết chia theo từng phân cảnh (Scene) có mô tả hình ảnh, lời thoại thuyết minh tiếng Việt và thời lượng rõ ràng cho từng cảnh."
+    Dựa trên ý tưởng: "{idea}", hãy viết một kịch bản video ngắn (TikTok/Reels/Shorts, thời lượng 25-30s) cực kỳ hấp dẫn và có tính lan truyền cao.
+    Kịch bản bắt buộc phải được trình bày theo cấu trúc Markdown chuyên nghiệp gồm các mục sau:
+    
+    1. **TÊN DỰ ÁN & THÔNG TIN CHUNG** (Tên video, Định dạng, Thời lượng dự kiến).
+    2. **CHIẾN LƯỢC ĐẦU 3 GIÂY (VIRAL HOOK)**: Nêu rõ câu thoại mở đầu và mô tả hành động nhằm thu hút sự chú ý của người xem ngay lập tức (sử dụng câu hỏi gây tò mò, sự thật bất ngờ hoặc tình huống kịch tính).
+    3. **BẢNG PHÂN CẢNH CHI TIẾT (SCENE-BY-SCENE TABLE)**: Trình bày dạng bảng Markdown có các cột:
+       - **Phân cảnh** (Scene 1, Scene 2, Scene 3...).
+       - **Thời lượng** (Duration, ví dụ: 5s, 6s...).
+       - **Mô tả hình ảnh (Visual)**: Chi tiết bối cảnh, nhân vật, biểu cảm, góc máy và chuyển động camera.
+       - **Lời thoại / Thuyết minh (Voiceover)**: Lời thoại tiếng Việt tương ứng cần đọc.
+       - **Hiệu ứng âm thanh & Nhạc (SFX/BGM)**: Gợi ý nhạc nền hoặc hiệu ứng âm thanh cụ thể cho cảnh đó.
+    
+    Yêu cầu nội dung kịch bản phải nhất quán, thông điệp rõ ràng, nhịp điệu nhanh và có lời kêu gọi hành động (CTA) mạnh mẽ ở cuối.
+    {markdown_template}
+  expected_output: "Bản kịch bản chi tiết định dạng Markdown chuyên nghiệp gồm cấu trúc Hook, bảng phân cảnh (Visual, Voiceover, SFX/BGM, Duration) và Call to Action (CTA)."
 
 visual_task:
   description: |
-    Dựa trên kịch bản chi tiết ở bước trước: "{previous_result}", bạn hãy đóng vai trò là một Visual Prompt Engineer xuất sắc.
-    Nhiệm vụ của bạn là tạo các prompt sinh ảnh/video chất lượng cao và đồng nhất:
-    1. Định nghĩa hồ sơ nhân vật cố định (Character Profile): Mô tả cụ thể ngoại hình nhân vật chính (ví dụ: bé gái, độ tuổi, kiểu tóc, màu tóc, trang phục, biểu cảm đặc trưng) để giữ tính đồng nhất (Character Consistency).
-    2. Định nghĩa phong cách nghệ thuật cố định (Art Style): Ví dụ: "3D animation, Pixar style, cute, vivid colors, detailed, high resolution, 8k".
-    3. Tạo Visual Prompt cho từng phân cảnh: Với mỗi Scene trong kịch bản, hãy kết hợp [Art Style] + [Character Profile] + [Mô tả chi tiết bối cảnh, chuyển động của cảnh đó].
-    Lưu ý: Các prompt viết bằng tiếng Anh để công cụ tạo ảnh/video hiểu tốt nhất. Định dạng đầu ra nghiêm ngặt cho mỗi cảnh:
-    Scene [Số]: [Nội dung prompt tiếng Anh của cảnh đó]
-  expected_output: "Hồ sơ nhân vật, phong cách nghệ thuật và danh sách Visual Prompt chi tiết (bằng tiếng Anh) cho từng phân cảnh để đảm bảo tính đồng nhất tối đa."
+    Dựa trên kịch bản chi tiết ở bước trước: "{previous_result}", hãy đóng vai trò là một Visual Prompt Engineer hàng đầu cho các mô hình khuếch tán hình ảnh (DALL-E 3, Midjourney, Stable Diffusion).
+    Nhiệm vụ của bạn là tạo ra bộ prompt mô tả hình ảnh cực kỳ chi tiết, đồng nhất và nghệ thuật:
+    
+    1. **HỒ SƠ NHÂN VẬT (CHARACTER PROFILE)**: Định nghĩa cụ thể về nhân vật chính (ngoại hình, tuổi, trang phục đặc trưng, kiểu tóc) để đảm bảo tính đồng nhất (Character Consistency).
+    2. **PHONG CÁCH NGHỆ THUẬT (ART STYLE)**: Định nghĩa phong cách điện ảnh đồng nhất (Ví dụ: Cinematic lighting, 8k, photorealistic, Unreal Engine 5 render, highly detailed).
+    3. **DANH SÁCH PROMPT CHI TIẾT BẰNG TIẾNG ANH (VISUAL PROMPTS)**: Với mỗi Cảnh (Scene) từ kịch bản, hãy viết một prompt mô tả hình ảnh hoàn chỉnh bằng tiếng Anh theo cấu trúc: `[Phong cách nghệ thuật] + [Hồ sơ nhân vật] + [Mô tả chi tiết bối cảnh, hoạt động của nhân vật, góc máy cận cảnh/trung cảnh, ánh sáng, cảm xúc]`.
+    
+    Yêu cầu đầu ra phải được định dạng Markdown rõ ràng và nghiêm ngặt cho mỗi cảnh:
+    `Scene [Số]: [Nội dung prompt tiếng Anh của cảnh đó]`
+    {markdown_template}
+  expected_output: "Hồ sơ nhân vật, phong cách nghệ thuật và danh sách Visual Prompt chi tiết bằng tiếng Anh định dạng Markdown rõ ràng cho mỗi phân cảnh."
 
 image_task:
   description: |
     Dựa trên danh sách prompt hình ảnh từ bước trước: "{previous_result}", hãy lấy prompt của Scene 1 (hoặc tạo một prompt đại diện cho nhân vật chính) để sinh hình ảnh chính (Character Reference).
     Hãy gọi công cụ generate_gpt_image để tạo ảnh.
     Lưu ý: Prompt gửi đi phải được tối ưu hóa chất lượng, bổ sung phong cách nghệ thuật và chỉ thị phủ định để triệt tiêu chữ.
+    {markdown_template}
   expected_output: "Đường dẫn ảnh cục bộ được tạo cho nhân vật chính từ Scene 1."
 
 voice_task:
-  description: "Tạo văn bản thuyết minh (voiceover) hoàn chỉnh từ kịch bản gốc: {script}. Hãy trích xuất và kết hợp toàn bộ phần Lời thoại/Thuyết minh (Voiceover) của các phân cảnh thành một đoạn văn bản thuyết minh liền mạch để đọc, bỏ qua các mô tả hình ảnh hoặc ký hiệu phân cảnh."
-  expected_output: "Văn bản voiceover hoàn chỉnh liền mạch bằng tiếng Việt + cấu hình giọng đọc ElevenLabs đề xuất"
+  description: |
+    Dựa trên kịch bản gốc ở bước 1: "{script}".
+    Hãy lọc và kết hợp toàn bộ phần Lời thoại/Thuyết minh (Voiceover) của các phân cảnh thành một đoạn văn thuyết minh tiếng Việt liền mạch để đọc voiceover.
+    
+    Yêu cầu kết quả đầu ra:
+    1. **VĂN BẢN ĐỌC LIỀN MẠCH**: Chỉ chứa văn bản cần đọc trực tiếp (không bao gồm tên phân cảnh, mô tả hình ảnh, hay ký hiệu đặc biệt).
+    2. **ĐỀ XUẤT GIỌNG ĐỌC**: Gợi ý các tham số cấu hình ElevenLabs (ví dụ: Tên giọng đọc, độ ổn định Stability, độ rõ Clarity) phù hợp nhất với tone & mood của kịch bản.
+    {markdown_template}
+  expected_output: "Văn bản voiceover hoàn chỉnh liền mạch bằng tiếng Việt + cấu hình giọng đọc ElevenLabs đề xuất."
 
 editor_task:
-  description: "Hướng dẫn chi tiết ghép video trong CapCut từ kịch bản gốc: {script} và các hình ảnh đã tạo."
-  expected_output: "Hướng dẫn từng bước chi tiết cách dựng phim trong CapCut"
+  description: |
+    Dựa trên kịch bản gốc: "{script}" và các hình ảnh đã tạo ở các bước trước.
+    Hãy đóng vai trò là một Chuyên gia Dựng phim chuyên nghiệp để viết cẩm nang hướng dẫn dựng video hoàn chỉnh trên CapCut:
+    
+    1. **CHUẨN BỊ TÀI NGUYÊN**: Hướng dẫn sắp xếp hình ảnh và file âm thanh (voiceover).
+    2. **ĐỒNG BỘ ÂM THANH & HÌNH ẢNH**: Hướng dẫn chi tiết cách khớp hình ảnh của từng phân cảnh theo nhịp của giọng đọc voiceover.
+    3. **HIỆU ỨNG & CHUYỂN CẢNH (EFFECTS & TRANSITIONS)**: Gợi ý các hiệu ứng chuyển cảnh mượt mà, hiệu ứng chữ (text animation) cho phụ đề tự động (auto captions) giúp tăng trải nghiệm người xem.
+    4. **MÀU SẮC & ÂM THANH PHỤ**: Gợi ý filter màu và âm lượng nhạc nền (BGM) thích hợp để làm nổi bật giọng đọc chính.
+    {markdown_template}
+  expected_output: "Hướng dẫn dựng video chi tiết từng bước bằng Markdown trên CapCut."

@@ -26,13 +26,28 @@ class AgentFactory:
             
         agent_cfg = self.config[agent_id]
         
+        # Định nghĩa cấu hình ban đầu từ file yaml
+        role = agent_cfg["role"]
+        goal = agent_cfg["goal"]
+        backstory = agent_cfg["backstory"]
+
+        # Ưu tiên lấy cấu hình tùy biến của Agent từ database nếu có trong context
+        stage_cfg = context.get("stage_config") if context else None
+        if stage_cfg:
+            if stage_cfg.get("role"):
+                role = stage_cfg["role"]
+            if stage_cfg.get("goal"):
+                goal = stage_cfg["goal"]
+            if stage_cfg.get("backstory"):
+                backstory = stage_cfg["backstory"]
+
         # Format lại text nếu có context
         from collections import defaultdict
         safe_context = defaultdict(str, context if context else {})
         
-        role = agent_cfg["role"].format_map(safe_context)
-        goal = agent_cfg["goal"].format_map(safe_context)
-        backstory = agent_cfg["backstory"].format_map(safe_context)
+        role = role.format_map(safe_context)
+        goal = goal.format_map(safe_context)
+        backstory = backstory.format_map(safe_context)
         
         # Gán tool sinh ảnh nếu là Image Generation Specialist
         tools = []
