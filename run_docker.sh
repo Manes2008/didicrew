@@ -14,15 +14,15 @@ if [ ! -f .env ]; then
 fi
 
 echo "[VideoCrew Docker] Dang dung va don dep container cu de tranh xung dot..."
-docker-compose down
+docker compose down
 echo "[VideoCrew Docker] Dang build va khoi chay cac container moi (Streamlit + PostgreSQL)..."
-docker-compose up -d --build --force-recreate
+docker compose up -d --build --force-recreate
 
 if [ $? -eq 0 ]; then
     echo "[VideoCrew Docker] Khoi chay thanh cong!"
     echo "[VideoCrew Docker] Ung dung Streamlit dang chay tai: http://localhost:8501"
     echo "[VideoCrew Docker] PostgreSQL dang chay tai port 5432"
-    echo "[VideoCrew Docker] Xem log: docker-compose logs -f videocrew"
+    echo "[VideoCrew Docker] Xem log: docker compose logs -f videocrew"
 else
     echo "[ERROR] Co loi xay ra khi khoi chay Docker Compose."
 fi
