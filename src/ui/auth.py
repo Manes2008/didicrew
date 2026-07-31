@@ -428,8 +428,7 @@ def render_login_page():
                                 else:
                                     try:
                                         hashed = hash_password(new_password)
-                                        user_count = db.query(User).count()
-                                        role_val = "admin" if user_count == 0 else "user"
+                                        role_val = "user"
                                         
                                         new_user = User(
                                             username=new_username.lower(),
@@ -439,7 +438,7 @@ def render_login_page():
                                         )
                                         db.add(new_user)
                                         db.commit()
-                                        st.success("Tạo tài khoản thành công! Vui lòng chuyển sang tab Đăng nhập.")
+                                        st.success("Tạo tài khoản người dùng thành công! Vui lòng chuyển sang tab Đăng nhập.")
                                     except Exception as ex:
                                         db.rollback()
                                         st.error(f"Lỗi hệ thống khi đăng ký: {ex}")

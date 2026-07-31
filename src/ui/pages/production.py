@@ -579,8 +579,8 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
     # ---------------------------------------------
     if st.session_state.get("user_role") == "ADMIN" and selected_project:
         st.markdown("---")
-        with st.expander("[ADMIN ONLY] Bo Phan Tich Hieu Suat & Toi Uu Prompt", expanded=False):
-            st.markdown("### Lich su Tu toi uu Prompt & Phan tich chat luong kịch ban")
+        with st.expander("[DÀNH CHO ADMIN] Bộ Phân Tích Hiệu Suất & Tối Ưu Prompt", expanded=False):
+            st.markdown("### Lịch sử Tự tối ưu Prompt & Phân tích chất lượng kịch bản")
             
             from src.core.models import PromptOptimizationLog
             import json
@@ -588,41 +588,52 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
             logs = db.query(PromptOptimizationLog).filter_by(project_id=selected_project.id).order_by(PromptOptimizationLog.created_at.desc()).all()
             
             if not logs:
-                st.info("Chua co du lieu phan tich hieu suat cho du an nay.")
+                st.info("Chưa có dữ liệu phân tích hiệu suất cho dự án này.")
             else:
                 for log in logs:
-                    step_title = "Buoc 1: Phan tich Y tuong" if log.step_name == "step_1_analysis" else "Buoc 2: Viet Kich ban chi tiet"
-                    status_badge = "[Dat chuan]" if log.is_standardized else "[Can toi uu]"
+                    step_title = "Bước 1: Phân tích Ý tưởng" if log.step_name == "step_1_analysis" else "Bước 2: Viết Kịch bản chi tiết"
+                    status_badge = "[Đạt chuẩn]" if log.is_standardized else "[Cần tối ưu]"
                     
                     with st.container(border=True):
-                        st.markdown(f"**{step_title}** -- {status_badge} -- *{log.created_at.strftime('%Y-%m-%d %H:%M:%S')}*")
+                        st.markdown(f"**{step_title}** -- `{status_badge}` -- *{log.created_at.strftime('%Y-%m-%d %H:%M:%S')}*")
                         
-                        st.markdown("**Dau vao ban dau (Original input):**")
-                        st.code(log.user_input_content, language="text")
+                        st.markdown("**Đầu vào ban đầu (Original input):**")
+                        tab_input_view, tab_input_copy = st.tabs(["Xem trực quan", "Sao chép"])
+                        with tab_input_view:
+                            st.markdown(log.user_input_content)
+                        with tab_input_copy:
+                            st.code(log.user_input_content, language="text")
                         
-                        st.markdown("**Ket qua da toi uu / sua doi (Adjusted prompt / result):**")
-                        st.code(log.adjusted_prompt, language="text")
+                        st.markdown("**Kết quả đã tối ưu / sửa đổi (Adjusted prompt / result):**")
+                        tab_result_view, tab_result_copy = st.tabs(["Xem trực quan", "Sao chép"])
+                        with tab_result_view:
+                            st.markdown(log.adjusted_prompt)
+                        with tab_result_copy:
+                            st.code(log.adjusted_prompt, language="text")
                         
                         if log.analysis_metrics:
                             try:
                                 metrics = json.loads(log.analysis_metrics)
-                                st.markdown("**Chi so phan tich hieu suat:**")
-                                col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-                                with col_m1:
-                                    st.metric("Tone / Tong giong", metrics.get("tone", "N/A"))
-                                with col_m2:
-                                    st.metric("Mat do tu khoa", metrics.get("keyword_density", "N/A"))
-                                with col_m3:
-                                    st.metric("Thoi luong du kien", metrics.get("estimated_duration", "N/A"))
-                                with col_m4:
-                                    if "transition_score" in metrics:
-                                        st.metric("Diem lien mach", f"{metrics['transition_score']}/10")
-                                    else:
-                                        st.metric("Trang thai", "Da phan tich")
+                                st.markdown("##### Chỉ số phân tích hiệu suất")
+                                with st.container(border=True):
+                                    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+                                    with col_m1:
+                                        st.caption("Tông giọng")
+                                        st.write(f"**{metrics.get('tone', 'N/A')}**")
+                                    with col_m2:
+                                        st.caption("Mật độ từ khóa")
+                                        st.write(f"**{metrics.get('keyword_density', 'N/A')}**")
+                                    with col_m3:
+                                        st.caption("Thời lượng dự kiến")
+                                        st.write(f"**{metrics.get('estimated_duration', 'N/A')}**")
+                                    with col_m4:
+                                        st.caption("Điểm liên mạch")
+                                        score_val = metrics.get('transition_score', 'Đã phân tích')
+                                        st.write(f"**{score_val}/10**" if isinstance(score_val, (int, float)) else f"**{score_val}**")
                                         
-                                if "feedback" in metrics and metrics["feedback"]:
-                                    st.markdown(f"**Y kien phan hoi:** *{metrics['feedback']}*")
-                                if "attempts" in metrics:
-                                    st.markdown(f"**So lan viet lai tu dong:** `{metrics['attempts']}`")
+                                    if "feedback" in metrics and metrics["feedback"]:
+                                        st.caption(f"Ý kiến phản hồi: {metrics['feedback']}")
+                                    if "attempts" in metrics:
+                                        st.caption(f"Số lần viết lại tự động: {metrics['attempts']}")
                             except Exception:
-                                st.text(f"Raw Metrics: {log.analysis_metrics}")
+                                st.caption(f"Dữ liệu thô: {log.analysis_metrics}")
