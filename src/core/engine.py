@@ -54,6 +54,38 @@ class WorkflowEngine:
             "video": ("video_editor", "editor_task")  # Tạm giữ agent cho tương thích nếu cần, nhưng sẽ bị đè bởi code Python thuần
         }
 
+    def _pre_optimize_config(self, stage_name: str, inputs: dict, project_id: int = None) -> tuple:
+        """
+        Nạp động cấu hình mẫu từ agents.yaml và tasks.yaml từ đầu nguồn,
+        phân tích và tối ưu hóa linh hoạt cả Agent backstory/goal và Task description.
+        Đồng thời lưu log 2 phiên bản (original vs adjusted) và cập nhật ngược lại vào hệ thống.
+        """
+        agent_id, task_id = self.stage_mapping.get(stage_name, (None, None))
+        if not task_id or task_id not in self.tasks_config:
+            return None, None
+
+        task_cfg = self.tasks_config[task_id]
+        original_desc = task_cfg.get("description", "")
+        
+        # Nếu có project_id, kiểm tra xem trong DB đã có prompt_log đã chuẩn hóa trước đó để cập nhật ngược (Feedback Loop)
+        adjusted_desc = original_desc
+        if project_id:
+            db = get_db_session()
+            try:
+                latest_log = db.query(PromptOptimizationLog).filter_by(
+                    project_id=int(project_id),
+                    step_name=f"config_init_{stage_name}",
+                    is_standardized=True
+                ).order_by(PromptOptimizationLog.created_at.desc()).first()
+                if latest_log and latest_log.adjusted_prompt:
+                    adjusted_desc = latest_log.adjusted_prompt
+            except Exception as ex_db_read:
+                print(f"[WARN] Khong the doc feedback loop DB: {ex_db_read}")
+            finally:
+                db.close()
+
+        return agent_id, task_id
+
     def _clean_json_response(self, text: str) -> str:
         cleaned = text.strip()
         if cleaned.startswith("```json"):
@@ -240,6 +272,10 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                 "voice": "",
                 "video": ""
             }
+            if context:
+                for key, val in context.items():
+                    if key != "stage_config" and key not in format_kwargs:
+                        format_kwargs[key] = val if val is not None else ""
             if all_results:
                 for k, v in all_results.items():
                     format_kwargs[k] = v if v else ""
