@@ -46,7 +46,17 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
         st.markdown(f"**Kênh đang chọn:** `{selected_channel.name}`")
         projects = db.query(Project).filter_by(channel_id=selected_channel.id).order_by(Project.id.desc()).all()
         project_options = ["+ Tạo dự án mới..."] + [f"#{p.id} - {p.idea[:40]}..." for p in projects]
-        selected_project_opt = st.selectbox("Chọn Dự án", project_options, key="project_select_main")
+        
+        # Tự động xác định index mặc định dựa trên st.session_state["project_id"]
+        default_index = 0
+        current_project_id = st.session_state.get("project_id")
+        if current_project_id:
+            for idx, opt in enumerate(project_options):
+                if opt.startswith(f"#{current_project_id} -"):
+                    default_index = idx
+                    break
+
+        selected_project_opt = st.selectbox("Chọn Dự án", project_options, index=default_index, key="project_select_main")
 
         selected_project = None
         if selected_project_opt != "+ Tạo dự án mới...":
@@ -134,6 +144,16 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                         duration_cfg.system_ratio_multiplier = ratio_mult
                         db.commit()
                         st.success("Đã lưu cấu hình thời lượng video thành công!")
+            else:
+                # Nếu người dùng chủ động chọn tạo dự án mới, reset các biến trạng thái liên quan đến dự án cũ
+                if st.session_state.get("project_id") is not None:
+                    st.session_state["project_id"] = None
+                    st.session_state["idea"] = ""
+                    if "stage" in st.session_state:
+                        del st.session_state["stage"]
+                    if "results" in st.session_state:
+                        del st.session_state["results"]
+                    st.rerun()
 
     # Nhập Ý Tưởng
     is_new = selected_project is None
@@ -187,7 +207,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
             )
 
     # WORKFLOW STEPPER MENU
-    if "stage" in st.session_state:
+    if "stage" in st.session_state and selected_project is not None:
         current = st.session_state["stage"]
         current_idx = STAGES_ORDER.index(current)
 
