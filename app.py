@@ -6,7 +6,9 @@ import os
 import sys
 
 # Đảm bảo đường dẫn import hoạt động đúng
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+root_dir = os.path.abspath(os.path.dirname(__file__))
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
 
 import config
 from src.core.models import init_db, get_db_session, Channel

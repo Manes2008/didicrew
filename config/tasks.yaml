@@ -1,6 +1,6 @@
 script_task:
   description: |
-    Dựa trên ý tưởng: "{idea}", hãy viết một kịch bản video ngắn (TikTok/Reels/Shorts, thời lượng 25-30s) cực kỳ hấp dẫn và có tính lan truyền cao.
+    Dựa trên ý tưởng: "{idea}", hãy viết một kịch bản video ngắn (TikTok/Reels/Shorts, thời lượng dự kiến {target_duration} giây) cực kỳ hấp dẫn và có tính lan truyền cao.
     Kịch bản bắt buộc phải được trình bày theo cấu trúc Markdown chuyên nghiệp gồm các mục sau:
     
     1. **TÊN DỰ ÁN & THÔNG TIN CHUNG** (Tên video, Định dạng, Thời lượng dự kiến).

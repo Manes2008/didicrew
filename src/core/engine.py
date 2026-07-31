@@ -102,6 +102,8 @@ class WorkflowEngine:
         """
         try:
             project_id = context.get("project_id") if context else None
+            stage_cfg = context.get("stage_config") if context else None
+            custom_template = stage_cfg.get("markdown_template") if stage_cfg else None
             
             # Đồng bộ ngữ cảnh toàn cục (Context Chain)
             context_chain = {}
@@ -197,7 +199,11 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                     style_text = style_match.group(1).strip() if style_match else ""
                     scene1_text = scene1_match.group(1).strip()
                     
-                    prompt = f"{style_text} {profile_text} {scene1_text}"
+                    # Ưu tiên sử dụng phong cách nghệ thuật tùy biến (markdown_template của stage 'image') nếu người dùng định nghĩa trong DB
+                    if custom_template and custom_template.strip():
+                        prompt = f"{custom_template.strip()} {profile_text} {scene1_text}"
+                    else:
+                        prompt = f"{style_text} {profile_text} {scene1_text}"
                     prompt = prompt.replace("\n", " ").strip()
 
                 image_engine = context.get("image_engine", "openai") if context else "openai"
