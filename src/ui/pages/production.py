@@ -54,6 +54,8 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
             for idx, opt in enumerate(project_options):
                 if opt.startswith(f"#{current_project_id} -"):
                     default_index = idx
+                    # Ép Streamlit chọn đúng option bằng cách gán trực tiếp vào session_state của selectbox key
+                    st.session_state["project_select_main"] = opt
                     break
 
         selected_project_opt = st.selectbox("Chọn Dự án", project_options, index=default_index, key="project_select_main")
@@ -145,7 +147,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                         db.commit()
                         st.success("Đã lưu cấu hình thời lượng video thành công!")
             else:
-                # Nếu người dùng chủ động chọn tạo dự án mới, reset các biến trạng thái liên quan đến dự án cũ
+                # Nếu không tìm thấy dự án trong DB (dù selectbox chọn một ID cụ thể nào đó)
                 if st.session_state.get("project_id") is not None:
                     st.session_state["project_id"] = None
                     st.session_state["idea"] = ""
@@ -154,6 +156,16 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     if "results" in st.session_state:
                         del st.session_state["results"]
                     st.rerun()
+        else:
+            # Khối else của selectbox: Người dùng chủ động chọn "+ Tạo dự án mới..."
+            if st.session_state.get("project_id") is not None:
+                st.session_state["project_id"] = None
+                st.session_state["idea"] = ""
+                if "stage" in st.session_state:
+                    del st.session_state["stage"]
+                if "results" in st.session_state:
+                    del st.session_state["results"]
+                st.rerun()
 
     # Nhập Ý Tưởng
     is_new = selected_project is None
