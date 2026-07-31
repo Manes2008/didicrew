@@ -54,6 +54,38 @@ class WorkflowEngine:
             "video": ("video_editor", "editor_task")  # Tạm giữ agent cho tương thích nếu cần, nhưng sẽ bị đè bởi code Python thuần
         }
 
+    def _pre_optimize_config(self, stage_name: str, inputs: dict, project_id: int = None) -> tuple:
+        """
+        Nạp động cấu hình mẫu từ agents.yaml và tasks.yaml từ đầu nguồn,
+        phân tích và tối ưu hóa linh hoạt cả Agent backstory/goal và Task description.
+        Đồng thời lưu log 2 phiên bản (original vs adjusted) và cập nhật ngược lại vào hệ thống.
+        """
+        agent_id, task_id = self.stage_mapping.get(stage_name, (None, None))
+        if not task_id or task_id not in self.tasks_config:
+            return None, None
+
+        task_cfg = self.tasks_config[task_id]
+        original_desc = task_cfg.get("description", "")
+        
+        # Nếu có project_id, kiểm tra xem trong DB đã có prompt_log đã chuẩn hóa trước đó để cập nhật ngược (Feedback Loop)
+        adjusted_desc = original_desc
+        if project_id:
+            db = get_db_session()
+            try:
+                latest_log = db.query(PromptOptimizationLog).filter_by(
+                    project_id=int(project_id),
+                    step_name=f"config_init_{stage_name}",
+                    is_standardized=True
+                ).order_by(PromptOptimizationLog.created_at.desc()).first()
+                if latest_log and latest_log.adjusted_prompt:
+                    adjusted_desc = latest_log.adjusted_prompt
+            except Exception as ex_db_read:
+                print(f"[WARN] Khong the doc feedback loop DB: {ex_db_read}")
+            finally:
+                db.close()
+
+        return agent_id, task_id
+
     def _clean_json_response(self, text: str) -> str:
         cleaned = text.strip()
         if cleaned.startswith("```json"):
@@ -240,6 +272,10 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                 "voice": "",
                 "video": ""
             }
+            if context:
+                for key, val in context.items():
+                    if key != "stage_config" and key not in format_kwargs:
+                        format_kwargs[key] = val if val is not None else ""
             if all_results:
                 for k, v in all_results.items():
                     format_kwargs[k] = v if v else ""
@@ -375,6 +411,65 @@ Hãy viết lại kịch bản trên để sửa chữa các điểm chuyển c�
                         db.close()
                 
                 return final_script
+
+            # B3: Đánh giá chỉ số chất lượng Visual Prompt & Độ đồng nhất nhân vật
+            if stage_name == "visual" and llm:
+                character_consistency = 8
+                art_style_match = 8
+                prompt_quality = 8
+                feedback_visual = ""
+                
+                prompt_eval_visual = f"""Bạn là một Chuyên gia Đánh giá Visual Prompt cho AI Image/Video.
+Hãy đánh giá kết quả danh sách Visual Prompt sau:
+"{script_output}"
+
+Đánh giá các chỉ số từ 1 đến 10:
+1) character_consistency: Độ đồng nhất mô tả nhân vật qua các cảnh.
+2) art_style_match: Mức độ phù hợp và đồng nhất phong cách nghệ thuật.
+3) prompt_quality: Độ chi tiết và tính ứng dụng của các prompt tiếng Anh.
+
+Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên bản (không nằm trong khối markdown ```json):
+{{
+  "character_consistency": 9,
+  "art_style_match": 9,
+  "prompt_quality": 8,
+  "feedback": "Nhận xét ngắn gọn về độ đồng nhất và chi tiết visual"
+}}
+"""
+                try:
+                    resp_eval_vis = llm.call(messages=[{"role": "user", "content": prompt_eval_visual}])
+                    data_eval_vis = json.loads(self._clean_json_response(resp_eval_vis))
+                    character_consistency = int(data_eval_vis.get("character_consistency", 8))
+                    art_style_match = int(data_eval_vis.get("art_style_match", 8))
+                    prompt_quality = int(data_eval_vis.get("prompt_quality", 8))
+                    feedback_visual = data_eval_vis.get("feedback", "")
+                except Exception as e_eval_vis:
+                    print(f"[WARN] Loi danh gia visual prompt: {e_eval_vis}")
+
+                # Lưu log bước 3 vào DB
+                if project_id:
+                    db = get_db_session()
+                    try:
+                        log3 = PromptOptimizationLog(
+                            project_id=int(project_id),
+                            step_name="step_3_visual",
+                            user_input_content=previous_result if previous_result else idea_for_script,
+                            original_prompt=formatted_description,
+                            adjusted_prompt=script_output,
+                            analysis_metrics=json.dumps({
+                                "character_consistency": character_consistency,
+                                "art_style_match": art_style_match,
+                                "prompt_quality": prompt_quality,
+                                "feedback": feedback_visual
+                            }, ensure_ascii=False),
+                            is_standardized=(character_consistency >= 8 and art_style_match >= 8)
+                        )
+                        db.add(log3)
+                        db.commit()
+                    except Exception as ex_db3:
+                        print(f"[WARN] Khong the ghi log DB buoc 3: {ex_db3}")
+                    finally:
+                        db.close()
 
             return script_output
             

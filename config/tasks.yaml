@@ -19,10 +19,16 @@ script_task:
 visual_task:
   description: |
     Dựa trên kịch bản chi tiết ở bước trước: "{previous_result}", hãy đóng vai trò là một Visual Prompt Engineer hàng đầu cho các mô hình khuếch tán hình ảnh (DALL-E 3, Midjourney, Stable Diffusion).
+    Mô tả kênh hiện tại để bạn tham chiếu phong cách nghệ thuật: "{channel_description}".
     Nhiệm vụ của bạn là tạo ra bộ prompt mô tả hình ảnh cực kỳ chi tiết, đồng nhất và nghệ thuật:
     
     1. **HỒ SƠ NHÂN VẬT (CHARACTER PROFILE)**: Định nghĩa cụ thể về nhân vật chính (ngoại hình, tuổi, trang phục đặc trưng, kiểu tóc) để đảm bảo tính đồng nhất (Character Consistency).
-    2. **PHONG CÁCH NGHỆ THUẬT (ART STYLE)**: Định nghĩa phong cách điện ảnh đồng nhất (Ví dụ: Cinematic lighting, 8k, photorealistic, Unreal Engine 5 render, highly detailed).
+    2. **PHONG CÁCH NGHỆ THUẬT (ART STYLE)**: Định nghĩa phong cách nghệ thuật đồng nhất cho toàn bộ video.
+       - Hãy tự động phân tích mô tả kênh ở trên để chọn phong cách nghệ thuật phù hợp nhất (ví dụ: nghệ thuật tranh vẽ nếu kênh kể chuyện, phong cách nhiếp ảnh/điện ảnh đời thực nếu là kênh chia sẻ trải nghiệm/lịch sử).
+       - NGUYÊN TẮC QUAN TRỌNG ĐỂ HÌNH ẢNH TỰ NHIÊN:
+         * Tuyệt đối tránh các từ khóa AI sáo rỗng tạo cảm giác nhựa và giả tạo (như "photorealistic", "hyper-detailed", "8k", "unreal engine").
+         * Nếu là phong cách đời thực, hãy sử dụng các thuật ngữ nhiếp ảnh thực tế (như "candid street photography", "shot on 35mm film", "natural soft lighting", "documentary style").
+         * Tập trung mô tả chi tiết không hoàn hảo: các chuyển động ngẫu hứng, biểu cảm tự nhiên (nhân vật không nhìn trực diện ống kính), bối cảnh đời thường có chiều sâu thực tế.
     3. **DANH SÁCH PROMPT CHI TIẾT BẰNG TIẾNG ANH (VISUAL PROMPTS)**: Với mỗi Cảnh (Scene) từ kịch bản, hãy viết một prompt mô tả hình ảnh hoàn chỉnh bằng tiếng Anh theo cấu trúc: `[Phong cách nghệ thuật] + [Hồ sơ nhân vật] + [Mô tả chi tiết bối cảnh, hoạt động của nhân vật, góc máy cận cảnh/trung cảnh, ánh sáng, cảm xúc]`.
     
     Yêu cầu đầu ra phải được định dạng Markdown rõ ràng và nghiêm ngặt cho mỗi cảnh:

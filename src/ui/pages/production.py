@@ -579,50 +579,146 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
     # ---------------------------------------------
     if st.session_state.get("user_role") == "ADMIN" and selected_project:
         st.markdown("---")
-        with st.expander("[ADMIN ONLY] Bo Phan Tich Hieu Suat & Toi Uu Prompt", expanded=False):
-            st.markdown("### Lich su Tu toi uu Prompt & Phan tich chat luong kịch ban")
-            
+        with st.expander("[DÀNH CHO ADMIN] Bộ Phân Tích Hiệu Suất & Tối Ưu Prompt", expanded=False):
+            st.markdown("### Lịch sử Tự tối ưu Prompt & Phân tích chất lượng kịch bản")
+
             from src.core.models import PromptOptimizationLog
             import json
-            
+            import os as _os
+
             logs = db.query(PromptOptimizationLog).filter_by(project_id=selected_project.id).order_by(PromptOptimizationLog.created_at.desc()).all()
-            
+
             if not logs:
-                st.info("Chua co du lieu phan tich hieu suat cho du an nay.")
+                st.info("Chưa có dữ liệu phân tích hiệu suất cho dự án này.")
             else:
                 for log in logs:
-                    step_title = "Buoc 1: Phan tich Y tuong" if log.step_name == "step_1_analysis" else "Buoc 2: Viet Kich ban chi tiet"
-                    status_badge = "[Dat chuan]" if log.is_standardized else "[Can toi uu]"
-                    
+                    if log.step_name == "step_1_analysis":
+                        step_title = "Bước 1: Phân tích Ý tưởng"
+                    elif log.step_name == "step_2_scripting":
+                        step_title = "Bước 2: Viết Kịch bản chi tiết"
+                    elif log.step_name == "step_3_visual":
+                        step_title = "Bước 3: Mô tả hình ảnh (Visual Prompt)"
+                    else:
+                        step_title = f"Giai đoạn: {log.step_name}"
+
+                    status_badge = "[Đạt chuẩn]" if log.is_standardized else "[Cần tối ưu]"
+
                     with st.container(border=True):
-                        st.markdown(f"**{step_title}** -- {status_badge} -- *{log.created_at.strftime('%Y-%m-%d %H:%M:%S')}*")
-                        
-                        st.markdown("**Dau vao ban dau (Original input):**")
-                        st.code(log.user_input_content, language="text")
-                        
-                        st.markdown("**Ket qua da toi uu / sua doi (Adjusted prompt / result):**")
-                        st.code(log.adjusted_prompt, language="text")
-                        
+                        st.markdown(f"**{step_title}** -- `{status_badge}` -- *{log.created_at.strftime('%Y-%m-%d %H:%M:%S')}*")
+
+                        st.markdown("**Đầu vào ban đầu (Original input):**")
+                        tab_input_view, tab_input_copy = st.tabs(["Xem trực quan", "Sao chép"])
+                        with tab_input_view:
+                            st.markdown(log.user_input_content)
+                        with tab_input_copy:
+                            st.code(log.user_input_content, language="text")
+
+                        st.markdown("**Kết quả đã tối ưu / sửa đổi (Adjusted prompt / result):**")
+                        tab_result_view, tab_result_copy = st.tabs(["Xem trực quan", "Sao chép"])
+                        with tab_result_view:
+                            st.markdown(log.adjusted_prompt)
+                        with tab_result_copy:
+                            st.code(log.adjusted_prompt, language="text")
+
                         if log.analysis_metrics:
                             try:
                                 metrics = json.loads(log.analysis_metrics)
-                                st.markdown("**Chi so phan tich hieu suat:**")
-                                col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-                                with col_m1:
-                                    st.metric("Tone / Tong giong", metrics.get("tone", "N/A"))
-                                with col_m2:
-                                    st.metric("Mat do tu khoa", metrics.get("keyword_density", "N/A"))
-                                with col_m3:
-                                    st.metric("Thoi luong du kien", metrics.get("estimated_duration", "N/A"))
-                                with col_m4:
-                                    if "transition_score" in metrics:
-                                        st.metric("Diem lien mach", f"{metrics['transition_score']}/10")
+                                st.markdown("##### Chỉ số phân tích hiệu suất")
+                                with st.container(border=True):
+                                    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+                                    if "character_consistency" in metrics:
+                                        with col_m1:
+                                            st.caption("Đồng nhất nhân vật")
+                                            st.write(f"**{metrics.get('character_consistency', 'N/A')}/10**")
+                                        with col_m2:
+                                            st.caption("Phong cách nghệ thuật")
+                                            st.write(f"**{metrics.get('art_style_match', 'N/A')}/10**")
+                                        with col_m3:
+                                            st.caption("Chất lượng Visual Prompt")
+                                            st.write(f"**{metrics.get('prompt_quality', 'N/A')}/10**")
+                                        with col_m4:
+                                            st.caption("Trạng thái")
+                                            st.write("**Đã phân tích**")
                                     else:
-                                        st.metric("Trang thai", "Da phan tich")
-                                        
-                                if "feedback" in metrics and metrics["feedback"]:
-                                    st.markdown(f"**Y kien phan hoi:** *{metrics['feedback']}*")
-                                if "attempts" in metrics:
-                                    st.markdown(f"**So lan viet lai tu dong:** `{metrics['attempts']}`")
+                                        with col_m1:
+                                            st.caption("Tông giọng")
+                                            st.write(f"**{metrics.get('tone', 'N/A')}**")
+                                        with col_m2:
+                                            st.caption("Mật độ từ khóa")
+                                            st.write(f"**{metrics.get('keyword_density', 'N/A')}**")
+                                        with col_m3:
+                                            st.caption("Thời lượng dự kiến")
+                                            st.write(f"**{metrics.get('estimated_duration', 'N/A')}**")
+                                        with col_m4:
+                                            st.caption("Điểm liên mạch")
+                                            score_val = metrics.get('transition_score', 'Đã phân tích')
+                                            st.write(f"**{score_val}/10**" if isinstance(score_val, (int, float)) else f"**{score_val}**")
+
+                                    if "feedback" in metrics and metrics["feedback"]:
+                                        st.caption(f"Ý kiến phản hồi: {metrics['feedback']}")
+                                    if "attempts" in metrics:
+                                        st.caption(f"Số lần viết lại tự động: {metrics['attempts']}")
                             except Exception:
-                                st.text(f"Raw Metrics: {log.analysis_metrics}")
+                                st.caption(f"Dữ liệu thô: {log.analysis_metrics}")
+
+                        # Nút phân tích lại cho bước 3 chưa có chỉ số Visual
+                        if log.step_name == "step_3_visual":
+                            _needs_reanalyze = True
+                            if log.analysis_metrics:
+                                try:
+                                    _existing = json.loads(log.analysis_metrics)
+                                    if "character_consistency" in _existing:
+                                        _needs_reanalyze = False
+                                except Exception:
+                                    pass
+
+                            if _needs_reanalyze:
+                                if st.button("Phân tích lại chỉ số Visual", key=f"reanalyze_visual_{log.id}"):
+                                    _api_key = _os.getenv("OPENAI_API_KEY", "")
+                                    if not _api_key:
+                                        st.error("Chưa cấu hình OPENAI_API_KEY trong .env")
+                                    else:
+                                        try:
+                                            from crewai import LLM
+                                            from src.core.engine import WorkflowEngine
+                                            from src.core.models import get_db_session
+                                            import json as _json_inner
+                                            _llm = LLM(model="gpt-4o-mini", api_key=_api_key)
+                                            _engine = WorkflowEngine()
+                                            _eval_prompt = (
+                                                "You are a Visual Prompt Quality Evaluator for AI Image/Video generation.\n"
+                                                "Evaluate the following Visual Prompt list:\n"
+                                                f'"{log.adjusted_prompt}"\n\n'
+                                                "Score each metric from 1 to 10:\n"
+                                                "1) character_consistency: Consistency of character description across scenes.\n"
+                                                "2) art_style_match: How well the art style is matched.\n"
+                                                "3) prompt_quality: Detail and usability of English prompts.\n\n"
+                                                "Return ONLY raw JSON (no markdown block):\n"
+                                                '{"character_consistency": 9, "art_style_match": 9, "prompt_quality": 8, "feedback": "brief comment"}'
+                                            )
+                                            _resp = _llm.call(messages=[{"role": "user", "content": _eval_prompt}])
+                                            _data = _json_inner.loads(_engine._clean_json_response(_resp))
+                                            _db2 = get_db_session()
+                                            try:
+                                                _log2 = _db2.query(PromptOptimizationLog).filter_by(id=log.id).first()
+                                                if _log2:
+                                                    _log2.analysis_metrics = _json_inner.dumps({
+                                                        "character_consistency": int(_data.get("character_consistency", 8)),
+                                                        "art_style_match": int(_data.get("art_style_match", 8)),
+                                                        "prompt_quality": int(_data.get("prompt_quality", 8)),
+                                                        "feedback": _data.get("feedback", "")
+                                                    }, ensure_ascii=False)
+                                                    _log2.is_standardized = (
+                                                        int(_data.get("character_consistency", 8)) >= 8 and
+                                                        int(_data.get("art_style_match", 8)) >= 8
+                                                    )
+                                                    _db2.commit()
+                                                st.success("Phân tích lại thành công! Đang tải lại...")
+                                                st.rerun()
+                                            except Exception as _ex2:
+                                                _db2.rollback()
+                                                st.error(f"Lỗi cập nhật DB: {_ex2}")
+                                            finally:
+                                                _db2.close()
+                                        except Exception as _ex:
+                                            st.error(f"Lỗi phân tích lại: {_ex}")
