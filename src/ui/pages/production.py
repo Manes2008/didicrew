@@ -42,46 +42,70 @@ def render_text_output(result_text: str):
 
 def render_production_page(db, api_key, provider, model_name, selected_channel):
     # Workspace Dự Án hiện tại
-    with st.expander("Workspace Dự Án hiện tại", icon=":material/folder_open:", expanded=True):
-        st.markdown(f"**Kênh đang chọn:** `{selected_channel.name}`")
-        projects = db.query(Project).filter_by(channel_id=selected_channel.id).order_by(Project.id.desc()).all()
-        project_options = ["+ Tạo dự án mới..."] + [f"#{p.id} - {p.idea[:40]}..." for p in projects]
+    with st.container(border=True):
+        from src.core.models import Channel, VideoDurationConfig
+        import json
         
-        # Tự động xác định index mặc định dựa trên st.session_state["project_id"]
+        channels = db.query(Channel).all()
+        channel_names = [c.name for c in channels]
+        
+        # Chia layout hàng ngang cực kỳ gọn gàng
+        col_chan, col_proj, col_dur_mode, col_dur_val, col_dur_save = st.columns([2.5, 3.2, 2.3, 2.5, 1.2])
+        
+        with col_chan:
+            try:
+                chan_index = channel_names.index(selected_channel.name)
+            except ValueError:
+                chan_index = 0
+            selected_chan_name = st.selectbox(
+                "Chọn Kênh", 
+                channel_names, 
+                index=chan_index, 
+                key="prod_channel_select"
+            )
+            if selected_chan_name != selected_channel.name:
+                st.session_state["selected_channel_name"] = selected_chan_name
+                if "project_id" in st.session_state:
+                    st.session_state["project_id"] = None
+                st.rerun()
+                
+        projects = db.query(Project).filter_by(channel_id=selected_channel.id).order_by(Project.id.desc()).all()
+        project_options = ["+ Tạo dự án mới..."] + [f"#{p.id} - {p.idea[:30]}..." for p in projects]
+        
         default_index = 0
         current_project_id = st.session_state.get("project_id")
         if current_project_id:
             for idx, opt in enumerate(project_options):
                 if opt.startswith(f"#{current_project_id} -"):
                     default_index = idx
-                    # Ép Streamlit chọn đúng option bằng cách gán trực tiếp vào session_state của selectbox key
-                    st.session_state["project_select_main"] = opt
                     break
-
-        selected_project_opt = st.selectbox("Chọn Dự án", project_options, index=default_index, key="project_select_main")
-
+                    
+        with col_proj:
+            selected_project_opt = st.selectbox(
+                "Chọn Dự án", 
+                project_options, 
+                index=default_index, 
+                key="project_select_main"
+            )
+            
         selected_project = None
+        duration_cfg = None
+        
         if selected_project_opt != "+ Tạo dự án mới...":
             project_id = int(selected_project_opt.split(" - ")[0].replace("#", ""))
             selected_project = db.query(Project).filter_by(id=project_id).first()
-
             if selected_project:
                 prev_project_id = st.session_state.get("project_id")
                 project_changed = prev_project_id != selected_project.id
-
                 st.session_state["project_id"] = selected_project.id
                 st.session_state["idea"] = selected_project.idea
-
                 if project_changed or "results" not in st.session_state:
                     st.session_state["stage"] = selected_project.current_stage
                     st.session_state["results"] = {}
                     for stage_rec in selected_project.stages:
                         if stage_rec.result_content:
                             st.session_state["results"][stage_rec.stage_name] = stage_rec.result_content
-
-                # Cấu hình thời lượng video (Bước 5)
-                st.markdown('<div class="vc-eyebrow" style="margin-top: 1rem;"><i class="bi bi-clock-history"></i> Cấu hình thời lượng video (Bước 5)</div>', unsafe_allow_html=True)
-                from src.core.models import VideoDurationConfig
+                            
                 duration_cfg = db.query(VideoDurationConfig).filter_by(project_id=selected_project.id).first()
                 if not duration_cfg:
                     duration_cfg = VideoDurationConfig(
@@ -94,70 +118,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     )
                     db.add(duration_cfg)
                     db.commit()
-                    
-                with st.container(border=True):
-                    col_dur1, col_dur2 = st.columns(2)
-                    with col_dur1:
-                        dur_type = st.selectbox(
-                            "Chế độ thời lượng",
-                            ["system_generated", "uploaded_video"],
-                            index=0 if duration_cfg.duration_type == "system_generated" else 1,
-                            key=f"dur_type_{selected_project.id}"
-                        )
-                        tgt_dur = st.number_input(
-                            "Thời lượng mong muốn (giây, 0 = theo âm thanh)",
-                            min_value=0,
-                            value=int(duration_cfg.target_duration or 0),
-                            key=f"tgt_dur_{selected_project.id}"
-                        )
-                        min_dur = st.number_input(
-                            "Thời lượng tối thiểu (giây)",
-                            min_value=0,
-                            value=int(duration_cfg.min_duration or 0),
-                            key=f"min_dur_{selected_project.id}"
-                        )
-                    with col_dur2:
-                        max_dur = st.number_input(
-                            "Thời lượng tối đa (giây, 0 = không giới hạn)",
-                            min_value=0,
-                            value=int(duration_cfg.max_duration or 0),
-                            key=f"max_dur_{selected_project.id}"
-                        )
-                        src_path = st.text_input(
-                            "Đường dẫn video nguồn (chế độ uploaded_video)",
-                            value=duration_cfg.video_source_path or "",
-                            key=f"src_path_{selected_project.id}"
-                        )
-                        ratio_mult = st.slider(
-                            "Hệ số co giãn (Speed multiplier)",
-                            min_value=0.5,
-                            max_value=3.0,
-                            value=float(duration_cfg.system_ratio_multiplier or 1.0),
-                            step=0.1,
-                            key=f"ratio_mult_{selected_project.id}"
-                        )
-                    
-                    if st.button("Lưu cấu hình thời lượng", key=f"save_dur_{selected_project.id}", type="secondary", use_container_width=True):
-                        duration_cfg.duration_type = dur_type
-                        duration_cfg.target_duration = tgt_dur
-                        duration_cfg.min_duration = min_dur
-                        duration_cfg.max_duration = max_dur
-                        duration_cfg.video_source_path = src_path.strip() if src_path.strip() else None
-                        duration_cfg.system_ratio_multiplier = ratio_mult
-                        db.commit()
-                        st.success("Đã lưu cấu hình thời lượng video thành công!")
-            else:
-                # Nếu không tìm thấy dự án trong DB (dù selectbox chọn một ID cụ thể nào đó)
-                if st.session_state.get("project_id") is not None:
-                    st.session_state["project_id"] = None
-                    st.session_state["idea"] = ""
-                    if "stage" in st.session_state:
-                        del st.session_state["stage"]
-                    if "results" in st.session_state:
-                        del st.session_state["results"]
-                    st.rerun()
         else:
-            # Khối else của selectbox: Người dùng chủ động chọn "+ Tạo dự án mới..."
             if st.session_state.get("project_id") is not None:
                 st.session_state["project_id"] = None
                 st.session_state["idea"] = ""
@@ -166,6 +127,53 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                 if "results" in st.session_state:
                     del st.session_state["results"]
                 st.rerun()
+                
+        # Hiển thị cấu hình thời lượng nhanh trên các cột
+        with col_dur_mode:
+            if selected_project and duration_cfg:
+                dur_type = st.selectbox(
+                    "Thời lượng",
+                    ["system_generated", "uploaded_video"],
+                    index=0 if duration_cfg.duration_type == "system_generated" else 1,
+                    key=f"prod_dur_type_{selected_project.id}"
+                )
+            else:
+                st.selectbox("Thời lượng", ["-"], disabled=True, key="prod_dur_type_disabled")
+                
+        with col_dur_val:
+            if selected_project and duration_cfg:
+                if dur_type == "system_generated":
+                    tgt_dur = st.number_input(
+                        "Số giây",
+                        min_value=0,
+                        value=int(duration_cfg.target_duration or 0),
+                        key=f"prod_tgt_dur_{selected_project.id}"
+                    )
+                    src_path = None
+                else:
+                    src_path = st.text_input(
+                        "Video nguồn",
+                        value=duration_cfg.video_source_path or "",
+                        key=f"prod_src_path_{selected_project.id}",
+                        placeholder="Đường dẫn file..."
+                    )
+                    tgt_dur = 0
+            else:
+                st.text_input("Giá trị", value="-", disabled=True, key="prod_dur_val_disabled")
+                
+        with col_dur_save:
+            st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
+            if selected_project and duration_cfg:
+                if st.button("Lưu", key=f"prod_save_dur_{selected_project.id}", type="primary", use_container_width=True):
+                    duration_cfg.duration_type = dur_type
+                    if dur_type == "system_generated":
+                        duration_cfg.target_duration = tgt_dur
+                    else:
+                        duration_cfg.video_source_path = src_path.strip() if src_path and src_path.strip() else None
+                    db.commit()
+                    st.toast("Đã lưu cấu hình thời lượng!", icon="✅")
+            else:
+                st.button("Lưu", disabled=True, key="prod_save_dur_disabled", use_container_width=True)
 
     # Nhập Ý Tưởng
     is_new = selected_project is None
@@ -198,6 +206,48 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                         status="pending"
                     )
                     db.add(new_proj)
+                    db.flush()  # Để sinh ra new_proj.id tạm thời
+                    
+                    # Tự động nạp cấu hình thời lượng mặc định của Kênh
+                    from src.core.models import ChannelStageConfig, VideoDurationConfig
+                    import json
+                    
+                    channel_video_cfg = db.query(ChannelStageConfig).filter_by(
+                        channel_id=selected_channel.id,
+                        stage_name="video"
+                    ).first()
+                    
+                    # Các thông số thời lượng mặc định
+                    dur_type = "system_generated"
+                    tgt_dur = 0
+                    min_dur = 0
+                    max_dur = 0
+                    src_path = None
+                    ratio_mult = 1.0
+                    
+                    if channel_video_cfg and channel_video_cfg.markdown_template:
+                        try:
+                            cfg_data = json.loads(channel_video_cfg.markdown_template)
+                            dur_type = cfg_data.get("duration_type", "system_generated")
+                            tgt_dur = int(cfg_data.get("target_duration", 0))
+                            min_dur = int(cfg_data.get("min_duration", 0))
+                            max_dur = int(cfg_data.get("max_duration", 0))
+                            src_path = cfg_data.get("video_source_path")
+                            ratio_mult = float(cfg_data.get("system_ratio_multiplier", 1.0))
+                        except Exception:
+                            pass
+                            
+                    # Tạo VideoDurationConfig cho Project mới
+                    new_duration_cfg = VideoDurationConfig(
+                        project_id=new_proj.id,
+                        duration_type=dur_type,
+                        target_duration=tgt_dur,
+                        min_duration=min_dur,
+                        max_duration=max_dur,
+                        video_source_path=src_path,
+                        system_ratio_multiplier=ratio_mult
+                    )
+                    db.add(new_duration_cfg)
                     db.commit()
                     st.session_state["project_id"] = new_proj.id
                     st.session_state["idea"] = idea.strip()
@@ -264,7 +314,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                         st.error("Phiên làm việc hết hạn, vui lòng khởi động lại dự án.")
                         st.stop()
 
-                    from src.core.models import ChannelStageConfig
+                    from src.core.models import ChannelStageConfig, VideoDurationConfig
                     prev_stage = STAGES_ORDER[current_idx - 1] if current_idx > 0 else None
                     prev = st.session_state["results"].get(prev_stage, "") if prev_stage else ""
 
@@ -272,13 +322,23 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                         channel_id=selected_channel.id, stage_name=current
                     ).first()
 
+                    # Nạp cấu hình thời lượng từ DB để truyền động vào prompt viết kịch bản
+                    duration_cfg = db.query(VideoDurationConfig).filter_by(project_id=st.session_state.get("project_id")).first()
+                    target_duration_str = "25-30"
+                    if duration_cfg:
+                        if duration_cfg.target_duration and duration_cfg.target_duration > 0:
+                            target_duration_str = f"{duration_cfg.target_duration}"
+                        elif duration_cfg.max_duration and duration_cfg.max_duration > 0:
+                            target_duration_str = f"dưới {duration_cfg.max_duration}"
+
                     context = {
                         "channel_name": selected_channel.name,
                         "channel_description": selected_channel.description,
                         "channel_goal": selected_channel.goal,
                         "video_engine": st.session_state.get("video_engine", "wan2.1_local"),
                         "image_engine": st.session_state.get("image_engine", "openai"),
-                        "project_id": st.session_state.get("project_id")
+                        "project_id": st.session_state.get("project_id"),
+                        "target_duration": target_duration_str
                     }
 
                     if stage_config:

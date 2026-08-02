@@ -1,5 +1,7 @@
 import streamlit as st
-from src.core.models import Channel, Project, ChannelStageConfig
+import json
+import os
+from src.core.models import Channel, Project, ChannelStageConfig, VideoDurationConfig, PromptOptimizationLog
 
 # Các hằng số workflow
 STAGE_DISPLAY_NAMES = {
@@ -32,9 +34,14 @@ def render_channels_page(db):
 
     with col_chan:
         st.markdown('<div class="vc-eyebrow">Chọn Kênh Sản Xuất</div>', unsafe_allow_html=True)
-        selected_channel_opt = st.selectbox("Danh sách Kênh", channel_options, index=current_index, key="channel_select_main", label_visibility="collapsed")
-        st.session_state["selected_channel_name"] = selected_channel_opt
-
+        
+        # Chia layout hàng ngang cho chọn kênh và sửa/xóa nhanh
+        c_sel, c_edit, c_del = st.columns([5.5, 2.2, 2.3])
+        
+        with c_sel:
+            selected_channel_opt = st.selectbox("Danh sách Kênh", channel_options, index=current_index, key="channel_select_main", label_visibility="collapsed")
+            st.session_state["selected_channel_name"] = selected_channel_opt
+            
         # Reset trạng thái sửa/xóa khi đổi kênh
         if st.session_state.get("_last_channel_for_edit") != selected_channel_opt:
             st.session_state["editing_channel"] = False
@@ -92,20 +99,19 @@ def render_channels_page(db):
             st.stop()
 
         selected_channel = next(c for c in channels if c.name == selected_channel_opt)
-        st.caption(f"Mục tiêu Kênh: {selected_channel.goal}")
-
-        # ===== SỬA / XÓA KÊNH =====
-        col_edit, col_del = st.columns(2)
-        with col_edit:
-            if st.button("Sửa kênh", icon=":material/edit:", use_container_width=True):
+        
+        with c_edit:
+            if st.button("Sửa", icon=":material/edit:", key="btn_channel_edit_top", use_container_width=True):
                 st.session_state["editing_channel"] = True
                 st.session_state["confirm_delete_channel"] = False
                 st.rerun()
-        with col_del:
-            if st.button("Xóa kênh", icon=":material/delete:", use_container_width=True):
+        with c_del:
+            if st.button("Xóa", icon=":material/delete:", key="btn_channel_del_top", use_container_width=True):
                 st.session_state["confirm_delete_channel"] = True
                 st.session_state["editing_channel"] = False
                 st.rerun()
+
+        st.markdown(f"🎯 **Mục tiêu Kênh:** *{selected_channel.goal}*")
 
         # Form sửa kênh
         if st.session_state.get("editing_channel"):
@@ -161,7 +167,6 @@ def render_channels_page(db):
                 else:
                     c_confirm, c_cancel_del = st.columns(2)
                     if c_confirm.button("Xác nhận xóa", type="primary", use_container_width=True):
-                        import datetime
                         try:
                             db.query(ChannelStageConfig).filter_by(channel_id=selected_channel.id).delete()
                             db.delete(selected_channel)
@@ -179,19 +184,54 @@ def render_channels_page(db):
                     if c_cancel_del.button("Hủy", use_container_width=True):
                         st.session_state["confirm_delete_channel"] = False
                         st.rerun()
+        
+        # ===== LƯỚI DANH SÁCH DỰ ÁN CỦA KÊNH =====
+        st.markdown('<div class="vc-eyebrow" style="margin-top:2rem;"><i class="bi bi-grid-3x3-gap"></i> Lưới danh sách Dự án của Kênh</div>', unsafe_allow_html=True)
+        projects = db.query(Project).filter_by(channel_id=selected_channel.id).order_by(Project.id.desc()).all()
+        if not projects:
+            st.info("Kênh này chưa có dự án nào.")
+        else:
+            import pandas as pd
+            project_data = []
+            for p in projects:
+                stage_name_display = STAGE_DISPLAY_NAMES.get(p.current_stage, p.current_stage)
+                status_badge = "🟢 Đang làm" if p.status == "pending" else "✅ Hoàn thành" if p.status == "completed" else "🔴 Thất bại"
+                project_data.append({
+                    "Mã dự án": f"#{p.id}",
+                    "Ý tưởng video": p.idea[:40] + "..." if len(p.idea) > 40 else p.idea,
+                    "Bộ não AI": f"{p.provider} ({p.model_name})",
+                    "Bước hiện tại": stage_name_display,
+                    "Trạng thái": status_badge,
+                    "Ngày tạo": p.created_at.strftime("%d/%m %H:%M")
+                })
+            df = pd.DataFrame(project_data)
+            st.dataframe(
+                df,
+                width="stretch",
+                hide_index=True,
+                column_config={
+                    "Mã dự án": st.column_config.TextColumn("Mã dự án", width="small"),
+                    "Ý tưởng video": st.column_config.TextColumn("Ý tưởng video", width="medium"),
+                    "Bộ não AI": st.column_config.TextColumn("Bộ não AI", width="small"),
+                    "Bước hiện tại": st.column_config.TextColumn("Bước hiện tại", width="small"),
+                    "Trạng thái": st.column_config.TextColumn("Trạng thái", width="small"),
+                    "Ngày tạo": st.column_config.TextColumn("Ngày tạo", width="small")
+                }
+            )
 
     with col_proj:
-        st.markdown("---")
         st.markdown('<div class="vc-eyebrow"><i class="bi bi-diagram-3"></i> Cấu hình Vai trò AI Các Bước</div>', unsafe_allow_html=True)
 
         # ===== CẤU HÌNH STAGE =====
         configs = db.query(ChannelStageConfig).filter_by(channel_id=selected_channel.id).all()
         if configs:
+            # Sắp xếp cấu hình AI theo đúng thứ tự workflow chuẩn (1, 2, 3, 4, 5)
+            configs = sorted(configs, key=lambda x: STAGES_ORDER.index(x.stage_name) if x.stage_name in STAGES_ORDER else 99)
             for cfg in configs:
                 display_name = TECH_TO_DISPLAY.get(cfg.stage_name, cfg.stage_name)
                 with st.container():
                     st.markdown('<div class="vc-stage-row">', unsafe_allow_html=True)
-                    c1, c2, c3, c4 = st.columns([2, 2, 5, 1.4])
+                    c1, c2, c3, c4 = st.columns([2.5, 2.2, 5, 1.4])
                     c1.markdown(f'<span class="vc-stage-name">{display_name}</span>', unsafe_allow_html=True)
                     c2.markdown(f'<span class="vc-stage-role-pill">{cfg.role}</span>', unsafe_allow_html=True)
                     c3.markdown(f'<span class="vc-stage-goal">{cfg.goal}</span>', unsafe_allow_html=True)
@@ -235,3 +275,240 @@ def render_channels_page(db):
                             del st.session_state["editing_config_id"]
                             st.session_state["show_add_config"] = False
                             st.rerun()
+
+    # ===== 3. Cấu hình thời lượng video (Cả Kênh & Dự án) =====
+    st.markdown("---")
+    st.markdown('<div class="vc-eyebrow" style="margin-top:1.5rem;"><i class="bi bi-clock-history"></i> Cấu hình thời lượng video (Bước 5)</div>', unsafe_allow_html=True)
+    
+    if 'selected_channel' in locals() and selected_channel:
+        tab_channel, tab_project = st.tabs(["Cấu hình mặc định cho Kênh", "Cấu hình riêng cho từng Dự án"])
+        
+        with tab_channel:
+            # Nạp cấu hình thời lượng của Kênh từ bảng ChannelStageConfig (stage_name="video", cột markdown_template)
+            video_cfg = db.query(ChannelStageConfig).filter_by(
+                channel_id=selected_channel.id, 
+                stage_name="video"
+            ).first()
+            
+            # Giá trị mặc định
+            dur_type = "system_generated"
+            tgt_dur = 0
+            min_dur = 0
+            max_dur = 0
+            src_path = ""
+            ratio_mult = 1.0
+            
+            if video_cfg and video_cfg.markdown_template:
+                try:
+                    cfg_data = json.loads(video_cfg.markdown_template)
+                    dur_type = cfg_data.get("duration_type", "system_generated")
+                    tgt_dur = int(cfg_data.get("target_duration", 0))
+                    min_dur = int(cfg_data.get("min_duration", 0))
+                    max_dur = int(cfg_data.get("max_duration", 0))
+                    src_path = cfg_data.get("video_source_path", "")
+                    ratio_mult = float(cfg_data.get("system_ratio_multiplier", 1.0))
+                except Exception:
+                    pass
+                    
+            with st.container(border=True):
+                col_dur1, col_dur2 = st.columns(2)
+                with col_dur1:
+                    dur_type_input = st.selectbox(
+                        "Chế độ thời lượng",
+                        ["system_generated", "uploaded_video"],
+                        index=0 if dur_type == "system_generated" else 1,
+                        key=f"chan_dur_type_{selected_channel.id}"
+                    )
+                    tgt_dur_input = st.number_input(
+                        "Thời lượng mong muốn (giây, 0 = theo âm thanh)",
+                        min_value=0,
+                        value=tgt_dur,
+                        key=f"chan_tgt_dur_{selected_channel.id}"
+                    )
+                    min_dur_input = st.number_input(
+                        "Thời lượng tối thiểu (giây)",
+                        min_value=0,
+                        value=min_dur,
+                        key=f"chan_min_dur_{selected_channel.id}"
+                    )
+                with col_dur2:
+                    max_dur_input = st.number_input(
+                        "Thời lượng tối đa (giây, 0 = không giới hạn)",
+                        min_value=0,
+                        value=max_dur,
+                        key=f"chan_max_dur_{selected_channel.id}"
+                    )
+                    src_path_input = st.text_input(
+                        "Đường dẫn video nguồn (chế độ uploaded_video)",
+                        value=src_path,
+                        key=f"chan_src_path_{selected_channel.id}"
+                    )
+                    ratio_mult_input = st.slider(
+                        "Hệ số co giãn (Speed multiplier)",
+                        min_value=0.5,
+                        max_value=3.0,
+                        value=ratio_mult,
+                        step=0.1,
+                        key=f"chan_ratio_mult_{selected_channel.id}"
+                    )
+                
+                if st.button("Lưu cấu hình thời lượng Kênh", key=f"chan_save_dur_{selected_channel.id}", type="primary", use_container_width=True):
+                    # Tìm hoặc tạo bản ghi ChannelStageConfig cho stage "video"
+                    if not video_cfg:
+                        video_cfg = ChannelStageConfig(
+                            channel_id=selected_channel.id,
+                            stage_name="video",
+                            role="Dựng Video",
+                            goal="Ghép thành video hoàn chỉnh",
+                            backstory="Chuyên gia dựng phim"
+                        )
+                        db.add(video_cfg)
+                    
+                    duration_data = {
+                        "duration_type": dur_type_input,
+                        "target_duration": tgt_dur_input,
+                        "min_duration": min_dur_input,
+                        "max_duration": max_dur_input,
+                        "video_source_path": src_path_input.strip() if src_path_input.strip() else None,
+                        "system_ratio_multiplier": ratio_mult_input
+                    }
+                    video_cfg.markdown_template = json.dumps(duration_data)
+                    db.commit()
+                    st.success("Đã lưu cấu hình thời lượng mặc định của Kênh thành công!")
+        
+        with tab_project:
+            projects = db.query(Project).filter_by(channel_id=selected_channel.id).order_by(Project.id.desc()).all()
+            if not projects:
+                st.info("Kênh này chưa có dự án nào để cấu hình thời lượng video.")
+            else:
+                project_options = [f"#{p.id} - {p.idea[:40]}..." for p in projects]
+                selected_project_opt = st.selectbox("Chọn Dự án để cấu hình thời lượng", project_options, key="channels_project_select")
+                
+                project_id = int(selected_project_opt.split(" - ")[0].replace("#", ""))
+                selected_project = next((p for p in projects if p.id == project_id), None)
+                
+                if selected_project:
+                    duration_cfg = db.query(VideoDurationConfig).filter_by(project_id=selected_project.id).first()
+                    if not duration_cfg:
+                        duration_cfg = VideoDurationConfig(
+                            project_id=selected_project.id,
+                            duration_type="system_generated",
+                            target_duration=0,
+                            min_duration=0,
+                            max_duration=0,
+                            system_ratio_multiplier=1.0
+                        )
+                        db.add(duration_cfg)
+                        db.commit()
+                        
+                    with st.container(border=True):
+                        col_dur1, col_dur2 = st.columns(2)
+                        with col_dur1:
+                            dur_type = st.selectbox(
+                                "Chế độ thời lượng",
+                                ["system_generated", "uploaded_video"],
+                                index=0 if duration_cfg.duration_type == "system_generated" else 1,
+                                key=f"channels_dur_type_{selected_project.id}"
+                            )
+                            tgt_dur = st.number_input(
+                                "Thời lượng mong muốn (giây, 0 = theo âm thanh)",
+                                min_value=0,
+                                value=int(duration_cfg.target_duration or 0),
+                                key=f"channels_tgt_dur_{selected_project.id}"
+                            )
+                            min_dur = st.number_input(
+                                "Thời lượng tối thiểu (giây)",
+                                min_value=0,
+                                value=int(duration_cfg.min_duration or 0),
+                                key=f"channels_min_dur_{selected_project.id}"
+                            )
+                        with col_dur2:
+                            max_dur = st.number_input(
+                                "Thời lượng tối đa (giây, 0 = không giới hạn)",
+                                min_value=0,
+                                value=int(duration_cfg.max_duration or 0),
+                                key=f"channels_max_dur_{selected_project.id}"
+                            )
+                            src_path = st.text_input(
+                                "Đường dẫn video nguồn (chế độ uploaded_video)",
+                                value=duration_cfg.video_source_path or "",
+                                key=f"channels_src_path_{selected_project.id}"
+                            )
+                            ratio_mult = st.slider(
+                                "Hệ số co giãn (Speed multiplier)",
+                                min_value=0.5,
+                                max_value=3.0,
+                                value=float(duration_cfg.system_ratio_multiplier or 1.0),
+                                step=0.1,
+                                key=f"channels_ratio_mult_{selected_project.id}"
+                            )
+                        
+                        if st.button("Lưu cấu hình thời lượng Dự án", key=f"channels_save_dur_{selected_project.id}", type="primary", use_container_width=True):
+                            duration_cfg.duration_type = dur_type
+                            duration_cfg.target_duration = tgt_dur
+                            duration_cfg.min_duration = min_dur
+                            duration_cfg.max_duration = max_dur
+                            duration_cfg.video_source_path = src_path.strip() if src_path.strip() else None
+                            duration_cfg.system_ratio_multiplier = ratio_mult
+                            db.commit()
+                            st.success("Đã lưu cấu hình thời lượng dự án thành công!")
+
+        # ===== 4. Bộ phân tích hiệu suất & Tự tối ưu Prompt (Chỉ dành cho ADMIN) =====
+        if st.session_state.get("user_role") == "ADMIN":
+            st.markdown('<div class="vc-eyebrow" style="margin-top:1.5rem;"><i class="bi bi-cpu"></i> Bộ Phân Tích Hiệu Suất & Tối Ưu Prompt (ADMIN ONLY)</div>', unsafe_allow_html=True)
+            
+            projects = db.query(Project).filter_by(channel_id=selected_channel.id).order_by(Project.id.desc()).all()
+            if not projects:
+                st.info("Kênh này chưa có dự án nào để xem phân tích hiệu suất.")
+            else:
+                project_options = [f"#{p.id} - {p.idea[:40]}..." for p in projects]
+                selected_project_opt = st.selectbox("Chọn Dự án để xem phân tích hiệu suất", project_options, key="channels_log_project_select")
+                
+                project_id = int(selected_project_opt.split(" - ")[0].replace("#", ""))
+                selected_project = next((p for p in projects if p.id == project_id), None)
+                
+                if selected_project:
+                    with st.container(border=True):
+                        st.markdown("### Lịch sử Tự tối ưu Prompt & Phân tích chất lượng kịch bản")
+                        
+                        logs = db.query(PromptOptimizationLog).filter_by(project_id=selected_project.id).order_by(PromptOptimizationLog.created_at.desc()).all()
+                        
+                        if not logs:
+                            st.info("Chưa có dữ liệu phân tích hiệu suất cho dự án này.")
+                        else:
+                            for log in logs:
+                                step_title = "Bước 1: Phân tích Ý tưởng" if log.step_name == "step_1_analysis" else "Bước 2: Viết Kịch bản chi tiết"
+                                status_badge = "[Đạt chuẩn]" if log.is_standardized else "[Cần tối ưu]"
+                                
+                                with st.container(border=True):
+                                    st.markdown(f"**{step_title}** -- {status_badge} -- *{log.created_at.strftime('%Y-%m-%d %H:%M:%S')}*")
+                                    
+                                    st.markdown("**Đầu vào ban đầu (Original input):**")
+                                    st.code(log.user_input_content, language="text")
+                                    
+                                    st.markdown("**Kết quả đã tối ưu / sửa đổi (Adjusted prompt / result):**")
+                                    st.code(log.adjusted_prompt, language="text")
+                                    
+                                    if log.analysis_metrics:
+                                        try:
+                                            metrics = json.loads(log.analysis_metrics)
+                                            st.markdown("**Chỉ số phân tích hiệu suất:**")
+                                            col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+                                            with col_m1:
+                                                st.metric("Tone / Tông giọng", metrics.get("tone", "N/A"))
+                                            with col_m2:
+                                                st.metric("Mật độ từ khóa", metrics.get("keyword_density", "N/A"))
+                                            with col_m3:
+                                                st.metric("Thời lượng dự kiến", metrics.get("estimated_duration", "N/A"))
+                                            with col_m4:
+                                                if "transition_score" in metrics:
+                                                    st.metric("Điểm liền mạch", f"{metrics['transition_score']}/10")
+                                                else:
+                                                    st.metric("Trạng thái", "Đã phân tích")
+                                                    
+                                            if "feedback" in metrics and metrics["feedback"]:
+                                                st.markdown(f"**Ý kiến phản hồi:** *{metrics['feedback']}*")
+                                            if "attempts" in metrics:
+                                                st.markdown(f"**Số lần viết lại tự động:** `{metrics['attempts']}`")
+                                        except Exception:
+                                            st.text(f"Raw Metrics: {log.analysis_metrics}")
