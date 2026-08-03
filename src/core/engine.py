@@ -186,37 +186,36 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
 
             # Chạy trực tiếp sinh ảnh bằng code Python thuần túy không qua Agent
             if stage_name == "image":
-                prompt = previous_result if previous_result else idea_for_script
-                
-                # Trích xuất prompt của Scene 1 và hồ sơ nhân vật/phong cách để sinh ảnh tối ưu
+                full_prompt = previous_result if previous_result else idea_for_script
                 import re
-                scene1_match = re.search(r"(?:Scene|Cảnh)\s*1[\s*:\-–\.]+(.*?)(?=(?:Scene|Cảnh)\s*2[\s*:\-–\.]+|\Z)", prompt, re.DOTALL | re.IGNORECASE)
-                if scene1_match:
-                    profile_match = re.search(r"(?:Character Profile|Hồ sơ nhân vật|Profile|Nhân vật)[\s*:\-–\.]+(.*?)(?=(?:Art Style|Phong cách|Scene)\s*|\Z)", prompt, re.DOTALL | re.IGNORECASE)
-                    style_match = re.search(r"(?:Art Style|Phong cách nghệ thuật|Style)[\s*:\-–\.]+(.*?)(?=(?:Scene|Nhân vật|Profile)\s*|\Z)", prompt, re.DOTALL | re.IGNORECASE)
-                    
-                    profile_text = profile_match.group(1).strip() if profile_match else ""
-                    style_text = style_match.group(1).strip() if style_match else ""
-                    scene1_text = scene1_match.group(1).strip()
-                    
-                    # Ưu tiên sử dụng phong cách nghệ thuật tùy biến (markdown_template của stage 'image') nếu người dùng định nghĩa trong DB
-                    if custom_template and custom_template.strip():
-                        prompt = f"{custom_template.strip()} {profile_text} {scene1_text}"
-                    else:
-                        prompt = f"{style_text} {profile_text} {scene1_text}"
-                    prompt = prompt.replace("\n", " ").strip()
 
                 image_engine = context.get("image_engine", "openai") if context else "openai"
-                if image_engine == "sd1.5_local":
+
+                if image_engine in ("sd1.5_local", "markl_local"):
+                    # Backward-compat: engine local chỉ nhận 1 prompt nên vẫn trích Scene 1
+                    scene1_match = re.search(r"(?:Scene|Cảnh)\s*1[\s*:\-\u2013\.]+(.*?)(?=(?:Scene|Cảnh)\s*2[\s*:\-\u2013\.]+|\Z)", full_prompt, re.DOTALL | re.IGNORECASE)
+                    if scene1_match:
+                        profile_match = re.search(r"(?:Character Profile|Hồ sơ nhân vật|Profile|Nhân vật)[\s*:\-\u2013\.]+(.*?)(?=(?:Art Style|Phong cách|Scene)\s*|\Z)", full_prompt, re.DOTALL | re.IGNORECASE)
+                        style_match = re.search(r"(?:Art Style|Phong cách nghệ thuật|Style)[\s*:\-\u2013\.]+(.*?)(?=(?:Scene|Nhân vật|Profile)\s*|\Z)", full_prompt, re.DOTALL | re.IGNORECASE)
+                        profile_text = profile_match.group(1).strip() if profile_match else ""
+                        style_text = style_match.group(1).strip() if style_match else ""
+                        scene1_text = scene1_match.group(1).strip()
+                        if custom_template and custom_template.strip():
+                            local_prompt = f"{custom_template.strip()} {profile_text} {scene1_text}"
+                        else:
+                            local_prompt = f"{style_text} {profile_text} {scene1_text}"
+                        local_prompt = local_prompt.replace("\n", " ").strip()
+                    else:
+                        local_prompt = full_prompt
                     from src.tools.image_tool import generate_local_image_sd_func
-                    return generate_local_image_sd_func(prompt, use_gpu=False)
-                elif image_engine == "markl_local":
-                    from src.tools.image_tool import generate_local_image_sd_func
-                    return generate_local_image_sd_func(prompt, use_gpu=True)
+                    return generate_local_image_sd_func(local_prompt, use_gpu=(image_engine == "markl_local"))
                 else:
+                    # OpenAI: truyền toàn bộ visual prompt; generate_gpt_image_func tự tách scene và sinh ảnh song song
+                    if custom_template and custom_template.strip():
+                        full_prompt = f"{custom_template.strip()}\n\n{full_prompt}"
                     from src.tools.image_tool import generate_gpt_image_func
-                    return generate_gpt_image_func(prompt)
-                
+                    return generate_gpt_image_func(full_prompt)
+            
             # Chạy trực tiếp sinh video
             if stage_name == "video":
                 from src.tools.video_tool import generate_video_func

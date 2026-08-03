@@ -14,6 +14,23 @@ STAGE_DISPLAY_NAMES = {
 STAGES_ORDER = ["script", "visual", "image", "voice", "video"]
 TECH_TO_DISPLAY = STAGE_DISPLAY_NAMES
 
+def _render_text_dual(text: str, key_prefix: str):
+    """Hiển thị 2 tab: Trực quan (Markdown được render) và Raw (copy)."""
+    def _clean(t):
+        t = t.strip()
+        if t.startswith("```markdown"):
+            t = t[11:]
+        elif t.startswith("```"):
+            t = t[3:]
+        if t.endswith("```"):
+            t = t[:-3]
+        return t.strip()
+    tab_v, tab_r = st.tabs([":material/edit: Trực quan", ":material/content_copy: Raw Markdown"])
+    with tab_v:
+        st.markdown(_clean(text))
+    with tab_r:
+        st.code(text, language="markdown")
+
 def render_channels_page(db):
     st.markdown('<div class="vc-eyebrow"><i class="bi bi-folder2-open"></i> Quản lý kênh</div>', unsafe_allow_html=True)
     st.subheader("Quản lý Kênh & Cấu hình Vai trò AI", anchor=False)
@@ -111,7 +128,7 @@ def render_channels_page(db):
                 st.session_state["editing_channel"] = False
                 st.rerun()
 
-        st.markdown(f"🎯 **Mục tiêu Kênh:** *{selected_channel.goal}*")
+        st.markdown(f"**:material/target: Mục tiêu Kênh:** *{selected_channel.goal}*")
 
         # Form sửa kênh
         if st.session_state.get("editing_channel"):
@@ -195,14 +212,14 @@ def render_channels_page(db):
             # Mapping trạng thái chính xác
             STATUS_BADGES = {
                 "pending": "⏳ Chưa chạy",
-                "running": "🔄 Đang chạy",
-                "completed": "✅ Hoàn thành",
-                "failed": "❌ Thất bại"
+                "running": ":material/sync: Đang chạy",
+                "completed": ":material/check_circle: Hoàn thành",
+                "failed": ":material/cancel: Thất bại"
             }
             project_data = []
             for p in projects:
                 stage_name_display = STAGE_DISPLAY_NAMES.get(p.current_stage, p.current_stage)
-                status_badge = STATUS_BADGES.get(p.status, f"❓ {p.status}")
+                status_badge = STATUS_BADGES.get(p.status, p.status)
                 project_data.append({
                     "Mã dự án": f"#{p.id}",
                     "Ý tưởng video": p.idea[:40] + "..." if len(p.idea) > 40 else p.idea,
@@ -501,10 +518,10 @@ def render_channels_page(db):
                                     st.markdown(f"**{step_title}** -- {status_badge} -- *{log.created_at.strftime('%Y-%m-%d %H:%M:%S')}*")
                                     
                                     st.markdown("**Đầu vào ban đầu (Original input):**")
-                                    st.code(log.user_input_content, language="text")
+                                    _render_text_dual(log.user_input_content or "", f"input_{log.id}")
                                     
                                     st.markdown("**Kết quả đã tối ưu / sửa đổi (Adjusted prompt / result):**")
-                                    st.code(log.adjusted_prompt, language="text")
+                                    _render_text_dual(log.adjusted_prompt or "", f"adj_{log.id}")
                                     
                                     if log.analysis_metrics:
                                         try:
@@ -527,5 +544,9 @@ def render_channels_page(db):
                                                 st.markdown(f"**Ý kiến phản hồi:** *{metrics['feedback']}*")
                                             if "attempts" in metrics:
                                                 st.markdown(f"**Số lần viết lại tự động:** `{metrics['attempts']}`")
+
+                                            with st.expander("Xem du lieu phan tich tho (Raw JSON)", expanded=False):
+                                                st.json(metrics)
                                         except Exception:
-                                            st.text(f"Raw Metrics: {log.analysis_metrics}")
+                                            st.warning("Khong the phan tich dinh dang JSON cua metrics. Dang hien thi du lieu tho:")
+                                            st.code(log.analysis_metrics, language="json")

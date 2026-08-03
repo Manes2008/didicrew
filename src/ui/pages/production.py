@@ -93,11 +93,11 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
             st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
             is_existing_proj = selected_project_opt != "+ Tạo dự án mới..."
             if is_existing_proj:
-                if st.button("🗑", key="btn_del_proj_quick", help="Xóa dự án này", use_container_width=True):
+                if st.button("Xóa", icon=":material/delete:", key="btn_del_proj_quick", help="Xóa dự án này", use_container_width=True):
                     st.session_state["confirm_delete_project"] = True
                     st.rerun()
             else:
-                st.button("🗑", key="btn_del_proj_disabled", disabled=True, use_container_width=True)
+                st.button("Xóa", icon=":material/delete:", key="btn_del_proj_disabled", disabled=True, use_container_width=True)
 
         # Dialog xác nhận xóa dự án
         if st.session_state.get("confirm_delete_project") and selected_project_opt != "+ Tạo dự án mới...":
@@ -117,7 +117,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                 st.session_state["idea"] = ""
                                 for _k in ["stage", "results", "llm"]:
                                     st.session_state.pop(_k, None)
-                            st.toast("Đã xóa dự án thành công!", icon="🗑️")
+                            st.toast("Đã xóa dự án thành công!", icon=":material/delete:")
                             st.rerun()
                         except Exception as ex:
                             db.rollback()
@@ -219,7 +219,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     else:
                         duration_cfg.video_source_path = src_path.strip() if src_path and src_path.strip() else None
                     db.commit()
-                    st.toast("Đã lưu cấu hình thời lượng!", icon="✅")
+                    st.toast("Đã lưu cấu hình thời lượng!", icon=":material/check_circle:")
             else:
                 st.button("Lưu", disabled=True, key="prod_save_dur_disabled", use_container_width=True)
 
@@ -421,9 +421,11 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                             media_path = None
                             image_paths = []
                             if current == "image":
-                                image_paths = [line.replace("📁 Đường dẫn ảnh:", "").replace("📁 Đường dẫn ảnh: ", "").strip() for line in result.split("\n") if "generated_images" in line]
-                                if image_paths:
-                                    media_path = ",".join(image_paths)
+                                for line in result.split("\n"):
+                                    if "generated_images" in line:
+                                        clean = line.replace("[ANH] Duong dan anh:", "").replace("Duong dan anh:", "").strip()
+                                        if clean and os.path.exists(clean):
+                                            image_paths.append(clean)
                             elif current == "video":
                                 for line in result.split("\n"):
                                     if "generated_videos" in line or ".mp4" in line:
@@ -439,53 +441,25 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                     status="completed"
                                 )
                                 db.add(stage_rec)
-                                db.flush()
                             else:
                                 stage_rec.result_content = result
                                 stage_rec.media_path = media_path
                                 stage_rec.status = "completed"
-                                db.flush()
-
-                            # Xoá MediaFile cũ liên quan đến stage này để ghi mới
-                            db.query(MediaFile).filter_by(project_stage_id=stage_rec.id).delete()
-
-                            # Lưu file nhị phân vào bảng MediaFile
+                            
+                            # Lưu file ảnh vào DB (MediaFile)
                             if current == "image" and image_paths:
-                                for ip in image_paths:
-                                    if os.path.exists(ip):
-                                        try:
-                                            with open(ip, "rb") as f:
-                                                f_data = f.read()
-                                            db.add(MediaFile(
-                                                project_stage_id=stage_rec.id,
-                                                file_name=os.path.basename(ip),
-                                                file_path=ip,
-                                                file_data=f_data,
-                                                mime_type="image/png",
-                                                file_size=len(f_data)
-                                            ))
-                                        except Exception as e_img:
-                                            st.warning(f"Không thể đọc file ảnh để lưu vào DB: {e_img}")
-                            elif current == "video" and media_path:
-                                if os.path.exists(media_path):
-                                    try:
-                                        with open(media_path, "rb") as f:
-                                            f_data = f.read()
-                                        db.add(MediaFile(
+                                for img_path in image_paths:
+                                    if os.path.exists(img_path):
+                                        with open(img_path, "rb") as img_f:
+                                            img_data = img_f.read()
+                                        media_rec = MediaFile(
                                             project_stage_id=stage_rec.id,
-                                            file_name=os.path.basename(media_path),
-                                            file_path=media_path,
-                                            file_data=f_data,
-                                            mime_type="video/mp4",
-                                            file_size=len(f_data)
-                                        ))
-                                    except Exception as e_vid:
-                                        st.warning(f"Không thể đọc file video để lưu vào DB: {e_vid}")
+                                            file_name=os.path.basename(img_path),
+                                            file_data=img_data,
+                                            media_type="image/png"
+                                        )
+                                        db.add(media_rec)
 
-                            proj_rec = db.query(Project).filter_by(id=project_id).first()
-                            if proj_rec:
-                                proj_rec.current_stage = current
-                                proj_rec.status = "running"
                             db.commit()
                         except Exception as ex:
                             db.rollback()
@@ -504,32 +478,59 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     stage_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="image").first() if project_id else None
                     media_files = db.query(MediaFile).filter_by(project_stage_id=stage_rec.id).all() if stage_rec else []
 
+                    # Lấy visual prompt từ kết quả bước "visual" để khớp mô tả cảnh với ảnh
+                    import re as _re_img
+                    visual_result = st.session_state.get("results", {}).get("visual", "")
+                    scene_descriptions = {}
+                    if visual_result:
+                        for m in _re_img.finditer(
+                            r"(?:Scene|Cảnh)\s*(\d+)[\s*:\-–\.]+(.+?)(?=(?:Scene|Cảnh)\s*\d+[\s*:\-–\.]|\Z)",
+                            visual_result,
+                            _re_img.DOTALL | _re_img.IGNORECASE
+                        ):
+                            scene_descriptions[int(m.group(1))] = m.group(2).strip()[:300]
+
+                    def _extract_img_paths_with_scene(text):
+                        paths = []  # list of (scene_num, path)
+                        for line in text.split("\n"):
+                            if "generated_images" not in line:
+                                continue
+                            clean = line
+                            for prefix in ["[ANH] Duong dan anh:", "Duong dan anh:"]:
+                                clean = clean.replace(prefix, "")
+                            clean = clean.strip()
+                            if not clean:
+                                continue
+                            sm = _re_img.search(r"scene_?(\d+)", clean)
+                            s_num = int(sm.group(1)) if sm else len(paths) + 1
+                            paths.append((s_num, clean))
+                        return paths
+
                     db_images = [m for m in media_files if m.file_data]
                     if db_images:
-                        cols = st.columns(min(len(db_images), 3))
                         for idx, media in enumerate(db_images):
-                            cols[idx % len(cols)].image(media.file_data, caption=media.file_name)
+                            s_num = idx + 1
+                            sm = _re_img.search(r"scene_?(\d+)", media.file_name or "")
+                            if sm:
+                                s_num = int(sm.group(1))
+                            desc = scene_descriptions.get(s_num, "")
+                            with st.container():
+                                st.markdown(f"**Cảnh {s_num}**")
+                                if desc:
+                                    st.caption(desc)
+                                st.image(media.file_data, use_container_width=True)
                     else:
-                        # Fallback: parse đường dẫn từ result_text — chuẩn hóa bỏ mọi prefix emoji/text
-                        def _extract_img_paths(text):
-                            paths = []
-                            for line in text.split("\n"):
-                                if "generated_images" not in line:
-                                    continue
-                                # Loại bỏ các prefix phổ biến
-                                clean = line
-                                for prefix in ["📁 Đường dẫn ảnh:", "Đường dẫn ảnh:", "📁"]:
-                                    clean = clean.replace(prefix, "")
-                                clean = clean.strip()
-                                if clean and os.path.exists(clean):
-                                    paths.append(clean)
-                            return paths
-
-                        image_paths = _extract_img_paths(result_text)
-                        if image_paths:
-                            cols = st.columns(min(len(image_paths), 3))
-                            for idx, img_path in enumerate(image_paths):
-                                cols[idx % len(cols)].image(img_path, caption=f"Ảnh cảnh {idx+1}")
+                        img_scene_paths = _extract_img_paths_with_scene(result_text)
+                        if img_scene_paths:
+                            cols = st.columns(min(len(img_scene_paths), 3))
+                            for col_idx, (s_num, img_path) in enumerate(img_scene_paths):
+                                desc = scene_descriptions.get(s_num, "")
+                                with cols[col_idx % len(cols)]:
+                                    st.markdown(f"**Cảnh {s_num}**")
+                                    if desc:
+                                        st.caption(desc)
+                                    if os.path.exists(img_path):
+                                        st.image(img_path, use_container_width=True)
                         else:
                             render_text_output(result_text)
 
@@ -599,7 +600,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                                         f_out.write(media.file_data)
                                         else:
                                             if img_rec.result_content:
-                                                img_paths = [l.replace("📁 Đường dẫn ảnh:", "").replace("📁 Đường dẫn ảnh: ", "").strip() for l in img_rec.result_content.split("\n") if "generated_images" in l]
+                                                img_paths = [l.replace("[ANH] Duong dan anh:", "").replace("Duong dan anh:", "").strip() for l in img_rec.result_content.split("\n") if "generated_images" in l]
                                                 for idx, ip in enumerate(img_paths):
                                                     if os.path.exists(ip):
                                                         shutil.copy(ip, os.path.join(export_dir, f"scene_{idx+1}_{os.path.basename(ip)}"))
@@ -659,13 +660,42 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                     from src.tools.computer_control import computer_control
                                     
                                     # 3. Kích hoạt cửa sổ Veo3 và tự động hoá nạp file
-                                    st.toast("Đang quét các cửa sổ ứng dụng trên Windows...", icon="🔍")
+                                    st.toast("Đang quét các cửa sổ ứng dụng trên Windows...", icon=":material/search:")
                                     import subprocess
-                                    # Quét tất cả cửa sổ có MainWindowTitle không rỗng
-                                    check_script = 'Get-Process | Where-Object {$_.MainWindowTitle -ne ""} | Select-Object -ExpandProperty MainWindowTitle'
+                                    # Quét tất cả visible windows bằng Win32 API (đáng tin cậy hơn Get-Process)
+                                    win32_scan_script = """
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+public class WinEnum {
+    [DllImport("user32.dll")] public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+    [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
+    [DllImport("user32.dll")] public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+    [DllImport("user32.dll")] public static extern int GetWindowTextLength(IntPtr hWnd);
+    public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+    public static System.Collections.Generic.List<string> GetVisibleWindowTitles() {
+        var list = new System.Collections.Generic.List<string>();
+        EnumWindows(delegate(IntPtr hwnd, IntPtr lParam) {
+            if (IsWindowVisible(hwnd)) {
+                int len = GetWindowTextLength(hwnd);
+                if (len > 0) {
+                    var sb = new StringBuilder(len + 1);
+                    GetWindowText(hwnd, sb, sb.Capacity);
+                    list.Add(sb.ToString());
+                }
+            }
+            return true;
+        }, IntPtr.Zero);
+        return list;
+    }
+}
+"@
+[WinEnum]::GetVisibleWindowTitles()
+"""
                                     check_res = subprocess.run(
-                                        ["powershell", "-NoProfile", "-NonInteractive", "-Command", check_script],
-                                        capture_output=True, text=True, timeout=5
+                                        ["powershell", "-NoProfile", "-NonInteractive", "-Command", win32_scan_script],
+                                        capture_output=True, text=True, timeout=10
                                     )
                                     window_titles = [line.strip() for line in check_res.stdout.split("\n") if line.strip()]
 
@@ -692,7 +722,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                             st.error("Không có cửa sổ nào đang mở. Vui lòng khởi động phần mềm Veo3 trước!")
 
                                     if target_title:
-                                        st.toast(f"Đang kích hoạt cửa sổ: {target_title}...", icon="🚀")
+                                        st.toast(f"Đang kích hoạt cửa sổ: {target_title}...", icon=":material/rocket_launch:")
                                         computer_control({"action": "focus_window", "title": target_title})
                                         
                                         # Đợi 1 giây để focus ổn định
@@ -832,8 +862,12 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                         st.caption(f"Ý kiến phản hồi: {metrics['feedback']}")
                                     if "attempts" in metrics:
                                         st.caption(f"Số lần viết lại tự động: {metrics['attempts']}")
+
+                                    with st.expander("Xem du lieu phan tich tho (Raw JSON)", expanded=False):
+                                        st.json(metrics)
                             except Exception:
-                                st.caption(f"Dữ liệu thô: {log.analysis_metrics}")
+                                st.warning("Khong the phan tich dinh dang JSON cua metrics. Dang hien thi du lieu tho:")
+                                st.code(log.analysis_metrics, language="json")
 
                         # Nút phân tích lại cho bước 3 chưa có chỉ số Visual
                         if log.step_name == "step_3_visual":
