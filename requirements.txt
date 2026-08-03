@@ -20,3 +20,4 @@ pyautogui
 pyperclip
 watchdog
 yt-dlp
+cryptography

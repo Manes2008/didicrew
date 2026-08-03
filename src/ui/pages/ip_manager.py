@@ -3,13 +3,10 @@ import datetime
 from src.core.models import get_db_session, AllowedIP, User
 
 def render_ip_manager_page(db):
-    st.markdown("""
-    <div class="vc-header">
-        <div class="vc-logo-mark"><i class="bi bi-shield-lock-fill"></i></div>
-        <h3 style="margin:0; font-weight:800;">Quản lý IP & Thiết bị</h3>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">Phê duyệt hoặc từ chối thiết bị truy cập vào VideoCrew Studio</div>', unsafe_allow_html=True)
+    # Header cẩn chỉnh giống các tab khác trong app.py
+    st.markdown('<div class="vc-eyebrow"><i class="bi bi-shield-lock-fill"></i> Quản lý thiết bị</div>', unsafe_allow_html=True)
+    st.subheader("Quản lý IP & Thiết bị Truy cập", anchor=False)
+    st.markdown('<div class="sub-title">Giám sát, phê duyệt hoặc từ chối thiết bị truy cập vào VideoCrew Studio</div>', unsafe_allow_html=True)
 
     # Đọc danh sách IP
     all_ips = db.query(AllowedIP).order_by(AllowedIP.created_at.desc()).all()
@@ -67,12 +64,15 @@ def render_ip_manager_page(db):
             if not pending:
                 st.info("Không có IP nào đang chờ duyệt.")
             for rec in pending:
-                with st.container():
-                    st.markdown('<div class="ip-row">', unsafe_allow_html=True)
-                    c1, c2, c3 = st.columns([4, 1, 1])
-                    c1.markdown(f'<span class="ip-address">{rec.ip_address}</span>', unsafe_allow_html=True)
-                    c1.markdown(f'<span class="ip-timestamp">Đăng ký lúc: {rec.created_at.strftime("%Y-%m-%d %H:%M:%S") if rec.created_at else "N/A"}</span>', unsafe_allow_html=True)
-
+                with st.container(border=True):
+                    c1, c2, c3 = st.columns([5, 1.2, 1.2])
+                    admin_badge = ' <span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;">ADMIN IP</span>' if rec.is_admin_ip else ''
+                    c1.markdown(
+                        f'<span style="font-weight:700;font-size:1rem;">{rec.ip_address}</span>{admin_badge}'  
+                        f'<br><span style="color:#aaa;font-size:0.8rem;">⏱️ Đăng ký: {rec.created_at.strftime("%d/%m/%Y %H:%M") if rec.created_at else "N/A"}</span>'  
+                        + (f'<br><span style="color:#bbb;font-size:0.78rem;">📝 {rec.label}</span>' if rec.label else ''),
+                        unsafe_allow_html=True
+                    )
                     if c2.button("Duyệt", key=f"ap_{rec.id}", type="primary", use_container_width=True):
                         try:
                             rec.status = "approved"
@@ -83,7 +83,6 @@ def render_ip_manager_page(db):
                         except Exception as ex:
                             db.rollback()
                             st.error(str(ex))
-
                     if c3.button("Từ chối", key=f"rj_{rec.id}", use_container_width=True):
                         try:
                             rec.status = "rejected"
@@ -93,19 +92,21 @@ def render_ip_manager_page(db):
                         except Exception as ex:
                             db.rollback()
                             st.error(str(ex))
-                    st.markdown('</div>', unsafe_allow_html=True)
 
         with tab_approved:
             if not approved:
                 st.info("Chưa có IP nào được duyệt.")
             for rec in approved:
-                with st.container():
-                    st.markdown('<div class="ip-row">', unsafe_allow_html=True)
-                    c1, c2, c3 = st.columns([4, 1, 1])
-                    c1.markdown(f'<span class="ip-address">{rec.ip_address}</span> — <span class="ip-label">{rec.label or "Không có nhãn"}</span>', unsafe_allow_html=True)
-                    c1.markdown(f'<span class="ip-timestamp">Duyệt lúc: {rec.approved_at.strftime("%Y-%m-%d %H:%M:%S") if rec.approved_at else "N/A"}  |  Đăng ký: {rec.created_at.strftime("%Y-%m-%d %H:%M:%S") if rec.created_at else "N/A"}</span>', unsafe_allow_html=True)
-
-                    if c2.button("Từ chối", key=f"rv_{rec.id}", use_container_width=True):
+                with st.container(border=True):
+                    c1, c2, c3 = st.columns([5, 1.2, 1.2])
+                    admin_badge = ' <span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;">ADMIN IP</span>' if rec.is_admin_ip else ''
+                    c1.markdown(
+                        f'<span style="font-weight:700;font-size:1rem;">{rec.ip_address}</span>{admin_badge}'  
+                        + (f' — <span style="color:#bbb;font-size:0.82rem;">{rec.label}</span>' if rec.label else '')  
+                        + f'<br><span style="color:#aaa;font-size:0.8rem;">✅ Duyệt: {rec.approved_at.strftime("%d/%m/%Y %H:%M") if rec.approved_at else "N/A"}  |  ⏱️ Đăng ký: {rec.created_at.strftime("%d/%m/%Y %H:%M") if rec.created_at else "N/A"}</span>',
+                        unsafe_allow_html=True
+                    )
+                    if c2.button("Thu hồi", key=f"rv_{rec.id}", use_container_width=True):
                         try:
                             rec.status = "rejected"
                             rec.approved_at = None
@@ -115,7 +116,6 @@ def render_ip_manager_page(db):
                         except Exception as ex:
                             db.rollback()
                             st.error(str(ex))
-
                     if c3.button("Xóa", key=f"dl_{rec.id}", use_container_width=True):
                         try:
                             db.delete(rec)
@@ -124,18 +124,19 @@ def render_ip_manager_page(db):
                         except Exception as ex:
                             db.rollback()
                             st.error(str(ex))
-                    st.markdown('</div>', unsafe_allow_html=True)
 
         with tab_rejected:
             if not rejected:
                 st.info("Chưa có IP nào bị từ chối.")
             for rec in rejected:
-                with st.container():
-                    st.markdown('<div class="ip-row">', unsafe_allow_html=True)
-                    c1, c2, c3 = st.columns([4, 1, 1])
-                    c1.markdown(f'<span class="ip-address">{rec.ip_address}</span>', unsafe_allow_html=True)
-                    c1.markdown(f'<span class="ip-timestamp">Đăng ký lúc: {rec.created_at.strftime("%Y-%m-%d %H:%M:%S") if rec.created_at else "N/A"}</span>', unsafe_allow_html=True)
-
+                with st.container(border=True):
+                    c1, c2, c3 = st.columns([5, 1.4, 1.2])
+                    admin_badge = ' <span style="background:#7f8c8d;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.72rem;">ADMIN IP</span>' if rec.is_admin_ip else ''
+                    c1.markdown(
+                        f'<span style="font-weight:700;font-size:1rem;text-decoration:line-through;color:#aaa;">{rec.ip_address}</span>{admin_badge}'  
+                        + f'<br><span style="color:#aaa;font-size:0.8rem;">⏱️ Đăng ký: {rec.created_at.strftime("%d/%m/%Y %H:%M") if rec.created_at else "N/A"}</span>',
+                        unsafe_allow_html=True
+                    )
                     if c2.button("Phê duyệt lại", key=f"rea_{rec.id}", type="primary", use_container_width=True):
                         try:
                             rec.status = "approved"
@@ -146,7 +147,6 @@ def render_ip_manager_page(db):
                         except Exception as ex:
                             db.rollback()
                             st.error(str(ex))
-
                     if c3.button("Xóa", key=f"dlr_{rec.id}", use_container_width=True):
                         try:
                             db.delete(rec)
@@ -155,7 +155,6 @@ def render_ip_manager_page(db):
                         except Exception as ex:
                             db.rollback()
                             st.error(str(ex))
-                    st.markdown('</div>', unsafe_allow_html=True)
 
         with tab_add:
             st.markdown("Thêm IP thủ công và duyệt ngay lập tức (hoặc để chờ).")

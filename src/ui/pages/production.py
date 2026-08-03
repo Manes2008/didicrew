@@ -49,8 +49,8 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
         channels = db.query(Channel).all()
         channel_names = [c.name for c in channels]
         
-        # Chia layout hàng ngang cực kỳ gọn gàng
-        col_chan, col_proj, col_dur_mode, col_dur_val, col_dur_save = st.columns([2.5, 3.2, 2.3, 2.5, 1.2])
+        # Chia layout hàng ngang cực kỳ gọn gàng (thêm cột xóa dự án)
+        col_chan, col_proj, col_del_proj, col_dur_mode, col_dur_val, col_dur_save = st.columns([2.5, 3.0, 0.7, 2.3, 2.5, 1.2])
         
         with col_chan:
             try:
@@ -82,12 +82,50 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     
         with col_proj:
             selected_project_opt = st.selectbox(
-                "Chọn Dự án", 
-                project_options, 
-                index=default_index, 
+                "Chọn Dự án",
+                project_options,
+                index=default_index,
                 key="project_select_main"
             )
-            
+
+        # Nút xóa dự án nhanh
+        with col_del_proj:
+            st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
+            is_existing_proj = selected_project_opt != "+ Tạo dự án mới..."
+            if is_existing_proj:
+                if st.button("🗑", key="btn_del_proj_quick", help="Xóa dự án này", use_container_width=True):
+                    st.session_state["confirm_delete_project"] = True
+                    st.rerun()
+            else:
+                st.button("🗑", key="btn_del_proj_disabled", disabled=True, use_container_width=True)
+
+        # Dialog xác nhận xóa dự án
+        if st.session_state.get("confirm_delete_project") and selected_project_opt != "+ Tạo dự án mới...":
+            _del_pid = int(selected_project_opt.split(" - ")[0].replace("#", ""))
+            _del_proj = db.query(Project).filter_by(id=_del_pid).first()
+            if _del_proj:
+                with st.container(border=True):
+                    st.warning(f"Xóa dự án **#{_del_pid}** — `{_del_proj.idea[:50]}...` ?  \nThao tác này không thể hoàn tác.")
+                    c_confirm_del, c_cancel_del = st.columns(2)
+                    if c_confirm_del.button("Xác nhận xóa", type="primary", use_container_width=True, key="confirm_del_proj_btn"):
+                        try:
+                            db.delete(_del_proj)
+                            db.commit()
+                            st.session_state["confirm_delete_project"] = False
+                            if st.session_state.get("project_id") == _del_pid:
+                                st.session_state["project_id"] = None
+                                st.session_state["idea"] = ""
+                                for _k in ["stage", "results", "llm"]:
+                                    st.session_state.pop(_k, None)
+                            st.toast("Đã xóa dự án thành công!", icon="🗑️")
+                            st.rerun()
+                        except Exception as ex:
+                            db.rollback()
+                            st.error(f"Lỗi xóa dự án: {ex}")
+                    if c_cancel_del.button("Hủy", use_container_width=True, key="cancel_del_proj_btn"):
+                        st.session_state["confirm_delete_project"] = False
+                        st.rerun()
+
         selected_project = None
         duration_cfg = None
         
@@ -129,17 +167,27 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                 st.rerun()
                 
         # Hiển thị cấu hình thời lượng nhanh trên các cột
+        DUR_TYPE_LABELS = {
+            "system_generated": "Hệ thống",
+            "uploaded_video": "Theo video nguồn ngoài"
+        }
+        DUR_TYPE_REVERSE = {v: k for k, v in DUR_TYPE_LABELS.items()}
+        dur_label_options = list(DUR_TYPE_LABELS.values())
+
         with col_dur_mode:
             if selected_project and duration_cfg:
-                dur_type = st.selectbox(
+                cur_label = DUR_TYPE_LABELS.get(duration_cfg.duration_type, "Hệ thống")
+                dur_label = st.selectbox(
                     "Thời lượng",
-                    ["system_generated", "uploaded_video"],
-                    index=0 if duration_cfg.duration_type == "system_generated" else 1,
+                    dur_label_options,
+                    index=dur_label_options.index(cur_label) if cur_label in dur_label_options else 0,
                     key=f"prod_dur_type_{selected_project.id}"
                 )
+                dur_type = DUR_TYPE_REVERSE[dur_label]
             else:
                 st.selectbox("Thời lượng", ["-"], disabled=True, key="prod_dur_type_disabled")
-                
+                dur_type = "system_generated"
+
         with col_dur_val:
             if selected_project and duration_cfg:
                 if dur_type == "system_generated":
@@ -160,7 +208,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     tgt_dur = 0
             else:
                 st.text_input("Giá trị", value="-", disabled=True, key="prod_dur_val_disabled")
-                
+
         with col_dur_save:
             st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
             if selected_project and duration_cfg:
@@ -455,19 +503,33 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     project_id = st.session_state.get("project_id")
                     stage_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="image").first() if project_id else None
                     media_files = db.query(MediaFile).filter_by(project_stage_id=stage_rec.id).all() if stage_rec else []
-                    
+
                     db_images = [m for m in media_files if m.file_data]
                     if db_images:
                         cols = st.columns(min(len(db_images), 3))
                         for idx, media in enumerate(db_images):
                             cols[idx % len(cols)].image(media.file_data, caption=media.file_name)
                     else:
-                        # Fallback hiển thị từ đường dẫn file local
-                        image_paths = [line.replace("Đường dẫn ảnh:", "").strip() for line in result_text.split("\n") if "generated_images" in line and os.path.exists(line.replace("Đường dẫn ảnh:", "").strip())]
+                        # Fallback: parse đường dẫn từ result_text — chuẩn hóa bỏ mọi prefix emoji/text
+                        def _extract_img_paths(text):
+                            paths = []
+                            for line in text.split("\n"):
+                                if "generated_images" not in line:
+                                    continue
+                                # Loại bỏ các prefix phổ biến
+                                clean = line
+                                for prefix in ["📁 Đường dẫn ảnh:", "Đường dẫn ảnh:", "📁"]:
+                                    clean = clean.replace(prefix, "")
+                                clean = clean.strip()
+                                if clean and os.path.exists(clean):
+                                    paths.append(clean)
+                            return paths
+
+                        image_paths = _extract_img_paths(result_text)
                         if image_paths:
                             cols = st.columns(min(len(image_paths), 3))
                             for idx, img_path in enumerate(image_paths):
-                                cols[idx % len(cols)].image(img_path, caption=f"Ảnh {idx+1}")
+                                cols[idx % len(cols)].image(img_path, caption=f"Ảnh cảnh {idx+1}")
                         else:
                             render_text_output(result_text)
 
@@ -598,18 +660,38 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                     
                                     # 3. Kích hoạt cửa sổ Veo3 và tự động hoá nạp file
                                     st.toast("Đang quét các cửa sổ ứng dụng trên Windows...", icon="🔍")
-                                    check_script = 'Get-Process | Where-Object {$_.MainWindowTitle -like "*Veo*"} | Select-Object -ExpandProperty MainWindowTitle'
                                     import subprocess
+                                    # Quét tất cả cửa sổ có MainWindowTitle không rỗng
+                                    check_script = 'Get-Process | Where-Object {$_.MainWindowTitle -ne ""} | Select-Object -ExpandProperty MainWindowTitle'
                                     check_res = subprocess.run(
-                                        ["powershell", "-NoProfile", "-NonInteractive", "-Command", check_script], 
+                                        ["powershell", "-NoProfile", "-NonInteractive", "-Command", check_script],
                                         capture_output=True, text=True, timeout=5
                                     )
                                     window_titles = [line.strip() for line in check_res.stdout.split("\n") if line.strip()]
-                                    target_title = next((t for t in window_titles if "veo" in t.lower()), None)
-                                    
+
+                                    # Tìm Veo3 bằng nhiều pattern khác nhau
+                                    VEO_KEYWORDS = ["veo3", "veo 3", "google veo", "veo"]
+                                    target_title = None
+                                    for kw in VEO_KEYWORDS:
+                                        target_title = next((t for t in window_titles if kw in t.lower()), None)
+                                        if target_title:
+                                            break
+
                                     if not target_title:
-                                        st.error("Không tìm thấy cửa sổ ứng dụng Veo3 nào đang mở trên Windows. Vui lòng khởi động phần mềm Veo3 trước khi thực hiện!")
-                                    else:
+                                        # Hiển thị danh sách cửa sổ để user chọn thủ công
+                                        st.warning("Không tự động tìm thấy cửa sổ Veo3. Vui lòng chọn thủ công từ danh sách bên dưới hoặc khởi động Veo3 trước.")
+                                        if window_titles:
+                                            manual_title = st.selectbox(
+                                                "Chọn cửa sổ ứng dụng Veo3 thủ công:",
+                                                ["-- Chọn --"] + window_titles,
+                                                key="veo3_manual_window_select"
+                                            )
+                                            if manual_title and manual_title != "-- Chọn --":
+                                                target_title = manual_title
+                                        else:
+                                            st.error("Không có cửa sổ nào đang mở. Vui lòng khởi động phần mềm Veo3 trước!")
+
+                                    if target_title:
                                         st.toast(f"Đang kích hoạt cửa sổ: {target_title}...", icon="🚀")
                                         computer_control({"action": "focus_window", "title": target_title})
                                         

@@ -192,10 +192,17 @@ def render_channels_page(db):
             st.info("Kênh này chưa có dự án nào.")
         else:
             import pandas as pd
+            # Mapping trạng thái chính xác
+            STATUS_BADGES = {
+                "pending": "⏳ Chưa chạy",
+                "running": "🔄 Đang chạy",
+                "completed": "✅ Hoàn thành",
+                "failed": "❌ Thất bại"
+            }
             project_data = []
             for p in projects:
                 stage_name_display = STAGE_DISPLAY_NAMES.get(p.current_stage, p.current_stage)
-                status_badge = "🟢 Đang làm" if p.status == "pending" else "✅ Hoàn thành" if p.status == "completed" else "🔴 Thất bại"
+                status_badge = STATUS_BADGES.get(p.status, f"❓ {p.status}")
                 project_data.append({
                     "Mã dự án": f"#{p.id}",
                     "Ý tưởng video": p.idea[:40] + "..." if len(p.idea) > 40 else p.idea,
@@ -312,13 +319,18 @@ def render_channels_page(db):
                     
             with st.container(border=True):
                 col_dur1, col_dur2 = st.columns(2)
+                DUR_LABELS = {"system_generated": "Hệ thống", "uploaded_video": "Theo video nguồn ngoài"}
+                DUR_REVERSE = {v: k for k, v in DUR_LABELS.items()}
+                dur_label_opts = list(DUR_LABELS.values())
                 with col_dur1:
-                    dur_type_input = st.selectbox(
+                    cur_dur_label = DUR_LABELS.get(dur_type, "Hệ thống")
+                    dur_type_input_label = st.selectbox(
                         "Chế độ thời lượng",
-                        ["system_generated", "uploaded_video"],
-                        index=0 if dur_type == "system_generated" else 1,
+                        dur_label_opts,
+                        index=dur_label_opts.index(cur_dur_label) if cur_dur_label in dur_label_opts else 0,
                         key=f"chan_dur_type_{selected_channel.id}"
                     )
+                    dur_type_input = DUR_REVERSE[dur_type_input_label]
                     tgt_dur_input = st.number_input(
                         "Thời lượng mong muốn (giây, 0 = theo âm thanh)",
                         min_value=0,
@@ -404,12 +416,17 @@ def render_channels_page(db):
                     with st.container(border=True):
                         col_dur1, col_dur2 = st.columns(2)
                         with col_dur1:
-                            dur_type = st.selectbox(
+                            DUR_LABELS_P = {"system_generated": "Hệ thống", "uploaded_video": "Theo video nguồn ngoài"}
+                            DUR_REVERSE_P = {v: k for k, v in DUR_LABELS_P.items()}
+                            dur_label_opts_p = list(DUR_LABELS_P.values())
+                            cur_p_label = DUR_LABELS_P.get(duration_cfg.duration_type, "Hệ thống")
+                            dur_type_label_p = st.selectbox(
                                 "Chế độ thời lượng",
-                                ["system_generated", "uploaded_video"],
-                                index=0 if duration_cfg.duration_type == "system_generated" else 1,
+                                dur_label_opts_p,
+                                index=dur_label_opts_p.index(cur_p_label) if cur_p_label in dur_label_opts_p else 0,
                                 key=f"channels_dur_type_{selected_project.id}"
                             )
+                            dur_type = DUR_REVERSE_P[dur_type_label_p]
                             tgt_dur = st.number_input(
                                 "Thời lượng mong muốn (giây, 0 = theo âm thanh)",
                                 min_value=0,

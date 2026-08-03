@@ -247,3 +247,13 @@ class VideoAnalysisLog(Base):
 
     project = relationship("Project", back_populates="video_analysis_logs")
 
+
+class SystemConfig(Base):
+    """Bảng lưu cấu hình hệ thống persistent (API keys mã hóa, v.v.)"""
+    __tablename__ = "system_configs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    key = Column(String(100), unique=True, nullable=False)
+    value = Column(Text, nullable=True)  # Giá trị đã mã hóa (Fernet)
+    is_encrypted = Column(Boolean, default=False)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
