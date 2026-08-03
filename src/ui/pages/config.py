@@ -184,3 +184,103 @@ def render_config_page(db, selected_channel):
             st.success("Da luu cau hinh AI Model thanh cong!")
             st.rerun()
 
+    # ─── 3. Backup & Restore ───────────────────────────────────────────────
+    st.markdown('<div class="vc-eyebrow" style="margin-top:1.5rem;"><i class="bi bi-database"></i> Backup & Restore Du lieu</div>', unsafe_allow_html=True)
+    with st.container(border=True):
+        tab_bk, tab_rs = st.tabs([":material/cloud_download: Tao Backup", ":material/restore: Restore tu Backup"])
+
+        # ── Tab Tao Backup ──
+        with tab_bk:
+            st.info("Backup toan bo du lieu DB (bao gom anh, audio, video nhi phan) va file local vao 1 file ZIP.")
+            col_bk1, col_bk2 = st.columns(2)
+            with col_bk1:
+                include_files = st.checkbox("Bao gom file local (generated_images, videos, ...)", value=True, key="bk_include_files")
+            with col_bk2:
+                st.caption("File ZIP co the dat 100MB+ neu co nhieu anh/video.")
+
+            if st.button("Tao Backup ngay", icon=":material/backup:", type="primary", use_container_width=True):
+                with st.spinner("Dang xuat du lieu, vui long cho..."):
+                    try:
+                        from src.tools.backup_restore import create_backup
+                        zip_bytes, stats = create_backup(db, include_local_files=include_files)
+                        st.session_state["_backup_bytes"] = zip_bytes
+                        st.session_state["_backup_stats"] = stats
+                        st.success(f"Tao backup thanh cong! Kich thuoc: {len(zip_bytes) / 1024:.1f} KB")
+                    except Exception as ex:
+                        st.error(f"Loi tao backup: {ex}")
+
+            if st.session_state.get("_backup_bytes"):
+                zip_bytes = st.session_state["_backup_bytes"]
+                stats = st.session_state.get("_backup_stats", {})
+                ts = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                st.download_button(
+                    label=f"Tai ve file backup ({len(zip_bytes)/1024:.1f} KB)",
+                    data=zip_bytes,
+                    file_name=f"videocrew_backup_{ts}.zip",
+                    mime="application/zip",
+                    icon=":material/download:",
+                    use_container_width=True
+                )
+                # Hien thi thong ke
+                if stats:
+                    st.markdown("**Thong ke du lieu da backup:**")
+                    stat_rows = {k: v for k, v in stats.items() if k != "local_files" and not str(v).startswith("ERROR")}
+                    if stat_rows:
+                        col_s1, col_s2, col_s3 = st.columns(3)
+                        items = list(stat_rows.items())
+                        for idx, (tname, cnt) in enumerate(items):
+                            with [col_s1, col_s2, col_s3][idx % 3]:
+                                st.metric(tname, cnt)
+                    local_stats = stats.get("local_files", {})
+                    if local_stats:
+                        st.caption("File local: " + ", ".join(f"{k}={v}" for k, v in local_stats.items()))
+
+        # ── Tab Restore ──
+        with tab_rs:
+            st.warning("Restore se THEM cac record chua ton tai. Record da co (cung PK) se bi BO QUA (skip).")
+            uploaded = st.file_uploader("Chon file backup (.zip)", type=["zip"], key="rs_upload")
+
+            if uploaded:
+                zip_bytes_up = uploaded.read()
+                # Hien thi preview
+                try:
+                    from src.tools.backup_restore import get_backup_preview, restore_backup
+                    preview = get_backup_preview(zip_bytes_up)
+                    if "error" in preview:
+                        st.error(f"File backup khong hop le: {preview['error']}")
+                    else:
+                        with st.expander("Xem thong tin backup nay", expanded=True):
+                            st.markdown(f"- **Phien ban:** `{preview.get('backup_version', 'N/A')}`")
+                            st.markdown(f"- **Thoi diem tao:** `{preview.get('created_at', 'N/A')}`")
+                            bk_stats = preview.get("stats", {})
+                            if bk_stats:
+                                stat_items = {k: v for k, v in bk_stats.items() if k != "local_files"}
+                                st.markdown("**Noi dung cac bang:**")
+                                for tname, cnt in stat_items.items():
+                                    st.caption(f"  {tname}: {cnt} records")
+                                local_fs = bk_stats.get("local_files", {})
+                                if local_fs:
+                                    st.caption("File local: " + ", ".join(f"{k}={v}" for k, v in local_fs.items()))
+
+                        if st.button("Bat dau Restore", icon=":material/restore:", type="primary", use_container_width=True):
+                            with st.spinner("Dang restore du lieu, vui long cho..."):
+                                try:
+                                    result = restore_backup(db, zip_bytes_up, overwrite=False)
+                                    st.success("Restore hoan tat!")
+                                    # Bao cao ket qua
+                                    for tname, info in result.items():
+                                        if tname == "local_files_restored":
+                                            st.caption(f"File local da phuc hoi: {info}")
+                                        elif isinstance(info, dict):
+                                            if "error" in info:
+                                                st.error(f"{tname}: {info['error']}")
+                                            else:
+                                                ins = info.get('inserted', 0)
+                                                skp = info.get('skipped', 0)
+                                                err = info.get('errors', 0)
+                                                color = "normal" if err == 0 else "inverse"
+                                                st.caption(f"{tname}: +{ins} them | {skp} bo qua | {err} loi")
+                                except Exception as ex:
+                                    st.error(f"Loi restore: {ex}")
+                except ImportError:
+                    st.error("Module backup_restore chua duoc cai dat.")

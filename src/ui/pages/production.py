@@ -93,11 +93,11 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
             st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
             is_existing_proj = selected_project_opt != "+ Tạo dự án mới..."
             if is_existing_proj:
-                if st.button("Xóa", icon=":material/delete:", key="btn_del_proj_quick", help="Xóa dự án này", use_container_width=True):
+                if st.button("", icon=":material/delete:", key="btn_del_proj_quick", help="Xóa dự án này", use_container_width=True):
                     st.session_state["confirm_delete_project"] = True
                     st.rerun()
             else:
-                st.button("Xóa", icon=":material/delete:", key="btn_del_proj_disabled", disabled=True, use_container_width=True)
+                st.button("", icon=":material/delete:", key="btn_del_proj_disabled", disabled=True, use_container_width=True)
 
         # Dialog xác nhận xóa dự án
         if st.session_state.get("confirm_delete_project") and selected_project_opt != "+ Tạo dự án mới...":
