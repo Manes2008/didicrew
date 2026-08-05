@@ -14,6 +14,23 @@ STAGE_DISPLAY_NAMES = {
 STAGES_ORDER = ["script", "visual", "image", "voice", "video"]
 TECH_TO_DISPLAY = STAGE_DISPLAY_NAMES
 
+def _render_text_dual(text: str, key_prefix: str):
+    """Hiển thị 2 tab: Trực quan (Markdown được render) và Raw (copy)."""
+    def _clean(t):
+        t = t.strip()
+        if t.startswith("```markdown"):
+            t = t[11:]
+        elif t.startswith("```"):
+            t = t[3:]
+        if t.endswith("```"):
+            t = t[:-3]
+        return t.strip()
+    tab_v, tab_r = st.tabs([":material/edit: Trực quan", ":material/content_copy: Raw Markdown"])
+    with tab_v:
+        st.markdown(_clean(text))
+    with tab_r:
+        st.code(text, language="markdown")
+
 def render_channels_page(db):
     st.markdown('<div class="vc-eyebrow"><i class="bi bi-folder2-open"></i> Quản lý kênh</div>', unsafe_allow_html=True)
     st.subheader("Quản lý Kênh & Cấu hình Vai trò AI", anchor=False)
@@ -55,7 +72,7 @@ def render_channels_page(db):
                     new_name = st.text_input("Tên kênh", placeholder="Ví dụ: Kênh Kể Chuyện AI")
                     new_desc = st.text_input("Mô tả kênh", placeholder="Mô tả ngắn...")
                     new_goal = st.text_area("Mục tiêu nội dung", value="Tạo video ngắn thu hút 100k view")
-                    btn_create = st.form_submit_button("Tạo Kênh Mới", type="primary", use_container_width=True)
+                    btn_create = st.form_submit_button("Tạo Kênh Mới", type="primary", width="stretch")
 
                     if btn_create:
                         if not new_name.strip() or not new_goal.strip():
@@ -101,17 +118,17 @@ def render_channels_page(db):
         selected_channel = next(c for c in channels if c.name == selected_channel_opt)
         
         with c_edit:
-            if st.button("Sửa", icon=":material/edit:", key="btn_channel_edit_top", use_container_width=True):
+            if st.button("Sửa", icon=":material/edit:", key="btn_channel_edit_top", width="stretch"):
                 st.session_state["editing_channel"] = True
                 st.session_state["confirm_delete_channel"] = False
                 st.rerun()
         with c_del:
-            if st.button("Xóa", icon=":material/delete:", key="btn_channel_del_top", use_container_width=True):
+            if st.button("Xóa", icon=":material/delete:", key="btn_channel_del_top", width="stretch"):
                 st.session_state["confirm_delete_channel"] = True
                 st.session_state["editing_channel"] = False
                 st.rerun()
 
-        st.markdown(f"🎯 **Mục tiêu Kênh:** *{selected_channel.goal}*")
+        st.markdown(f"**:material/target: Mục tiêu Kênh:** *{selected_channel.goal}*")
 
         # Form sửa kênh
         if st.session_state.get("editing_channel"):
@@ -122,8 +139,8 @@ def render_channels_page(db):
                     edit_desc = st.text_input("Mô tả (không bắt buộc)", value=selected_channel.description or "")
                     edit_goal = st.text_area("Mục tiêu", value=selected_channel.goal)
                     c_save, c_cancel = st.columns(2)
-                    save_edit = c_save.form_submit_button("Lưu thay đổi", type="primary", use_container_width=True)
-                    cancel_edit = c_cancel.form_submit_button("Hủy", use_container_width=True)
+                    save_edit = c_save.form_submit_button("Lưu thay đổi", type="primary", width="stretch")
+                    cancel_edit = c_cancel.form_submit_button("Hủy", width="stretch")
 
                     if save_edit:
                         if not edit_name.strip() or not edit_goal.strip():
@@ -156,17 +173,17 @@ def render_channels_page(db):
                 related_projects = db.query(Project).filter_by(channel_id=selected_channel.id).count()
                 if related_projects > 0:
                     st.error(f"Kênh đang có {related_projects} dự án, không thể xóa.")
-                    if st.button("Đóng", use_container_width=True):
+                    if st.button("Đóng", width="stretch"):
                         st.session_state["confirm_delete_channel"] = False
                         st.rerun()
                 elif len(channels) <= 1:
                     st.error("Không thể xóa kênh cuối cùng.")
-                    if st.button("Đóng", use_container_width=True):
+                    if st.button("Đóng", width="stretch"):
                         st.session_state["confirm_delete_channel"] = False
                         st.rerun()
                 else:
                     c_confirm, c_cancel_del = st.columns(2)
-                    if c_confirm.button("Xác nhận xóa", type="primary", use_container_width=True):
+                    if c_confirm.button("Xác nhận xóa", type="primary", width="stretch"):
                         try:
                             db.query(ChannelStageConfig).filter_by(channel_id=selected_channel.id).delete()
                             db.delete(selected_channel)
@@ -181,7 +198,7 @@ def render_channels_page(db):
                         except Exception as ex:
                             db.rollback()
                             st.error(f"Lỗi: {ex}")
-                    if c_cancel_del.button("Hủy", use_container_width=True):
+                    if c_cancel_del.button("Hủy", width="stretch"):
                         st.session_state["confirm_delete_channel"] = False
                         st.rerun()
         
@@ -192,10 +209,17 @@ def render_channels_page(db):
             st.info("Kênh này chưa có dự án nào.")
         else:
             import pandas as pd
+            # Mapping trạng thái chính xác
+            STATUS_BADGES = {
+                "pending": "⏳ Chưa chạy",
+                "running": ":material/sync: Đang chạy",
+                "completed": ":material/check_circle: Hoàn thành",
+                "failed": ":material/cancel: Thất bại"
+            }
             project_data = []
             for p in projects:
                 stage_name_display = STAGE_DISPLAY_NAMES.get(p.current_stage, p.current_stage)
-                status_badge = "🟢 Đang làm" if p.status == "pending" else "✅ Hoàn thành" if p.status == "completed" else "🔴 Thất bại"
+                status_badge = STATUS_BADGES.get(p.status, p.status)
                 project_data.append({
                     "Mã dự án": f"#{p.id}",
                     "Ý tưởng video": p.idea[:40] + "..." if len(p.idea) > 40 else p.idea,
@@ -237,7 +261,7 @@ def render_channels_page(db):
                     c3.markdown(f'<span class="vc-stage-goal">{cfg.goal}</span>', unsafe_allow_html=True)
                     
                     # Nút Sửa vai trò
-                    if c4.button("Sửa", key=f"btn_edit_stage_{cfg.id}", use_container_width=True):
+                    if c4.button("Sửa", key=f"btn_edit_stage_{cfg.id}", width="stretch"):
                         st.session_state["editing_config_id"] = cfg.id
                         st.session_state["show_add_config"] = True
                         st.rerun()
@@ -257,7 +281,7 @@ def render_channels_page(db):
                         markdown_template = st.text_area("Markdown Template (Chỉ dành cho viết kịch bản)", value=cfg_rec.markdown_template or "", placeholder="Nhập cấu trúc kịch bản...")
                         
                         col_save, col_cancel = st.columns(2)
-                        if col_save.form_submit_button("Lưu cấu hình", type="primary", use_container_width=True):
+                        if col_save.form_submit_button("Lưu cấu hình", type="primary", width="stretch"):
                             try:
                                 cfg_rec.role = role.strip()
                                 cfg_rec.goal = goal.strip()
@@ -271,7 +295,7 @@ def render_channels_page(db):
                             except Exception as ex:
                                 db.rollback()
                                 st.error(f"Lỗi lưu: {ex}")
-                        if col_cancel.form_submit_button("Hủy", use_container_width=True):
+                        if col_cancel.form_submit_button("Hủy", width="stretch"):
                             del st.session_state["editing_config_id"]
                             st.session_state["show_add_config"] = False
                             st.rerun()
@@ -312,13 +336,18 @@ def render_channels_page(db):
                     
             with st.container(border=True):
                 col_dur1, col_dur2 = st.columns(2)
+                DUR_LABELS = {"system_generated": "Hệ thống", "uploaded_video": "Theo video nguồn ngoài"}
+                DUR_REVERSE = {v: k for k, v in DUR_LABELS.items()}
+                dur_label_opts = list(DUR_LABELS.values())
                 with col_dur1:
-                    dur_type_input = st.selectbox(
+                    cur_dur_label = DUR_LABELS.get(dur_type, "Hệ thống")
+                    dur_type_input_label = st.selectbox(
                         "Chế độ thời lượng",
-                        ["system_generated", "uploaded_video"],
-                        index=0 if dur_type == "system_generated" else 1,
+                        dur_label_opts,
+                        index=dur_label_opts.index(cur_dur_label) if cur_dur_label in dur_label_opts else 0,
                         key=f"chan_dur_type_{selected_channel.id}"
                     )
+                    dur_type_input = DUR_REVERSE[dur_type_input_label]
                     tgt_dur_input = st.number_input(
                         "Thời lượng mong muốn (giây, 0 = theo âm thanh)",
                         min_value=0,
@@ -352,7 +381,7 @@ def render_channels_page(db):
                         key=f"chan_ratio_mult_{selected_channel.id}"
                     )
                 
-                if st.button("Lưu cấu hình thời lượng Kênh", key=f"chan_save_dur_{selected_channel.id}", type="primary", use_container_width=True):
+                if st.button("Lưu cấu hình thời lượng Kênh", key=f"chan_save_dur_{selected_channel.id}", type="primary", width="stretch"):
                     # Tìm hoặc tạo bản ghi ChannelStageConfig cho stage "video"
                     if not video_cfg:
                         video_cfg = ChannelStageConfig(
@@ -404,12 +433,17 @@ def render_channels_page(db):
                     with st.container(border=True):
                         col_dur1, col_dur2 = st.columns(2)
                         with col_dur1:
-                            dur_type = st.selectbox(
+                            DUR_LABELS_P = {"system_generated": "Hệ thống", "uploaded_video": "Theo video nguồn ngoài"}
+                            DUR_REVERSE_P = {v: k for k, v in DUR_LABELS_P.items()}
+                            dur_label_opts_p = list(DUR_LABELS_P.values())
+                            cur_p_label = DUR_LABELS_P.get(duration_cfg.duration_type, "Hệ thống")
+                            dur_type_label_p = st.selectbox(
                                 "Chế độ thời lượng",
-                                ["system_generated", "uploaded_video"],
-                                index=0 if duration_cfg.duration_type == "system_generated" else 1,
+                                dur_label_opts_p,
+                                index=dur_label_opts_p.index(cur_p_label) if cur_p_label in dur_label_opts_p else 0,
                                 key=f"channels_dur_type_{selected_project.id}"
                             )
+                            dur_type = DUR_REVERSE_P[dur_type_label_p]
                             tgt_dur = st.number_input(
                                 "Thời lượng mong muốn (giây, 0 = theo âm thanh)",
                                 min_value=0,
@@ -443,7 +477,7 @@ def render_channels_page(db):
                                 key=f"channels_ratio_mult_{selected_project.id}"
                             )
                         
-                        if st.button("Lưu cấu hình thời lượng Dự án", key=f"channels_save_dur_{selected_project.id}", type="primary", use_container_width=True):
+                        if st.button("Lưu cấu hình thời lượng Dự án", key=f"channels_save_dur_{selected_project.id}", type="primary", width="stretch"):
                             duration_cfg.duration_type = dur_type
                             duration_cfg.target_duration = tgt_dur
                             duration_cfg.min_duration = min_dur
@@ -484,10 +518,10 @@ def render_channels_page(db):
                                     st.markdown(f"**{step_title}** -- {status_badge} -- *{log.created_at.strftime('%Y-%m-%d %H:%M:%S')}*")
                                     
                                     st.markdown("**Đầu vào ban đầu (Original input):**")
-                                    st.code(log.user_input_content, language="text")
+                                    _render_text_dual(log.user_input_content or "", f"input_{log.id}")
                                     
                                     st.markdown("**Kết quả đã tối ưu / sửa đổi (Adjusted prompt / result):**")
-                                    st.code(log.adjusted_prompt, language="text")
+                                    _render_text_dual(log.adjusted_prompt or "", f"adj_{log.id}")
                                     
                                     if log.analysis_metrics:
                                         try:
@@ -510,5 +544,9 @@ def render_channels_page(db):
                                                 st.markdown(f"**Ý kiến phản hồi:** *{metrics['feedback']}*")
                                             if "attempts" in metrics:
                                                 st.markdown(f"**Số lần viết lại tự động:** `{metrics['attempts']}`")
+
+                                            with st.expander("Xem du lieu phan tich tho (Raw JSON)", expanded=False):
+                                                st.json(metrics)
                                         except Exception:
-                                            st.text(f"Raw Metrics: {log.analysis_metrics}")
+                                            st.warning("Khong the phan tich dinh dang JSON cua metrics. Dang hien thi du lieu tho:")
+                                            st.code(log.analysis_metrics, language="json")

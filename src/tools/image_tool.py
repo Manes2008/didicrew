@@ -13,7 +13,7 @@ from crewai.tools import tool
 from concurrent.futures import ThreadPoolExecutor
 
 def generate_gpt_image_func(prompt: str) -> str:
-    """Hàm Python thuần túy để tạo hình ảnh bằng gpt-image-2 và tải về máy local (tạo song song 4 ảnh, loại bỏ chữ)."""
+    """Hàm Python thuần túy để tạo hình ảnh bằng gpt-image-2 và tải về máy local cho tất cả các cảnh, có cơ chế retry khi cạn quota."""
     try:
         # Sử dụng API Key của OpenAI được thiết lập trong môi trường
         api_key = os.environ.get("OPENAI_API_KEY")
@@ -22,72 +22,122 @@ def generate_gpt_image_func(prompt: str) -> str:
 
         # Thêm chỉ thị loại bỏ chữ/text
         no_text_suffix = ", absolutely NO text, NO words, NO letters, NO signs, NO watermark, NO logo, NO labels, pure visual scene"
-        refined_prompt = f"{prompt[:30000]}{no_text_suffix}"
+
+        # Trích xuất profile, style và các scene từ prompt
+        import re
+        profile_match = re.search(r"(?:Character Profile|Hồ sơ nhân vật|Profile|Nhân vật)[\s*:\-–\.]+(.*?)(?=(?:Art Style|Phong cách|Scene|Cảnh)\s*|\Z)", prompt, re.DOTALL | re.IGNORECASE)
+        style_match = re.search(r"(?:Art Style|Phong cách nghệ thuật|Style|Phong cách)[\s*:\-–\.]+(.*?)(?=(?:Scene|Cảnh|Nhân vật|Profile)\s*|\Z)", prompt, re.DOTALL | re.IGNORECASE)
+        
+        profile_text = profile_match.group(1).strip() if profile_match else ""
+        style_text = style_match.group(1).strip() if style_match else ""
+        
+        scenes = re.findall(r"(?:Scene|Cảnh)\s*(\d+)[\s*:\-–\.]+(.*?)(?=(?:Scene|Cảnh)\s*\d+[\s*:\-–\.]+|\Z)", prompt, re.DOTALL | re.IGNORECASE)
+        
+        if not scenes:
+            # Fallback nếu không trích xuất được scene nào thì coi cả prompt là 1 scene
+            scenes = [("1", prompt)]
+
+        scene_prompts = []
+        for s_num, s_desc in scenes:
+            scene_prompt = f"{style_text} {profile_text} {s_desc.strip()}".strip()
+            scene_prompt = scene_prompt.replace("\n", " ").strip()
+            scene_prompts.append((int(s_num), scene_prompt))
 
         # Chỉ định cứng base_url của OpenAI để tránh bị ghi đè bởi biến môi trường proxy
         client = OpenAI(api_key=api_key, base_url="https://api.openai.com/v1")
         
-        def generate_single_image(idx: int) -> str:
-            try:
+        scene_results = {}
+        pending_scenes = list(scene_prompts)
+        
+        max_attempts = 3
+        attempt = 0
+        
+        while pending_scenes and attempt < max_attempts:
+            attempt += 1
+            
+            def generate_single_scene_image(scene_info) -> tuple[int, str]:
+                s_num, s_prompt = scene_info
+                refined_prompt = f"{s_prompt[:30000]}{no_text_suffix}"
                 try:
-                    # Thử tạo ảnh bằng gpt-image-2
-                    response = client.images.generate(
-                        model="gpt-image-2",
-                        prompt=refined_prompt,
-                        size="1024x1024",
-                        quality="medium",
-                        n=1
-                    )
-                except Exception as e2:
-                    # Nếu gpt-image-2 lỗi, tự động hạ cấp xuống gpt-image-1-mini
                     try:
+                        # Thử tạo ảnh bằng gpt-image-2
                         response = client.images.generate(
-                            model="gpt-image-1-mini",
+                            model="gpt-image-2",
                             prompt=refined_prompt,
                             size="1024x1024",
                             quality="medium",
                             n=1
                         )
-                    except Exception as e1:
-                        return f"ERROR_IDX_{idx}: gpt-image-2: {str(e2)} | gpt-image-1-mini: {str(e1)}"
-                
-                # gpt-image-1/2 trả về b64_json mặc định
-                b64_data = response.data[0].b64_json
-                if not b64_data:
-                    return f"ERROR_IDX_{idx}: OpenAI khong tra ve du lieu anh."
-                
-                # Giải mã base64 thành bytes hình ảnh
-                img_bytes = base64.b64decode(b64_data)
-                img = Image.open(BytesIO(img_bytes))
-                
-                # Đảm bảo thư mục lưu trữ tồn tại
-                os.makedirs("generated_images", exist_ok=True)
-                file_path = f"generated_images/image_{int(time.time())}_{idx}.png"
-                img.save(file_path)
-                
-                return file_path
-            except Exception as e:
-                return f"ERROR_IDX_{idx}: {str(e)}"
+                    except Exception as e2:
+                        # Nếu gpt-image-2 lỗi, tự động hạ cấp xuống gpt-image-1-mini
+                        try:
+                            response = client.images.generate(
+                                model="gpt-image-1-mini",
+                                prompt=refined_prompt,
+                                size="1024x1024",
+                                quality="medium",
+                                n=1
+                            )
+                        except Exception as e1:
+                            return s_num, f"ERROR_IDX_{s_num}: gpt-image-2: {str(e2)} | gpt-image-1-mini: {str(e1)}"
+                    
+                    b64_data = response.data[0].b64_json
+                    if not b64_data:
+                        return s_num, f"ERROR_IDX_{s_num}: OpenAI khong tra ve du lieu anh."
+                    
+                    img_bytes = base64.b64decode(b64_data)
+                    img = Image.open(BytesIO(img_bytes))
+                    
+                    os.makedirs("generated_images", exist_ok=True)
+                    # Lưu tên file chứa scene_{s_num} để UI dễ đối chiếu
+                    file_path = f"generated_images/scene_{s_num}_image_{int(time.time())}.png"
+                    img.save(file_path)
+                    
+                    return s_num, file_path
+                except Exception as e:
+                    return s_num, f"ERROR_IDX_{s_num}: {str(e)}"
 
-        # Tạo song song 4 ảnh bằng ThreadPoolExecutor
-        num_images = 4
-        with ThreadPoolExecutor(max_workers=num_images) as executor:
-            results = list(executor.map(generate_single_image, range(num_images)))
+            # Tạo song song các ảnh bằng ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=min(len(pending_scenes), 4)) as executor:
+                batch_results = list(executor.map(generate_single_scene_image, pending_scenes))
+            
+            next_pending = []
+            for s_num, res in batch_results:
+                if "ERROR_IDX_" in res:
+                    err_lower = res.lower()
+                    is_api_limit = "429" in err_lower or "quota" in err_lower or "limit" in err_lower or "exhausted" in err_lower
+                    
+                    # Nếu gặp lỗi rate limit / quota, ta sẽ đưa vào danh sách thử lại cho vòng sau
+                    if is_api_limit and attempt < max_attempts:
+                        s_prompt = next(p[1] for p in pending_scenes if p[0] == s_num)
+                        next_pending.append((s_num, s_prompt))
+                        scene_results[s_num] = res
+                    else:
+                        scene_results[s_num] = res
+                else:
+                    scene_results[s_num] = res
+            
+            pending_scenes = next_pending
+            if pending_scenes:
+                # Đợi 2 giây trước khi gửi lại request lần tiếp theo
+                time.sleep(2)
 
-        file_paths = []
+        # Định dạng dòng trả về để tương thích ngược
+        output_lines = []
         errors = []
-        for r in results:
-            if r.startswith("ERROR_IDX_"):
-                errors.append(r)
+        for s_num in sorted(scene_results.keys()):
+            res = scene_results[s_num]
+            if "ERROR_IDX_" in res:
+                errors.append(res)
             else:
-                file_paths.append(r)
-
-        if not file_paths:
-            return f"ERROR: Khong the tao bat ky anh nao. Chi tiet:\n" + "\n".join(errors)
-
-        output_lines = [f"📁 Đường dẫn ảnh: {fp}" for fp in file_paths]
+                output_lines.append(f"[ANH] Duong dan anh: {res}")
+        
+        if not output_lines:
+            return "ERROR: Khong the tao bat ky anh nao. Chi tiet:\n" + "\n".join(errors)
+            
         if errors:
-            output_lines.append(f"[WARN] Mot so anh bi loi khi tao:\n" + "\n".join(errors))
+            output_lines.append("[WARN] Mot so anh bi loi khi tao:\n" + "\n".join(errors))
+            
         return "\n".join(output_lines)
 
     except Exception as e:
@@ -161,7 +211,7 @@ def generate_local_image_sd_func(prompt: str, use_gpu: bool = None) -> str:
             gc.collect()
             torch.cuda.empty_cache()
             
-        return f"📁 Đường dẫn ảnh: {file_path}"
+        return f"[ANH] Duong dan anh: {file_path}"
         
     except ImportError:
         return "ERROR: Chưa cài đặt thư viện diffusers / transformers / torch. Vui lòng chạy: pip install diffusers transformers torch"

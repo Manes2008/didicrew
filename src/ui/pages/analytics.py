@@ -132,7 +132,7 @@ def render_analytics_page(db, selected_channel):
     with tab_new:
         with st.container(border=True):
             url_input = st.text_input("URL video (YouTube / TikTok / Instagram...)", placeholder="https://", key="analytics_url")
-            if st.button("Phân tích video", type="primary", use_container_width=True):
+            if st.button("Phân tích video", type="primary", width="stretch"):
                 if not url_input.strip():
                     st.warning("Vui lòng nhập URL video.")
                 else:

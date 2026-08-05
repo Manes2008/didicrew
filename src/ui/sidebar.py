@@ -78,7 +78,7 @@ def render_sidebar(client_ip):
         st.markdown('<div style="height:1rem;"></div>', unsafe_allow_html=True)
 
         # 4. Nút Đăng xuất
-        if st.button("Đăng xuất", icon=":material/logout:", type="secondary", use_container_width=True):
+        if st.button("Đăng xuất", icon=":material/logout:", type="secondary", width="stretch"):
             # Reset session state
             st.session_state["logged_in"] = False
             if "user_role" in st.session_state:

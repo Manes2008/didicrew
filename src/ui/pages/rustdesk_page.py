@@ -13,13 +13,10 @@ from src.tools.rustdesk_manager import (
 )
 
 def render_rustdesk_page():
-    st.markdown("""
-    <div class="vc-header">
-        <div class="vc-logo-mark"><i class="bi bi-pc-display"></i></div>
-        <h3 style="margin:0; font-weight:800;">Cấu hình RustDesk Server</h3>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">Deploy và quản lý RustDesk ID/Relay Server tự host qua Docker cho kết nối ngoài</div>', unsafe_allow_html=True)
+    # Header cuẩn chỉnh giống các tab khác
+    st.markdown('<div class="vc-eyebrow"><i class="bi bi-pc-display"></i> Cấu hình RustDesk</div>', unsafe_allow_html=True)
+    st.subheader("Cấu hình RustDesk Server tự host", anchor=False)
+    st.markdown('<div class="sub-title">Deploy và quản lý RustDesk ID/Relay Server qua Docker cho kết nối từ ngoài</div>', unsafe_allow_html=True)
 
     # 1. Kiểm tra Docker
     if not check_docker_installed():
@@ -94,7 +91,7 @@ def render_rustdesk_page():
         with col_cfg2:
             st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
             if is_running:
-                if st.button("Dừng RustDesk Server", type="secondary", use_container_width=True):
+                if st.button("Dừng RustDesk Server", type="secondary", width="stretch"):
                     with st.spinner("Đang dừng containers..."):
                         success, msg = stop_docker_services()
                         if success:
@@ -106,7 +103,7 @@ def render_rustdesk_page():
             else:
                 # Disable nút Start nếu host không hợp lệ
                 btn_disabled = not validate_relay_host(relay_host_input)
-                if st.button("Khởi động RustDesk Server", type="primary", use_container_width=True, disabled=btn_disabled):
+                if st.button("Khởi động RustDesk Server", type="primary", width="stretch", disabled=btn_disabled):
                     with st.spinner("Đang cấu hình và chạy docker compose..."):
                         success, msg = start_docker_services(relay_host_input)
                         if success:
@@ -128,7 +125,15 @@ def render_rustdesk_page():
             
             if quick_link:
                 st.code(quick_link, language="bash")
-                # Hiển thị nút copy link thân thiện
+                # Nút copy link thân thiện
+                st.button(
+                    "Sao chép link kết nối",
+                    icon=":material/content_copy:",
+                    on_click=lambda: st.write(quick_link),
+                    key="btn_copy_quick_link",
+                    width="stretch",
+                    help="Click để hiển thị link để copy thủ công"
+                )
                 st.info("Hãy gửi link trên cho đối tác/người dùng bên ngoài để họ truy cập nhanh vào máy của bạn.")
             else:
                 st.warning("Đang chờ Server sinh khóa mã hóa (Key). Vui lòng đợi vài giây hoặc tải lại trang.")

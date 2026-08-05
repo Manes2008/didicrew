@@ -49,8 +49,8 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
         channels = db.query(Channel).all()
         channel_names = [c.name for c in channels]
         
-        # Chia layout hàng ngang cực kỳ gọn gàng
-        col_chan, col_proj, col_dur_mode, col_dur_val, col_dur_save = st.columns([2.5, 3.2, 2.3, 2.5, 1.2])
+        # Chia layout hàng ngang cực kỳ gọn gàng (thêm cột xóa dự án)
+        col_chan, col_proj, col_del_proj, col_dur_mode, col_dur_val, col_dur_save = st.columns([2.5, 3.0, 0.7, 2.3, 2.5, 1.2])
         
         with col_chan:
             try:
@@ -82,12 +82,50 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     
         with col_proj:
             selected_project_opt = st.selectbox(
-                "Chọn Dự án", 
-                project_options, 
-                index=default_index, 
+                "Chọn Dự án",
+                project_options,
+                index=default_index,
                 key="project_select_main"
             )
-            
+
+        # Nút xóa dự án nhanh
+        with col_del_proj:
+            st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
+            is_existing_proj = selected_project_opt != "+ Tạo dự án mới..."
+            if is_existing_proj:
+                if st.button("", icon=":material/delete:", key="btn_del_proj_quick", help="Xóa dự án này", width="stretch"):
+                    st.session_state["confirm_delete_project"] = True
+                    st.rerun()
+            else:
+                st.button("", icon=":material/delete:", key="btn_del_proj_disabled", disabled=True, width="stretch")
+
+        # Dialog xác nhận xóa dự án
+        if st.session_state.get("confirm_delete_project") and selected_project_opt != "+ Tạo dự án mới...":
+            _del_pid = int(selected_project_opt.split(" - ")[0].replace("#", ""))
+            _del_proj = db.query(Project).filter_by(id=_del_pid).first()
+            if _del_proj:
+                with st.container(border=True):
+                    st.warning(f"Xóa dự án **#{_del_pid}** — `{_del_proj.idea[:50]}...` ?  \nThao tác này không thể hoàn tác.")
+                    c_confirm_del, c_cancel_del = st.columns(2)
+                    if c_confirm_del.button("Xác nhận xóa", type="primary", width="stretch", key="confirm_del_proj_btn"):
+                        try:
+                            db.delete(_del_proj)
+                            db.commit()
+                            st.session_state["confirm_delete_project"] = False
+                            if st.session_state.get("project_id") == _del_pid:
+                                st.session_state["project_id"] = None
+                                st.session_state["idea"] = ""
+                                for _k in ["stage", "results", "llm"]:
+                                    st.session_state.pop(_k, None)
+                            st.toast("Đã xóa dự án thành công!", icon=":material/delete:")
+                            st.rerun()
+                        except Exception as ex:
+                            db.rollback()
+                            st.error(f"Lỗi xóa dự án: {ex}")
+                    if c_cancel_del.button("Hủy", width="stretch", key="cancel_del_proj_btn"):
+                        st.session_state["confirm_delete_project"] = False
+                        st.rerun()
+
         selected_project = None
         duration_cfg = None
         
@@ -129,17 +167,27 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                 st.rerun()
                 
         # Hiển thị cấu hình thời lượng nhanh trên các cột
+        DUR_TYPE_LABELS = {
+            "system_generated": "Hệ thống",
+            "uploaded_video": "Theo video nguồn ngoài"
+        }
+        DUR_TYPE_REVERSE = {v: k for k, v in DUR_TYPE_LABELS.items()}
+        dur_label_options = list(DUR_TYPE_LABELS.values())
+
         with col_dur_mode:
             if selected_project and duration_cfg:
-                dur_type = st.selectbox(
+                cur_label = DUR_TYPE_LABELS.get(duration_cfg.duration_type, "Hệ thống")
+                dur_label = st.selectbox(
                     "Thời lượng",
-                    ["system_generated", "uploaded_video"],
-                    index=0 if duration_cfg.duration_type == "system_generated" else 1,
+                    dur_label_options,
+                    index=dur_label_options.index(cur_label) if cur_label in dur_label_options else 0,
                     key=f"prod_dur_type_{selected_project.id}"
                 )
+                dur_type = DUR_TYPE_REVERSE[dur_label]
             else:
                 st.selectbox("Thời lượng", ["-"], disabled=True, key="prod_dur_type_disabled")
-                
+                dur_type = "system_generated"
+
         with col_dur_val:
             if selected_project and duration_cfg:
                 if dur_type == "system_generated":
@@ -160,20 +208,20 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     tgt_dur = 0
             else:
                 st.text_input("Giá trị", value="-", disabled=True, key="prod_dur_val_disabled")
-                
+
         with col_dur_save:
             st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
             if selected_project and duration_cfg:
-                if st.button("Lưu", key=f"prod_save_dur_{selected_project.id}", type="primary", use_container_width=True):
+                if st.button("Lưu", key=f"prod_save_dur_{selected_project.id}", type="primary", width="stretch"):
                     duration_cfg.duration_type = dur_type
                     if dur_type == "system_generated":
                         duration_cfg.target_duration = tgt_dur
                     else:
                         duration_cfg.video_source_path = src_path.strip() if src_path and src_path.strip() else None
                     db.commit()
-                    st.toast("Đã lưu cấu hình thời lượng!", icon="✅")
+                    st.toast("Đã lưu cấu hình thời lượng!", icon=":material/check_circle:")
             else:
-                st.button("Lưu", disabled=True, key="prod_save_dur_disabled", use_container_width=True)
+                st.button("Lưu", disabled=True, key="prod_save_dur_disabled", width="stretch")
 
     # Nhập Ý Tưởng
     is_new = selected_project is None
@@ -190,7 +238,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
     )
 
     if is_new:
-        if st.button("Bắt Đầu Dự Án Mới", icon=":material/rocket_launch:", type="primary", use_container_width=True):
+        if st.button("Bắt Đầu Dự Án Mới", icon=":material/rocket_launch:", type="primary", width="stretch"):
             if not api_key:
                 st.error(f"Thiếu API Key cho {provider}! Vui lòng cấu hình ở tab 'Cấu hình AI' hoặc Đăng nhập lại.")
             elif not idea.strip() or len(idea.strip()) < 5:
@@ -373,9 +421,11 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                             media_path = None
                             image_paths = []
                             if current == "image":
-                                image_paths = [line.replace("📁 Đường dẫn ảnh:", "").replace("📁 Đường dẫn ảnh: ", "").strip() for line in result.split("\n") if "generated_images" in line]
-                                if image_paths:
-                                    media_path = ",".join(image_paths)
+                                for line in result.split("\n"):
+                                    if "generated_images" in line:
+                                        clean = line.replace("[ANH] Duong dan anh:", "").replace("Duong dan anh:", "").strip()
+                                        if clean and os.path.exists(clean):
+                                            image_paths.append(clean)
                             elif current == "video":
                                 for line in result.split("\n"):
                                     if "generated_videos" in line or ".mp4" in line:
@@ -391,53 +441,25 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                     status="completed"
                                 )
                                 db.add(stage_rec)
-                                db.flush()
                             else:
                                 stage_rec.result_content = result
                                 stage_rec.media_path = media_path
                                 stage_rec.status = "completed"
-                                db.flush()
-
-                            # Xoá MediaFile cũ liên quan đến stage này để ghi mới
-                            db.query(MediaFile).filter_by(project_stage_id=stage_rec.id).delete()
-
-                            # Lưu file nhị phân vào bảng MediaFile
+                            
+                            # Lưu file ảnh vào DB (MediaFile)
                             if current == "image" and image_paths:
-                                for ip in image_paths:
-                                    if os.path.exists(ip):
-                                        try:
-                                            with open(ip, "rb") as f:
-                                                f_data = f.read()
-                                            db.add(MediaFile(
-                                                project_stage_id=stage_rec.id,
-                                                file_name=os.path.basename(ip),
-                                                file_path=ip,
-                                                file_data=f_data,
-                                                mime_type="image/png",
-                                                file_size=len(f_data)
-                                            ))
-                                        except Exception as e_img:
-                                            st.warning(f"Không thể đọc file ảnh để lưu vào DB: {e_img}")
-                            elif current == "video" and media_path:
-                                if os.path.exists(media_path):
-                                    try:
-                                        with open(media_path, "rb") as f:
-                                            f_data = f.read()
-                                        db.add(MediaFile(
+                                for img_path in image_paths:
+                                    if os.path.exists(img_path):
+                                        with open(img_path, "rb") as img_f:
+                                            img_data = img_f.read()
+                                        media_rec = MediaFile(
                                             project_stage_id=stage_rec.id,
-                                            file_name=os.path.basename(media_path),
-                                            file_path=media_path,
-                                            file_data=f_data,
-                                            mime_type="video/mp4",
-                                            file_size=len(f_data)
-                                        ))
-                                    except Exception as e_vid:
-                                        st.warning(f"Không thể đọc file video để lưu vào DB: {e_vid}")
+                                            file_name=os.path.basename(img_path),
+                                            file_data=img_data,
+                                            media_type="image/png"
+                                        )
+                                        db.add(media_rec)
 
-                            proj_rec = db.query(Project).filter_by(id=project_id).first()
-                            if proj_rec:
-                                proj_rec.current_stage = current
-                                proj_rec.status = "running"
                             db.commit()
                         except Exception as ex:
                             db.rollback()
@@ -455,19 +477,60 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     project_id = st.session_state.get("project_id")
                     stage_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="image").first() if project_id else None
                     media_files = db.query(MediaFile).filter_by(project_stage_id=stage_rec.id).all() if stage_rec else []
-                    
+
+                    # Lấy visual prompt từ kết quả bước "visual" để khớp mô tả cảnh với ảnh
+                    import re as _re_img
+                    visual_result = st.session_state.get("results", {}).get("visual", "")
+                    scene_descriptions = {}
+                    if visual_result:
+                        for m in _re_img.finditer(
+                            r"(?:Scene|Cảnh)\s*(\d+)[\s*:\-–\.]+(.+?)(?=(?:Scene|Cảnh)\s*\d+[\s*:\-–\.]|\Z)",
+                            visual_result,
+                            _re_img.DOTALL | _re_img.IGNORECASE
+                        ):
+                            scene_descriptions[int(m.group(1))] = m.group(2).strip()[:300]
+
+                    def _extract_img_paths_with_scene(text):
+                        paths = []  # list of (scene_num, path)
+                        for line in text.split("\n"):
+                            if "generated_images" not in line:
+                                continue
+                            clean = line
+                            for prefix in ["[ANH] Duong dan anh:", "Duong dan anh:"]:
+                                clean = clean.replace(prefix, "")
+                            clean = clean.strip()
+                            if not clean:
+                                continue
+                            sm = _re_img.search(r"scene_?(\d+)", clean)
+                            s_num = int(sm.group(1)) if sm else len(paths) + 1
+                            paths.append((s_num, clean))
+                        return paths
+
                     db_images = [m for m in media_files if m.file_data]
                     if db_images:
-                        cols = st.columns(min(len(db_images), 3))
                         for idx, media in enumerate(db_images):
-                            cols[idx % len(cols)].image(media.file_data, caption=media.file_name)
+                            s_num = idx + 1
+                            sm = _re_img.search(r"scene_?(\d+)", media.file_name or "")
+                            if sm:
+                                s_num = int(sm.group(1))
+                            desc = scene_descriptions.get(s_num, "")
+                            with st.container():
+                                st.markdown(f"**Cảnh {s_num}**")
+                                if desc:
+                                    st.caption(desc)
+                                st.image(media.file_data, width="stretch")
                     else:
-                        # Fallback hiển thị từ đường dẫn file local
-                        image_paths = [line.replace("Đường dẫn ảnh:", "").strip() for line in result_text.split("\n") if "generated_images" in line and os.path.exists(line.replace("Đường dẫn ảnh:", "").strip())]
-                        if image_paths:
-                            cols = st.columns(min(len(image_paths), 3))
-                            for idx, img_path in enumerate(image_paths):
-                                cols[idx % len(cols)].image(img_path, caption=f"Ảnh {idx+1}")
+                        img_scene_paths = _extract_img_paths_with_scene(result_text)
+                        if img_scene_paths:
+                            cols = st.columns(min(len(img_scene_paths), 3))
+                            for col_idx, (s_num, img_path) in enumerate(img_scene_paths):
+                                desc = scene_descriptions.get(s_num, "")
+                                with cols[col_idx % len(cols)]:
+                                    st.markdown(f"**Cảnh {s_num}**")
+                                    if desc:
+                                        st.caption(desc)
+                                    if os.path.exists(img_path):
+                                        st.image(img_path, width="stretch")
                         else:
                             render_text_output(result_text)
 
@@ -501,7 +564,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     
                     col_exp1, col_exp2 = st.columns(2)
                     with col_exp1:
-                        if st.button("Tạo gói xuất dữ liệu (Veo3)", icon=":material/output:", type="secondary", use_container_width=True):
+                        if st.button("Tạo gói xuất dữ liệu (Veo3)", icon=":material/output:", type="secondary", width="stretch"):
                             project_id = st.session_state.get("project_id")
                             if project_id:
                                 try:
@@ -537,7 +600,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                                         f_out.write(media.file_data)
                                         else:
                                             if img_rec.result_content:
-                                                img_paths = [l.replace("📁 Đường dẫn ảnh:", "").replace("📁 Đường dẫn ảnh: ", "").strip() for l in img_rec.result_content.split("\n") if "generated_images" in l]
+                                                img_paths = [l.replace("[ANH] Duong dan anh:", "").replace("Duong dan anh:", "").strip() for l in img_rec.result_content.split("\n") if "generated_images" in l]
                                                 for idx, ip in enumerate(img_paths):
                                                     if os.path.exists(ip):
                                                         shutil.copy(ip, os.path.join(export_dir, f"scene_{idx+1}_{os.path.basename(ip)}"))
@@ -558,7 +621,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                     st.error(f"Lỗi khi tạo gói xuất dữ liệu: {ex}")
                     
                     with col_exp2:
-                        if st.button("Đẩy tự động vào Veo3 (Qua Mark-L)", icon=":material/bolt:", type="primary", use_container_width=True):
+                        if st.button("Đẩy tự động vào Veo3 (Qua Mark-L)", icon=":material/bolt:", type="primary", width="stretch"):
                             project_id = st.session_state.get("project_id")
                             if project_id:
                                 try:
@@ -597,20 +660,69 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                     from src.tools.computer_control import computer_control
                                     
                                     # 3. Kích hoạt cửa sổ Veo3 và tự động hoá nạp file
-                                    st.toast("Đang quét các cửa sổ ứng dụng trên Windows...", icon="🔍")
-                                    check_script = 'Get-Process | Where-Object {$_.MainWindowTitle -like "*Veo*"} | Select-Object -ExpandProperty MainWindowTitle'
+                                    st.toast("Đang quét các cửa sổ ứng dụng trên Windows...", icon=":material/search:")
                                     import subprocess
+                                    # Quét tất cả visible windows bằng Win32 API (đáng tin cậy hơn Get-Process)
+                                    win32_scan_script = """
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+public class WinEnum {
+    [DllImport("user32.dll")] public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+    [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
+    [DllImport("user32.dll")] public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+    [DllImport("user32.dll")] public static extern int GetWindowTextLength(IntPtr hWnd);
+    public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+    public static System.Collections.Generic.List<string> GetVisibleWindowTitles() {
+        var list = new System.Collections.Generic.List<string>();
+        EnumWindows(delegate(IntPtr hwnd, IntPtr lParam) {
+            if (IsWindowVisible(hwnd)) {
+                int len = GetWindowTextLength(hwnd);
+                if (len > 0) {
+                    var sb = new StringBuilder(len + 1);
+                    GetWindowText(hwnd, sb, sb.Capacity);
+                    list.Add(sb.ToString());
+                }
+            }
+            return true;
+        }, IntPtr.Zero);
+        return list;
+    }
+}
+"@
+[WinEnum]::GetVisibleWindowTitles()
+"""
                                     check_res = subprocess.run(
-                                        ["powershell", "-NoProfile", "-NonInteractive", "-Command", check_script], 
-                                        capture_output=True, text=True, timeout=5
+                                        ["powershell", "-NoProfile", "-NonInteractive", "-Command", win32_scan_script],
+                                        capture_output=True, text=True, timeout=10
                                     )
                                     window_titles = [line.strip() for line in check_res.stdout.split("\n") if line.strip()]
-                                    target_title = next((t for t in window_titles if "veo" in t.lower()), None)
-                                    
+
+                                    # Tìm Veo3 bằng nhiều pattern khác nhau
+                                    VEO_KEYWORDS = ["veo3", "veo 3", "google veo", "veo"]
+                                    target_title = None
+                                    for kw in VEO_KEYWORDS:
+                                        target_title = next((t for t in window_titles if kw in t.lower()), None)
+                                        if target_title:
+                                            break
+
                                     if not target_title:
-                                        st.error("Không tìm thấy cửa sổ ứng dụng Veo3 nào đang mở trên Windows. Vui lòng khởi động phần mềm Veo3 trước khi thực hiện!")
-                                    else:
-                                        st.toast(f"Đang kích hoạt cửa sổ: {target_title}...", icon="🚀")
+                                        # Hiển thị danh sách cửa sổ để user chọn thủ công
+                                        st.warning("Không tự động tìm thấy cửa sổ Veo3. Vui lòng chọn thủ công từ danh sách bên dưới hoặc khởi động Veo3 trước.")
+                                        if window_titles:
+                                            manual_title = st.selectbox(
+                                                "Chọn cửa sổ ứng dụng Veo3 thủ công:",
+                                                ["-- Chọn --"] + window_titles,
+                                                key="veo3_manual_window_select"
+                                            )
+                                            if manual_title and manual_title != "-- Chọn --":
+                                                target_title = manual_title
+                                        else:
+                                            st.error("Không có cửa sổ nào đang mở. Vui lòng khởi động phần mềm Veo3 trước!")
+
+                                    if target_title:
+                                        st.toast(f"Đang kích hoạt cửa sổ: {target_title}...", icon=":material/rocket_launch:")
                                         computer_control({"action": "focus_window", "title": target_title})
                                         
                                         # Đợi 1 giây để focus ổn định
@@ -637,7 +749,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
             # Nút điều hướng
             c_next, c_retry, c_back = st.columns([2, 1, 1])
             with c_next:
-                if st.button("Duyệt & Sang Bước Tiếp Theo", icon=":material/check_circle:", type="primary", use_container_width=True):
+                if st.button("Duyệt & Sang Bước Tiếp Theo", icon=":material/check_circle:", type="primary", width="stretch"):
                     idx = STAGES_ORDER.index(current)
                     if idx < len(STAGES_ORDER) - 1:
                         next_stage = STAGES_ORDER[idx + 1]
@@ -654,13 +766,13 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     st.rerun()
 
             with c_retry:
-                if st.button("Làm lại", icon=":material/refresh:", use_container_width=True):
+                if st.button("Làm lại", icon=":material/refresh:", width="stretch"):
                     if current in st.session_state["results"]:
                         del st.session_state["results"][current]
                     st.rerun()
 
             with c_back:
-                if st.button("Quay lại", icon=":material/arrow_back:", use_container_width=True):
+                if st.button("Quay lại", icon=":material/arrow_back:", width="stretch"):
                     idx = STAGES_ORDER.index(current)
                     if idx > 0:
                         st.session_state["stage"] = STAGES_ORDER[idx - 1]
@@ -750,8 +862,12 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                         st.caption(f"Ý kiến phản hồi: {metrics['feedback']}")
                                     if "attempts" in metrics:
                                         st.caption(f"Số lần viết lại tự động: {metrics['attempts']}")
+
+                                    with st.expander("Xem du lieu phan tich tho (Raw JSON)", expanded=False):
+                                        st.json(metrics)
                             except Exception:
-                                st.caption(f"Dữ liệu thô: {log.analysis_metrics}")
+                                st.warning("Khong the phan tich dinh dang JSON cua metrics. Dang hien thi du lieu tho:")
+                                st.code(log.analysis_metrics, language="json")
 
                         # Nút phân tích lại cho bước 3 chưa có chỉ số Visual
                         if log.step_name == "step_3_visual":
