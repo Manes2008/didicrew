@@ -93,11 +93,11 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
             st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
             is_existing_proj = selected_project_opt != "+ Tạo dự án mới..."
             if is_existing_proj:
-                if st.button("", icon=":material/delete:", key="btn_del_proj_quick", help="Xóa dự án này", use_container_width=True):
+                if st.button("", icon=":material/delete:", key="btn_del_proj_quick", help="Xóa dự án này", width="stretch"):
                     st.session_state["confirm_delete_project"] = True
                     st.rerun()
             else:
-                st.button("", icon=":material/delete:", key="btn_del_proj_disabled", disabled=True, use_container_width=True)
+                st.button("", icon=":material/delete:", key="btn_del_proj_disabled", disabled=True, width="stretch")
 
         # Dialog xác nhận xóa dự án
         if st.session_state.get("confirm_delete_project") and selected_project_opt != "+ Tạo dự án mới...":
@@ -107,7 +107,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                 with st.container(border=True):
                     st.warning(f"Xóa dự án **#{_del_pid}** — `{_del_proj.idea[:50]}...` ?  \nThao tác này không thể hoàn tác.")
                     c_confirm_del, c_cancel_del = st.columns(2)
-                    if c_confirm_del.button("Xác nhận xóa", type="primary", use_container_width=True, key="confirm_del_proj_btn"):
+                    if c_confirm_del.button("Xác nhận xóa", type="primary", width="stretch", key="confirm_del_proj_btn"):
                         try:
                             db.delete(_del_proj)
                             db.commit()
@@ -122,7 +122,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                         except Exception as ex:
                             db.rollback()
                             st.error(f"Lỗi xóa dự án: {ex}")
-                    if c_cancel_del.button("Hủy", use_container_width=True, key="cancel_del_proj_btn"):
+                    if c_cancel_del.button("Hủy", width="stretch", key="cancel_del_proj_btn"):
                         st.session_state["confirm_delete_project"] = False
                         st.rerun()
 
@@ -212,7 +212,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
         with col_dur_save:
             st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
             if selected_project and duration_cfg:
-                if st.button("Lưu", key=f"prod_save_dur_{selected_project.id}", type="primary", use_container_width=True):
+                if st.button("Lưu", key=f"prod_save_dur_{selected_project.id}", type="primary", width="stretch"):
                     duration_cfg.duration_type = dur_type
                     if dur_type == "system_generated":
                         duration_cfg.target_duration = tgt_dur
@@ -221,7 +221,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     db.commit()
                     st.toast("Đã lưu cấu hình thời lượng!", icon=":material/check_circle:")
             else:
-                st.button("Lưu", disabled=True, key="prod_save_dur_disabled", use_container_width=True)
+                st.button("Lưu", disabled=True, key="prod_save_dur_disabled", width="stretch")
 
     # Nhập Ý Tưởng
     is_new = selected_project is None
@@ -238,7 +238,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
     )
 
     if is_new:
-        if st.button("Bắt Đầu Dự Án Mới", icon=":material/rocket_launch:", type="primary", use_container_width=True):
+        if st.button("Bắt Đầu Dự Án Mới", icon=":material/rocket_launch:", type="primary", width="stretch"):
             if not api_key:
                 st.error(f"Thiếu API Key cho {provider}! Vui lòng cấu hình ở tab 'Cấu hình AI' hoặc Đăng nhập lại.")
             elif not idea.strip() or len(idea.strip()) < 5:
@@ -518,7 +518,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                 st.markdown(f"**Cảnh {s_num}**")
                                 if desc:
                                     st.caption(desc)
-                                st.image(media.file_data, use_container_width=True)
+                                st.image(media.file_data, width="stretch")
                     else:
                         img_scene_paths = _extract_img_paths_with_scene(result_text)
                         if img_scene_paths:
@@ -530,7 +530,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                     if desc:
                                         st.caption(desc)
                                     if os.path.exists(img_path):
-                                        st.image(img_path, use_container_width=True)
+                                        st.image(img_path, width="stretch")
                         else:
                             render_text_output(result_text)
 
@@ -564,7 +564,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     
                     col_exp1, col_exp2 = st.columns(2)
                     with col_exp1:
-                        if st.button("Tạo gói xuất dữ liệu (Veo3)", icon=":material/output:", type="secondary", use_container_width=True):
+                        if st.button("Tạo gói xuất dữ liệu (Veo3)", icon=":material/output:", type="secondary", width="stretch"):
                             project_id = st.session_state.get("project_id")
                             if project_id:
                                 try:
@@ -621,7 +621,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                     st.error(f"Lỗi khi tạo gói xuất dữ liệu: {ex}")
                     
                     with col_exp2:
-                        if st.button("Đẩy tự động vào Veo3 (Qua Mark-L)", icon=":material/bolt:", type="primary", use_container_width=True):
+                        if st.button("Đẩy tự động vào Veo3 (Qua Mark-L)", icon=":material/bolt:", type="primary", width="stretch"):
                             project_id = st.session_state.get("project_id")
                             if project_id:
                                 try:
@@ -749,7 +749,7 @@ public class WinEnum {
             # Nút điều hướng
             c_next, c_retry, c_back = st.columns([2, 1, 1])
             with c_next:
-                if st.button("Duyệt & Sang Bước Tiếp Theo", icon=":material/check_circle:", type="primary", use_container_width=True):
+                if st.button("Duyệt & Sang Bước Tiếp Theo", icon=":material/check_circle:", type="primary", width="stretch"):
                     idx = STAGES_ORDER.index(current)
                     if idx < len(STAGES_ORDER) - 1:
                         next_stage = STAGES_ORDER[idx + 1]
@@ -766,13 +766,13 @@ public class WinEnum {
                     st.rerun()
 
             with c_retry:
-                if st.button("Làm lại", icon=":material/refresh:", use_container_width=True):
+                if st.button("Làm lại", icon=":material/refresh:", width="stretch"):
                     if current in st.session_state["results"]:
                         del st.session_state["results"][current]
                     st.rerun()
 
             with c_back:
-                if st.button("Quay lại", icon=":material/arrow_back:", use_container_width=True):
+                if st.button("Quay lại", icon=":material/arrow_back:", width="stretch"):
                     idx = STAGES_ORDER.index(current)
                     if idx > 0:
                         st.session_state["stage"] = STAGES_ORDER[idx - 1]

@@ -180,7 +180,7 @@ def render_config_page(db, selected_channel):
             }
             st.session_state["image_engine"] = reverse_map[image_engine_option]
 
-        if st.button("Luu Cau Hinh Model", use_container_width=True):
+        if st.button("Luu Cau Hinh Model", width="stretch"):
             st.success("Da luu cau hinh AI Model thanh cong!")
             st.rerun()
 
@@ -198,7 +198,7 @@ def render_config_page(db, selected_channel):
             with col_bk2:
                 st.caption("File ZIP co the dat 100MB+ neu co nhieu anh/video.")
 
-            if st.button("Tao Backup ngay", icon=":material/backup:", type="primary", use_container_width=True):
+            if st.button("Tao Backup ngay", icon=":material/backup:", type="primary", width="stretch"):
                 with st.spinner("Dang xuat du lieu, vui long cho..."):
                     try:
                         from src.tools.backup_restore import create_backup
@@ -219,7 +219,7 @@ def render_config_page(db, selected_channel):
                     file_name=f"videocrew_backup_{ts}.zip",
                     mime="application/zip",
                     icon=":material/download:",
-                    use_container_width=True
+                    width="stretch"
                 )
                 # Hien thi thong ke
                 if stats:
@@ -262,7 +262,7 @@ def render_config_page(db, selected_channel):
                                 if local_fs:
                                     st.caption("File local: " + ", ".join(f"{k}={v}" for k, v in local_fs.items()))
 
-                        if st.button("Bat dau Restore", icon=":material/restore:", type="primary", use_container_width=True):
+                        if st.button("Bat dau Restore", icon=":material/restore:", type="primary", width="stretch"):
                             with st.spinner("Dang restore du lieu, vui long cho..."):
                                 try:
                                     result = restore_backup(db, zip_bytes_up, overwrite=False)

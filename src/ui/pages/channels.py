@@ -72,7 +72,7 @@ def render_channels_page(db):
                     new_name = st.text_input("Tên kênh", placeholder="Ví dụ: Kênh Kể Chuyện AI")
                     new_desc = st.text_input("Mô tả kênh", placeholder="Mô tả ngắn...")
                     new_goal = st.text_area("Mục tiêu nội dung", value="Tạo video ngắn thu hút 100k view")
-                    btn_create = st.form_submit_button("Tạo Kênh Mới", type="primary", use_container_width=True)
+                    btn_create = st.form_submit_button("Tạo Kênh Mới", type="primary", width="stretch")
 
                     if btn_create:
                         if not new_name.strip() or not new_goal.strip():
@@ -118,12 +118,12 @@ def render_channels_page(db):
         selected_channel = next(c for c in channels if c.name == selected_channel_opt)
         
         with c_edit:
-            if st.button("Sửa", icon=":material/edit:", key="btn_channel_edit_top", use_container_width=True):
+            if st.button("Sửa", icon=":material/edit:", key="btn_channel_edit_top", width="stretch"):
                 st.session_state["editing_channel"] = True
                 st.session_state["confirm_delete_channel"] = False
                 st.rerun()
         with c_del:
-            if st.button("Xóa", icon=":material/delete:", key="btn_channel_del_top", use_container_width=True):
+            if st.button("Xóa", icon=":material/delete:", key="btn_channel_del_top", width="stretch"):
                 st.session_state["confirm_delete_channel"] = True
                 st.session_state["editing_channel"] = False
                 st.rerun()
@@ -139,8 +139,8 @@ def render_channels_page(db):
                     edit_desc = st.text_input("Mô tả (không bắt buộc)", value=selected_channel.description or "")
                     edit_goal = st.text_area("Mục tiêu", value=selected_channel.goal)
                     c_save, c_cancel = st.columns(2)
-                    save_edit = c_save.form_submit_button("Lưu thay đổi", type="primary", use_container_width=True)
-                    cancel_edit = c_cancel.form_submit_button("Hủy", use_container_width=True)
+                    save_edit = c_save.form_submit_button("Lưu thay đổi", type="primary", width="stretch")
+                    cancel_edit = c_cancel.form_submit_button("Hủy", width="stretch")
 
                     if save_edit:
                         if not edit_name.strip() or not edit_goal.strip():
@@ -173,17 +173,17 @@ def render_channels_page(db):
                 related_projects = db.query(Project).filter_by(channel_id=selected_channel.id).count()
                 if related_projects > 0:
                     st.error(f"Kênh đang có {related_projects} dự án, không thể xóa.")
-                    if st.button("Đóng", use_container_width=True):
+                    if st.button("Đóng", width="stretch"):
                         st.session_state["confirm_delete_channel"] = False
                         st.rerun()
                 elif len(channels) <= 1:
                     st.error("Không thể xóa kênh cuối cùng.")
-                    if st.button("Đóng", use_container_width=True):
+                    if st.button("Đóng", width="stretch"):
                         st.session_state["confirm_delete_channel"] = False
                         st.rerun()
                 else:
                     c_confirm, c_cancel_del = st.columns(2)
-                    if c_confirm.button("Xác nhận xóa", type="primary", use_container_width=True):
+                    if c_confirm.button("Xác nhận xóa", type="primary", width="stretch"):
                         try:
                             db.query(ChannelStageConfig).filter_by(channel_id=selected_channel.id).delete()
                             db.delete(selected_channel)
@@ -198,7 +198,7 @@ def render_channels_page(db):
                         except Exception as ex:
                             db.rollback()
                             st.error(f"Lỗi: {ex}")
-                    if c_cancel_del.button("Hủy", use_container_width=True):
+                    if c_cancel_del.button("Hủy", width="stretch"):
                         st.session_state["confirm_delete_channel"] = False
                         st.rerun()
         
@@ -261,7 +261,7 @@ def render_channels_page(db):
                     c3.markdown(f'<span class="vc-stage-goal">{cfg.goal}</span>', unsafe_allow_html=True)
                     
                     # Nút Sửa vai trò
-                    if c4.button("Sửa", key=f"btn_edit_stage_{cfg.id}", use_container_width=True):
+                    if c4.button("Sửa", key=f"btn_edit_stage_{cfg.id}", width="stretch"):
                         st.session_state["editing_config_id"] = cfg.id
                         st.session_state["show_add_config"] = True
                         st.rerun()
@@ -281,7 +281,7 @@ def render_channels_page(db):
                         markdown_template = st.text_area("Markdown Template (Chỉ dành cho viết kịch bản)", value=cfg_rec.markdown_template or "", placeholder="Nhập cấu trúc kịch bản...")
                         
                         col_save, col_cancel = st.columns(2)
-                        if col_save.form_submit_button("Lưu cấu hình", type="primary", use_container_width=True):
+                        if col_save.form_submit_button("Lưu cấu hình", type="primary", width="stretch"):
                             try:
                                 cfg_rec.role = role.strip()
                                 cfg_rec.goal = goal.strip()
@@ -295,7 +295,7 @@ def render_channels_page(db):
                             except Exception as ex:
                                 db.rollback()
                                 st.error(f"Lỗi lưu: {ex}")
-                        if col_cancel.form_submit_button("Hủy", use_container_width=True):
+                        if col_cancel.form_submit_button("Hủy", width="stretch"):
                             del st.session_state["editing_config_id"]
                             st.session_state["show_add_config"] = False
                             st.rerun()
@@ -381,7 +381,7 @@ def render_channels_page(db):
                         key=f"chan_ratio_mult_{selected_channel.id}"
                     )
                 
-                if st.button("Lưu cấu hình thời lượng Kênh", key=f"chan_save_dur_{selected_channel.id}", type="primary", use_container_width=True):
+                if st.button("Lưu cấu hình thời lượng Kênh", key=f"chan_save_dur_{selected_channel.id}", type="primary", width="stretch"):
                     # Tìm hoặc tạo bản ghi ChannelStageConfig cho stage "video"
                     if not video_cfg:
                         video_cfg = ChannelStageConfig(
@@ -477,7 +477,7 @@ def render_channels_page(db):
                                 key=f"channels_ratio_mult_{selected_project.id}"
                             )
                         
-                        if st.button("Lưu cấu hình thời lượng Dự án", key=f"channels_save_dur_{selected_project.id}", type="primary", use_container_width=True):
+                        if st.button("Lưu cấu hình thời lượng Dự án", key=f"channels_save_dur_{selected_project.id}", type="primary", width="stretch"):
                             duration_cfg.duration_type = dur_type
                             duration_cfg.target_duration = tgt_dur
                             duration_cfg.min_duration = min_dur

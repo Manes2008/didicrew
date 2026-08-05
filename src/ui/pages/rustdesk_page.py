@@ -91,7 +91,7 @@ def render_rustdesk_page():
         with col_cfg2:
             st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
             if is_running:
-                if st.button("Dừng RustDesk Server", type="secondary", use_container_width=True):
+                if st.button("Dừng RustDesk Server", type="secondary", width="stretch"):
                     with st.spinner("Đang dừng containers..."):
                         success, msg = stop_docker_services()
                         if success:
@@ -103,7 +103,7 @@ def render_rustdesk_page():
             else:
                 # Disable nút Start nếu host không hợp lệ
                 btn_disabled = not validate_relay_host(relay_host_input)
-                if st.button("Khởi động RustDesk Server", type="primary", use_container_width=True, disabled=btn_disabled):
+                if st.button("Khởi động RustDesk Server", type="primary", width="stretch", disabled=btn_disabled):
                     with st.spinner("Đang cấu hình và chạy docker compose..."):
                         success, msg = start_docker_services(relay_host_input)
                         if success:
@@ -131,7 +131,7 @@ def render_rustdesk_page():
                     icon=":material/content_copy:",
                     on_click=lambda: st.write(quick_link),
                     key="btn_copy_quick_link",
-                    use_container_width=True,
+                    width="stretch",
                     help="Click để hiển thị link để copy thủ công"
                 )
                 st.info("Hãy gửi link trên cho đối tác/người dùng bên ngoài để họ truy cập nhanh vào máy của bạn.")

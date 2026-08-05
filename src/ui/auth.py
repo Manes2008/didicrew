@@ -341,7 +341,7 @@ def render_login_page():
                     with st.form("login_form_new", border=False):
                         username = st.text_input("Tên đăng nhập", placeholder="Nhập username...").strip()
                         password = st.text_input("Mật khẩu", type="password", placeholder="••••••••")
-                        btn_login = st.form_submit_button("Xác nhận đăng nhập", type="primary", use_container_width=True)
+                        btn_login = st.form_submit_button("Xác nhận đăng nhập", type="primary", width="stretch")
                         
                         if btn_login:
                             if not username or not password:
@@ -409,7 +409,7 @@ def render_login_page():
                         new_username = st.text_input("Tên đăng nhập mới", placeholder="3-20 ký tự (a-z, 0-9, _)").strip()
                         new_password = st.text_input("Mật khẩu mới", type="password", placeholder="Tối thiểu 8 ký tự (chữ + số)")
                         confirm_password = st.text_input("Xác nhận mật khẩu", type="password", placeholder="Nhập lại mật khẩu")
-                        btn_register = st.form_submit_button("Tạo tài khoản mới", type="primary", use_container_width=True)
+                        btn_register = st.form_submit_button("Tạo tài khoản mới", type="primary", width="stretch")
                         
                         if btn_register:
                             is_valid_user, msg_user = validate_username(new_username)

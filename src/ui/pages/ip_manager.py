@@ -73,7 +73,7 @@ def render_ip_manager_page(db):
                         + (f'<br><span style="color:#bbb;font-size:0.78rem;">📝 {rec.label}</span>' if rec.label else ''),
                         unsafe_allow_html=True
                     )
-                    if c2.button("Duyệt", key=f"ap_{rec.id}", type="primary", use_container_width=True):
+                    if c2.button("Duyệt", key=f"ap_{rec.id}", type="primary", width="stretch"):
                         try:
                             rec.status = "approved"
                             rec.approved_at = datetime.datetime.utcnow()
@@ -83,7 +83,7 @@ def render_ip_manager_page(db):
                         except Exception as ex:
                             db.rollback()
                             st.error(str(ex))
-                    if c3.button("Từ chối", key=f"rj_{rec.id}", use_container_width=True):
+                    if c3.button("Từ chối", key=f"rj_{rec.id}", width="stretch"):
                         try:
                             rec.status = "rejected"
                             db.commit()
@@ -106,7 +106,7 @@ def render_ip_manager_page(db):
                         + f'<br><span style="color:#aaa;font-size:0.8rem;">✅ Duyệt: {rec.approved_at.strftime("%d/%m/%Y %H:%M") if rec.approved_at else "N/A"}  |  ⏱️ Đăng ký: {rec.created_at.strftime("%d/%m/%Y %H:%M") if rec.created_at else "N/A"}</span>',
                         unsafe_allow_html=True
                     )
-                    if c2.button("Thu hồi", key=f"rv_{rec.id}", use_container_width=True):
+                    if c2.button("Thu hồi", key=f"rv_{rec.id}", width="stretch"):
                         try:
                             rec.status = "rejected"
                             rec.approved_at = None
@@ -116,7 +116,7 @@ def render_ip_manager_page(db):
                         except Exception as ex:
                             db.rollback()
                             st.error(str(ex))
-                    if c3.button("Xóa", key=f"dl_{rec.id}", use_container_width=True):
+                    if c3.button("Xóa", key=f"dl_{rec.id}", width="stretch"):
                         try:
                             db.delete(rec)
                             db.commit()
@@ -137,7 +137,7 @@ def render_ip_manager_page(db):
                         + f'<br><span style="color:#aaa;font-size:0.8rem;">⏱️ Đăng ký: {rec.created_at.strftime("%d/%m/%Y %H:%M") if rec.created_at else "N/A"}</span>',
                         unsafe_allow_html=True
                     )
-                    if c2.button("Phê duyệt lại", key=f"rea_{rec.id}", type="primary", use_container_width=True):
+                    if c2.button("Phê duyệt lại", key=f"rea_{rec.id}", type="primary", width="stretch"):
                         try:
                             rec.status = "approved"
                             rec.approved_at = datetime.datetime.utcnow()
@@ -147,7 +147,7 @@ def render_ip_manager_page(db):
                         except Exception as ex:
                             db.rollback()
                             st.error(str(ex))
-                    if c3.button("Xóa", key=f"dlr_{rec.id}", use_container_width=True):
+                    if c3.button("Xóa", key=f"dlr_{rec.id}", width="stretch"):
                         try:
                             db.delete(rec)
                             db.commit()
@@ -163,7 +163,7 @@ def render_ip_manager_page(db):
                     new_ip    = st.text_input("Địa chỉ IP", placeholder="Vd: 192.168.1.100")
                     new_label = st.text_input("Ghi chú thiết bị", placeholder="Vd: PC cá nhân...")
                     auto_approve = st.checkbox("Phê duyệt ngay sau khi thêm", value=True)
-                    add_submitted = st.form_submit_button("Thêm IP", use_container_width=True, type="primary")
+                    add_submitted = st.form_submit_button("Thêm IP", width="stretch", type="primary")
 
                 if add_submitted:
                     if not new_ip or not new_ip.strip():
@@ -202,7 +202,7 @@ def render_ip_manager_page(db):
                 col1.markdown(f'<i class="bi {status_icon}" style="color:{"#27ae60" if u.is_active else "#e74c3c"};"></i> <strong>{u.username}</strong> — <span class="user-badge">{u.role.upper()}</span> ({status_text})', unsafe_allow_html=True)
                 col1.caption(f"Ngày tạo: {u.created_at.strftime('%Y-%m-%d %H:%M') if u.created_at else 'N/A'}")
 
-                if col2.button("Đổi vai trò", key=f"role_user_{u.id}", use_container_width=True):
+                if col2.button("Đổi vai trò", key=f"role_user_{u.id}", width="stretch"):
                     try:
                         u.role = "user" if u.role == "admin" else "admin"
                         db.commit()
@@ -212,7 +212,7 @@ def render_ip_manager_page(db):
                         st.error(str(ex))
 
                 btn_lock_label = "Khóa" if u.is_active else "Mở khóa"
-                if col3.button(btn_lock_label, key=f"lock_user_{u.id}", use_container_width=True):
+                if col3.button(btn_lock_label, key=f"lock_user_{u.id}", width="stretch"):
                     try:
                         u.is_active = not u.is_active
                         db.commit()
@@ -221,7 +221,7 @@ def render_ip_manager_page(db):
                         db.rollback()
                         st.error(str(ex))
 
-                if col4.button("Xóa", key=f"del_user_{u.id}", use_container_width=True):
+                if col4.button("Xóa", key=f"del_user_{u.id}", width="stretch"):
                     try:
                         db.delete(u)
                         db.commit()
