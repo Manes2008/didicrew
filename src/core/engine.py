@@ -128,6 +128,7 @@ class WorkflowEngine:
                 metrics_step1 = {}
                 
                 if llm:
+                    target_dur = context.get("target_duration", "25-30") if context else "25-30"
                     prompt_analysis = f"""Bạn là một chuyên gia tối ưu hóa ý tưởng video ngắn. 
 Hãy phân tích ý tưởng thô sau đây của người dùng: "{idea}".
 
@@ -138,6 +139,14 @@ Kiểm tra xem nó đã có đầy đủ thông tin về các yếu tố:
 
 Nếu thiếu bất kỳ thông tin nào, hãy tự động bổ sung hoặc làm rõ để tạo nên một prompt kịch bản chi tiết và hấp dẫn nhất.
 Đồng thời, đánh giá các bộ chỉ số: tone, keyword_density, estimated_duration.
+
+[CHỈ THỊ QUAN TRỌNG VỀ ĐỘ DÀI VÀ CHI TIẾT]:
+- TUYỆT ĐỐI KHÔNG tóm tắt, viết tắt hay cắt bớt bất kỳ chi tiết, cốt truyện hoặc thông tin sự kiện nào từ ý tưởng gốc của người dùng.
+- Hãy tối ưu hóa bằng cách GIỮ NGUYÊN nội dung gốc và PHÁT TRIỂN THÊM các chi tiết cụ thể (nhân vật, cảm xúc, biểu cảm, không gian bối cảnh, âm thanh) để làm cho ý tưởng trở nên phong phú hơn, dài hơn và sẵn sàng cho việc viết kịch bản chi tiết.
+
+[ĐỊNH HƯỚNG THỜI LƯỢNG]:
+- Video này có mục tiêu thời lượng là {target_dur} giây.
+- Hãy điều chỉnh độ dài và độ chi tiết của ý tưởng đã tối ưu (adjusted_prompt) và ước lượng thời lượng (estimated_duration) sao cho phù hợp nhất với mục tiêu {target_dur} giây này (ví dụ: video dài cần nhiều chi tiết và phân cảnh hơn, video ngắn cần cô đọng nhưng vẫn giàu mô tả).
 
 Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên bản (không nằm trong khối markdown ```json), bao gồm các trường sau:
 {{

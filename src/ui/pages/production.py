@@ -743,6 +743,39 @@ public class WinEnum {
                                         st.success(f"Đã tự động đẩy dữ liệu từ `{abs_export_dir}` vào {target_title} thành công!")
                                 except Exception as ex:
                                     st.error(f"Không thể gọi module tự động hóa của Mark-L: {ex}")
+                elif current == "script":
+                    project_id = st.session_state.get("project_id")
+                    if project_id:
+                        from src.core.models import PromptOptimizationLog
+                        log1 = db.query(PromptOptimizationLog).filter_by(
+                            project_id=project_id,
+                            step_name="step_1_analysis"
+                        ).order_by(PromptOptimizationLog.created_at.desc()).first()
+                        
+                        if log1:
+                            with st.container(border=True):
+                                status_label = "Đạt chuẩn" if log1.is_standardized else "Cần tối ưu"
+                                status_color = "green" if log1.is_standardized else "orange"
+                                st.markdown(f"### <i class='bi bi-lightbulb-fill'></i> Ý tưởng đã tối ưu hóa & Phân tích ban đầu <span style='font-size:0.85rem; padding: 2px 8px; border-radius: 4px; background-color: {status_color}; color: white; margin-left: 10px;'>{status_label}</span>", unsafe_allow_html=True)
+                                
+                                st.markdown("**Nội dung ý tưởng sau tối ưu:**")
+                                st.info(log1.adjusted_prompt)
+                                
+                                if log1.analysis_metrics:
+                                    try:
+                                        metrics = json.loads(log1.analysis_metrics)
+                                        col_m1, col_m2, col_m3 = st.columns(3)
+                                        with col_m1:
+                                            st.markdown(f"<i class='bi bi-chat-quote'></i> **Tông giọng:**  \n`{metrics.get('tone', 'N/A')}`", unsafe_allow_html=True)
+                                        with col_m2:
+                                            st.markdown(f"<i class='bi bi-key'></i> **Mật độ từ khóa:**  \n`{metrics.get('keyword_density', 'N/A')}`", unsafe_allow_html=True)
+                                        with col_m3:
+                                            st.markdown(f"<i class='bi bi-alarm'></i> **Thời lượng dự kiến:**  \n`{metrics.get('estimated_duration', 'N/A')}`", unsafe_allow_html=True)
+                                    except Exception:
+                                        pass
+                            
+                            st.markdown("### <i class='bi bi-file-earmark-text-fill'></i> Kịch bản chi tiết được tạo", unsafe_allow_html=True)
+                    render_text_output(result_text)
                 else:
                     render_text_output(result_text)
 

@@ -14,7 +14,7 @@ import config
 DATABASE_URL = config.DATABASE_URL
 
 Base = declarative_base()
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, pool_recycle=300, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
