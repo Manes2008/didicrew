@@ -506,7 +506,51 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                             paths.append((s_num, clean))
                         return paths
 
+                    # Thêm chức năng tải về bộ hình ảnh thành file ZIP
+                    import io
+                    import zipfile
+                    import datetime
+                    
+                    images_to_zip = []
                     db_images = [m for m in media_files if m.file_data]
+                    if db_images:
+                        for idx, media in enumerate(db_images):
+                            if media.file_data and len(media.file_data) > 0:
+                                images_to_zip.append((media.file_name or f"scene_{idx+1}.png", media.file_data))
+                    else:
+                        img_scene_paths = _extract_img_paths_with_scene(result_text)
+                        for s_num, img_path in img_scene_paths:
+                            if os.path.exists(img_path):
+                                try:
+                                    with open(img_path, "rb") as f_img:
+                                        f_bytes = f_img.read()
+                                    images_to_zip.append((f"scene_{s_num}_{os.path.basename(img_path)}", f_bytes))
+                                except Exception:
+                                    pass
+                                    
+                    if images_to_zip:
+                        zip_buffer = io.BytesIO()
+                        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                            for file_name, file_bytes in images_to_zip:
+                                zip_file.writestr(file_name, file_bytes)
+                        zip_data = zip_buffer.getvalue()
+                        
+                        channel_clean = "".join(c for c in (selected_channel.name if selected_channel else "Kenh") if c.isalnum() or c in (" ", "_", "-")).strip().replace(" ", "_")
+                        project_clean = f"Project_{project_id}" if project_id else "Duan"
+                        date_str = datetime.datetime.now().strftime("%d_%m_%Y")
+                        zip_filename = f"{channel_clean}_{project_clean}_{date_str}.zip"
+                        
+                        st.download_button(
+                            label="Tải bộ ảnh về máy (ZIP)",
+                            data=zip_data,
+                            file_name=zip_filename,
+                            mime="application/zip",
+                            icon=":material/download:",
+                            type="primary",
+                            use_container_width=True
+                        )
+                        st.write("") # Tạo khoảng cách nhỏ
+                    
                     if db_images:
                         for idx, media in enumerate(db_images):
                             s_num = idx + 1
@@ -522,6 +566,9 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     else:
                         img_scene_paths = _extract_img_paths_with_scene(result_text)
                         if img_scene_paths:
+                            if media_files:
+                                st.warning("⚠️ Phát hiện bản ghi hình ảnh trong cơ sở dữ liệu bị lỗi hoặc bằng 0 bytes.")
+                            
                             cols = st.columns(min(len(img_scene_paths), 3))
                             for col_idx, (s_num, img_path) in enumerate(img_scene_paths):
                                 desc = scene_descriptions.get(s_num, "")
@@ -531,6 +578,8 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                         st.caption(desc)
                                     if os.path.exists(img_path):
                                         st.image(img_path, width="stretch")
+                                    else:
+                                        st.error("Không tìm thấy tệp ảnh local (có thể do container đã bị khởi động lại). Vui lòng thực thi lại bước này để tạo lại.")
                         else:
                             render_text_output(result_text)
 
