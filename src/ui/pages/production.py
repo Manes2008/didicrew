@@ -446,8 +446,14 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                 stage_rec.media_path = media_path
                                 stage_rec.status = "completed"
                             
+                            # Sinh ID cho stage_rec trước khi tạo MediaFile (tránh lỗi NotNullViolation cho project_stage_id)
+                            db.flush()
+                            
                             # Lưu file ảnh vào DB (MediaFile)
                             if current == "image" and image_paths:
+                                # Xóa sạch các bản ghi MediaFile cũ để tránh tích tụ file lỗi/0-bytes
+                                db.query(MediaFile).filter_by(project_stage_id=stage_rec.id).delete()
+                                
                                 for img_path in image_paths:
                                     if os.path.exists(img_path):
                                         with open(img_path, "rb") as img_f:
@@ -455,16 +461,18 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                         media_rec = MediaFile(
                                             project_stage_id=stage_rec.id,
                                             file_name=os.path.basename(img_path),
-                                            file_data=img_data,
-                                            media_type="image/png"
+                                            file_path=img_path,
+                                            mime_type="image/png",
+                                            file_size=len(img_data),
+                                            file_data=img_data
                                         )
                                         db.add(media_rec)
 
                             db.commit()
+                            st.rerun()
                         except Exception as ex:
                             db.rollback()
                             st.error(f"Lỗi lưu DB: {ex}")
-                    st.rerun()
 
             # Hiển thị Kết quả
             if current in st.session_state.get("results", {}):
