@@ -1,0 +1,28 @@
+```markdown
+# **TÊN DỰ ÁN & THÔNG TIN CHUNG**
+**Tên video:** Phạm Ngọc Thạch - Hành Trình Của Một Anh Hùng  
+**Định dạng:** TikTok/Reels/Shorts  
+**Thời lượng dự kiến:** 25-30 giây  
+
+---
+
+## **CHIẾN LƯỢC ĐẦU 3 GIÂY (VIRAL HOOK)**
+**Câu thoại mở đầu:** "Bạn có biết ai là người đã biến con đường này thành biểu tượng của lòng dũng cảm?"  
+**Hành động:** Một đoạn video nhanh, cảnh quay từ trên cao xuống con đường Phạm Ngọc Thạch, sau đó zoom nhanh vào tấm biển tên đường.
+
+---
+
+## **BẢNG PHÂN CẢNH CHI TIẾT (SCENE-BY-SCENE TABLE)**
+
+| **Phân cảnh**   | **Thời lượng** | **Mô tả hình ảnh (Visual)**                                                                 | **Lời thoại / Thuyết minh (Voiceover)**                                                                       | **Hiệu ứng âm thanh & Nhạc (SFX/BGM)**                       |
+|------------------|----------------|------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------|
+| **Scene 1**      | 5s             | Cảnh quay từ trên cao, zoom vào tấm biển tên đường "Phạm Ngọc Thạch".                       | "Bạn có biết ai là người đã biến con đường này thành biểu tượng của lòng dũng cảm?"                           | Nhạc nền kịch tính, âm thanh nhẹ nhàng dần tăng lên.          |
+| **Scene 2**      | 10s            | Hình ảnh bác sĩ Phạm Ngọc Thạch trong áo blouse, đang chăm sóc bệnh nhân trong phòng khám. | "Phạm Ngọc Thạch, một bác sĩ tận tâm, đã từ bỏ cuộc sống xa hoa ở châu Âu để trở về cứu người."                | Tiếng nhạc nền trẻ trung, âm thanh bệnh viện nhẹ nhàng.       |
+| **Scene 3**      | 10s            | Cảnh ông tham gia cứu chữa thương binh trên chiến trường, giữa khói lửa.                     | "Ông dũng cảm đứng giữa khói lửa, không ngại khó khăn, chỉ để cứu giúp những người đau khổ."                   | Âm thanh chiến trường, tiếng súng xa, nhạc nền trầm hùng.     |
+| **Scene 4**      | 5s             | Hình ảnh cuối cùng: tấm biển tên đường kết hợp với những bông hoa tưởng niệm.             | "Hãy ghi nhớ tên những người như ông, những anh hùng thực sự của dân tộc."                                    | Nhạc nền lắng đọng, âm thanh nhẹ nhàng, cảm xúc.               |
+
+---
+
+## **CALL TO ACTION (CTA)**
+"Hãy chia sẻ video này để cùng nhau tri ân những người đã cống hiến cuộc đời cho dân tộc. Đừng quên nhấn like và theo dõi để biết thêm nhiều câu chuyện cảm động khác!"
+```

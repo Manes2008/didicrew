@@ -1,0 +1,12 @@
+[package]
+name = "host-agent-launcher"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Thư viện làm khay hệ thống siêu nhẹ
+tray-item = "0.8.0"
+
+[build-dependencies]
+# Thư viện để nhúng icon (.ico) vào file .exe khi build release
+winres = "0.1.12"

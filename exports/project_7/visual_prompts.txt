@@ -1,0 +1,25 @@
+# **CHARACTER PROFILE**
+- **Name**: Phạm Ngọc Thạch
+- **Age**: Approximately 40-50 years old (depicted in historical context)
+- **Appearance**: Tall, with a medium build, a confident demeanor. He has short, neatly combed black hair with a few strands of gray, reflecting his wisdom and experience. 
+- **Clothing**: In scenes of his medical practice, he wears a traditional white doctor's coat over a simple shirt and trousers. During revolutionary scenes, he is dressed in a plain yet proud outfit reflecting the era, such as a khaki shirt and trousers.
+- **Expression**: His expressions range from compassionate and dedicated when treating patients to determined and proud when leading a crowd during revolutionary activities.
+
+# **ART STYLE**
+The art style for the video should reflect a realistic documentary style, capturing the essence of the time period and the character's life. The visuals should feel authentic and grounded, focusing on candid moments that evoke emotion, with natural soft lighting that creates an intimate atmosphere. The use of depth-of-field should highlight the character and the surrounding context without looking staged or overly polished.
+
+# **VISUAL PROMPTS**
+
+```markdown
+Scene 1: [Documentary style] + [Name: Phạm Ngọc Thạch, Age: 40-50, Appearance: Tall with medium build, short black hair with gray strands] + [A close-up shot of the street sign "Phạm Ngọc Thạch" at night, streetlights illuminating the sign, the camera slowly zooms out to reveal a bustling Saigon street filled with cars and pedestrians, a sense of vibrancy and life, soft urban sounds in the background, capturing the essence of the city.]
+ 
+Scene 2: [Documentary style] + [Name: Phạm Ngọc Thạch, Age: 40-50, Appearance: Tall, wearing a white doctor's coat, compassionate expression] + [He is shown examining a patient in a well-lit clinic, the scene captures a side view with him bending slightly towards the patient, demonstrating care, the room filled with medical tools and charts, the atmosphere conveys hope and dedication, warm lighting enhances the sense of professionalism.]
+
+Scene 3: [Documentary style] + [Name: Phạm Ngọc Thạch, Age: 40-50, Appearance: Dressed in a khaki shirt, determined expression] + [The scene depicts him leading a crowd during a revolutionary event, surrounded by enthusiastic supporters waving red flags, he stands proudly in the middle of the frame with a slight smile, the camera captures the energy of the crowd, sunlight streaming down, creating a dramatic effect that emphasizes the historical significance of the moment.]
+
+Scene 4: [Documentary style] + [Name: Phạm Ngọc Thạch, Age: 40-50, Appearance: Wearing a white doctor's coat, gentle expression] + [A close-up of him tending to a wounded soldier, gently wrapping bandages around the soldier's arm, his eyes showcasing deep empathy and resolve, the lighting is softer, creating a somber mood, capturing the intensity of the moment as he focuses on his work.]
+
+Scene 5: [Documentary style] + [Name: Phạm Ngọc Thạch, Age: 40-50, Appearance: Dressed in casual clothing, reflective expression] + [A wide shot of Phạm Ngọc Thạch street, full of bustling pedestrians, the camera captures children playing near a school sign with his name, sunlight filtering through trees lining the street, the atmosphere is lively yet nostalgic, evoking a sense of community and remembrance.]
+
+Scene 6: [Documentary style] + [Name: Phạm Ngọc Thạch, Age: 40-50, Appearance: Portrait of him with a wise expression] + [The final scene shows his portrait framed against a simple backdrop, overlaying the text "Remember those who gave their lives for others", the lighting is warm yet soft, creating a sentimental closing to the video, with gentle applause sounds fading in the background.]
+```

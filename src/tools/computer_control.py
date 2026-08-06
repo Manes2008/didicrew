@@ -376,6 +376,21 @@ def computer_control(
     if not action:
         return "No action specified for computer_control."
 
+    # Tự động chuyển hướng yêu cầu sang Windows Host qua HTTP nếu chạy trong Docker/Linux headless
+    import os
+    if os.getenv("RUNNING_IN_DOCKER") == "true" or (platform.system() == "Linux" and not os.getenv("DISPLAY")):
+        try:
+            import requests
+            resp = requests.post("http://host.docker.internal:8000/control", json=params, timeout=15)
+            if resp.status_code == 200:
+                data = resp.json()
+                if data.get("success"):
+                    return data.get("result", "Thành công")
+                return f"Lỗi thực thi trên Host: {data.get('error')}"
+            return f"Không thể kết nối tới Host Agent (HTTP {resp.status_code})"
+        except Exception as e:
+            return f"Không thể gửi lệnh điều khiển tới Host: {e}"
+
     if player:
         player.write_log(f"[Computer] {action}")
 

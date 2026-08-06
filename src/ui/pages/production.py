@@ -40,6 +40,117 @@ def render_text_output(result_text: str):
     with tab_copy:
         st.code(result_text, language="markdown")
 
+def export_and_sync_project(project_id, db) -> tuple[str, list]:
+    import os
+    import shutil
+    import base64
+    import requests
+    from src.core.models import ProjectStage, MediaFile
+    
+    export_dir = f"exports/project_{project_id}"
+    os.makedirs(export_dir, exist_ok=True)
+    sync_files = []
+    
+    # 1. Voiceover
+    voice_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="voice").first()
+    if voice_rec:
+        voice_media = db.query(MediaFile).filter_by(project_stage_id=voice_rec.id).first()
+        if voice_media and voice_media.file_data and len(voice_media.file_data) > 0:
+            with open(os.path.join(export_dir, voice_media.file_name), "wb") as f_out:
+                f_out.write(voice_media.file_data)
+            sync_files.append({
+                "name": voice_media.file_name,
+                "content_type": "binary",
+                "data": base64.b64encode(voice_media.file_data).decode('utf-8')
+            })
+        else:
+            voice_path = None
+            if voice_rec.result_content:
+                for line in voice_rec.result_content.split("\n"):
+                    if ".mp3" in line or ".wav" in line:
+                        voice_path = line.strip()
+                        break
+            if voice_path and os.path.exists(voice_path):
+                shutil.copy(voice_path, os.path.join(export_dir, os.path.basename(voice_path)))
+                with open(voice_path, "rb") as f_in:
+                    voice_bytes = f_in.read()
+                sync_files.append({
+                    "name": os.path.basename(voice_path),
+                    "content_type": "binary",
+                    "data": base64.b64encode(voice_bytes).decode('utf-8')
+                })
+                
+    # 2. Image
+    img_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="image").first()
+    if img_rec:
+        img_medias = db.query(MediaFile).filter_by(project_stage_id=img_rec.id).all()
+        # Kiểm tra xem có bất kỳ file ảnh nào hợp lệ (lớn hơn 0 bytes) không
+        valid_img_medias = [m for m in img_medias if m.file_data and len(m.file_data) > 0] if img_medias else []
+        if valid_img_medias:
+            for idx, media in enumerate(valid_img_medias):
+                img_name = f"scene_{idx+1}_{media.file_name}"
+                with open(os.path.join(export_dir, img_name), "wb") as f_out:
+                    f_out.write(media.file_data)
+                sync_files.append({
+                    "name": img_name,
+                    "content_type": "binary",
+                    "data": base64.b64encode(media.file_data).decode('utf-8')
+                })
+        else:
+            if img_rec.result_content:
+                img_paths = [l.replace("[ANH] Duong dan anh:", "").replace("Duong dan anh:", "").strip() for l in img_rec.result_content.split("\n") if "generated_images" in l]
+                for idx, ip in enumerate(img_paths):
+                    if os.path.exists(ip):
+                        img_name = f"scene_{idx+1}_{os.path.basename(ip)}"
+                        shutil.copy(ip, os.path.join(export_dir, img_name))
+                        with open(ip, "rb") as f_in:
+                            img_bytes = f_in.read()
+                        sync_files.append({
+                            "name": img_name,
+                            "content_type": "binary",
+                            "data": base64.b64encode(img_bytes).decode('utf-8')
+                        })
+                        
+    # 3. Script
+    script_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="script").first()
+    if script_rec and script_rec.result_content:
+        with open(os.path.join(export_dir, "script.txt"), "w", encoding="utf-8") as sf:
+            sf.write(script_rec.result_content)
+        sync_files.append({
+            "name": "script.txt",
+            "content_type": "text",
+            "data": script_rec.result_content
+        })
+        
+    # 4. Visual prompts
+    visual_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="visual").first()
+    if visual_rec and visual_rec.result_content:
+        with open(os.path.join(export_dir, "visual_prompts.txt"), "w", encoding="utf-8") as vf:
+            vf.write(visual_rec.result_content)
+        sync_files.append({
+            "name": "visual_prompts.txt",
+            "content_type": "text",
+            "data": visual_rec.result_content
+        })
+        
+    # 5. Đồng bộ hóa sang Host Agent local (Tự động phát hiện môi trường)
+    try:
+        sync_payload = {
+            "project_id": project_id,
+            "files": sync_files
+        }
+        is_docker = os.path.exists('/.dockerenv') or os.environ.get('IS_DOCKER') == 'true'
+        sync_host = "host.docker.internal" if is_docker else "127.0.0.1"
+        sync_url = f"http://{sync_host}:8000/sync_project"
+        
+        resp = requests.post(sync_url, json=sync_payload, timeout=15)
+        if resp.status_code == 200 and resp.json().get("success"):
+            print(f"[Sync] Đồng bộ dự án {project_id} sang Windows Host thành công.")
+    except Exception as ex_sync:
+        print(f"[WARN] Không thể gửi đồng bộ sang Windows Host: {ex_sync}")
+        
+    return export_dir, sync_files
+
 def render_production_page(db, api_key, provider, model_name, selected_channel):
     # Workspace Dự Án hiện tại
     with st.container(border=True):
@@ -568,55 +679,8 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                             project_id = st.session_state.get("project_id")
                             if project_id:
                                 try:
-                                    import shutil
-                                    export_dir = f"exports/project_{project_id}"
-                                    os.makedirs(export_dir, exist_ok=True)
-                                    
-                                    # Copy/Write voiceover
-                                    voice_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="voice").first()
-                                    if voice_rec:
-                                        voice_media = db.query(MediaFile).filter_by(project_stage_id=voice_rec.id).first()
-                                        if voice_media and voice_media.file_data:
-                                            with open(os.path.join(export_dir, voice_media.file_name), "wb") as f_out:
-                                                f_out.write(voice_media.file_data)
-                                        else:
-                                            voice_path = None
-                                            if voice_rec.result_content:
-                                                for line in voice_rec.result_content.split("\n"):
-                                                    if ".mp3" in line or ".wav" in line:
-                                                        voice_path = line.strip()
-                                                        break
-                                            if voice_path and os.path.exists(voice_path):
-                                                shutil.copy(voice_path, os.path.join(export_dir, os.path.basename(voice_path)))
-                                    
-                                    # Copy/Write image
-                                    img_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="image").first()
-                                    if img_rec:
-                                        img_medias = db.query(MediaFile).filter_by(project_stage_id=img_rec.id).all()
-                                        if img_medias:
-                                            for idx, media in enumerate(img_medias):
-                                                if media.file_data:
-                                                    with open(os.path.join(export_dir, f"scene_{idx+1}_{media.file_name}"), "wb") as f_out:
-                                                        f_out.write(media.file_data)
-                                        else:
-                                            if img_rec.result_content:
-                                                img_paths = [l.replace("[ANH] Duong dan anh:", "").replace("Duong dan anh:", "").strip() for l in img_rec.result_content.split("\n") if "generated_images" in l]
-                                                for idx, ip in enumerate(img_paths):
-                                                    if os.path.exists(ip):
-                                                        shutil.copy(ip, os.path.join(export_dir, f"scene_{idx+1}_{os.path.basename(ip)}"))
-                                            
-                                    # Ghi file kịch bản & phân cảnh
-                                    script_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="script").first()
-                                    if script_rec and script_rec.result_content:
-                                        with open(os.path.join(export_dir, "script.txt"), "w", encoding="utf-8") as sf:
-                                            sf.write(script_rec.result_content)
-                                            
-                                        visual_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="visual").first()
-                                        if visual_rec and visual_rec.result_content:
-                                            with open(os.path.join(export_dir, "visual_prompts.txt"), "w", encoding="utf-8") as vf:
-                                                vf.write(visual_rec.result_content)
-                                                
-                                        st.success(f"Đã tạo gói xuất dữ liệu thành công tại: `{os.path.abspath(export_dir)}`.")
+                                    export_dir, _ = export_and_sync_project(project_id, db)
+                                    st.success(f"Đã tạo gói xuất dữ liệu và đồng bộ sang Windows Host thành công tại: `{os.path.abspath(export_dir)}`.")
                                 except Exception as ex:
                                     st.error(f"Lỗi khi tạo gói xuất dữ liệu: {ex}")
                     
@@ -625,37 +689,10 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                             project_id = st.session_state.get("project_id")
                             if project_id:
                                 try:
-                                    import sys
-                                    # 1. Đảm bảo gói dữ liệu đã được xuất trước
-                                    export_dir = f"exports/project_{project_id}"
+                                    # 1. Đảm bảo dữ liệu đã được xuất và đồng bộ sang Windows Host
+                                    export_dir, _ = export_and_sync_project(project_id, db)
                                     abs_export_dir = os.path.abspath(export_dir)
-                                    if not os.path.exists(export_dir) or not os.listdir(export_dir):
-                                        os.makedirs(export_dir, exist_ok=True)
-                                        # Copy/Write voiceover
-                                        voice_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="voice").first()
-                                        if voice_rec:
-                                            voice_media = db.query(MediaFile).filter_by(project_stage_id=voice_rec.id).first()
-                                            if voice_media and voice_media.file_data:
-                                                with open(os.path.join(export_dir, voice_media.file_name), "wb") as f_out:
-                                                    f_out.write(voice_media.file_data)
-                                        # Copy/Write image
-                                        img_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="image").first()
-                                        if img_rec:
-                                            img_medias = db.query(MediaFile).filter_by(project_stage_id=img_rec.id).all()
-                                            for idx, media in enumerate(img_medias):
-                                                if media.file_data:
-                                                    with open(os.path.join(export_dir, f"scene_{idx+1}_{media.file_name}"), "wb") as f_out:
-                                                        f_out.write(media.file_data)
-                                        # Ghi file kịch bản & phân cảnh
-                                        script_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="script").first()
-                                        if script_rec and script_rec.result_content:
-                                            with open(os.path.join(export_dir, "script.txt"), "w", encoding="utf-8") as sf:
-                                                sf.write(script_rec.result_content)
-                                        visual_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="visual").first()
-                                        if visual_rec and visual_rec.result_content:
-                                            with open(os.path.join(export_dir, "visual_prompts.txt"), "w", encoding="utf-8") as vf:
-                                                vf.write(visual_rec.result_content)
-
+                                    
                                     # 2. Import computer_control
                                     from src.tools.computer_control import computer_control
                                     
@@ -740,9 +777,88 @@ public class WinEnum {
                                         computer_control({"action": "wait", "seconds": "0.5"})
                                         computer_control({"action": "press", "key": "enter"})
                                         
+                                        # Tự động trích xuất prompt và dán hàng loạt vào Bước 2
+                                        prompts_text = ""
+                                        try:
+                                            import re
+                                            vp_path = os.path.join(export_dir, "visual_prompts.txt")
+                                            if os.path.exists(vp_path):
+                                                with open(vp_path, "r", encoding="utf-8") as vf:
+                                                    vp_content = vf.read()
+                                                # Lọc bỏ "Scene X:" để lấy prompt tiếng Anh sạch
+                                                matches = re.findall(r"(?:Scene|Cảnh)\s*\d+\s*[:\-–\.]\s*(.*)", vp_content, re.IGNORECASE)
+                                                if matches:
+                                                    prompts_text = "\n".join([m.strip() for m in matches if m.strip()])
+                                                else:
+                                                    prompts_text = vp_content
+                                        except Exception as ex_pe:
+                                            print(f"[WARN] Khong the trich xuat prompts: {ex_pe}")
+
+                                        if prompts_text:
+                                            # Đợi ảnh load xong
+                                            computer_control({"action": "wait", "seconds": "2.0"})
+                                            st.toast("Đang tìm ô nhập prompt trên màn hình...", icon=":material/search:")
+                                            computer_control({"action": "screen_click", "description": "Nhập hàng loạt prompt tương ứng"})
+                                            computer_control({"action": "wait", "seconds": "0.5"})
+                                            # Xóa ô cũ nếu có và dán prompt mới
+                                            computer_control({"action": "clear_field"})
+                                            computer_control({"action": "wait", "seconds": "0.2"})
+                                            st.toast("Đang dán danh sách prompt vào Veo3...", icon=":material/content_paste:")
+                                            computer_control({"action": "paste", "text": prompts_text})
+                                        
+                                        # Ghi trạng thái đã đẩy thành công vào push_status.json
+                                        try:
+                                            import datetime
+                                            import json
+                                            status_file = os.path.join(export_dir, "push_status.json")
+                                            with open(status_file, "w", encoding="utf-8") as sf:
+                                                json.dump({
+                                                    "pushed": True,
+                                                    "pushed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                                }, sf)
+                                        except Exception as ex_status:
+                                            print(f"[WARN] Khong the ghi push_status.json: {ex_status}")
+                                        
                                         st.success(f"Đã tự động đẩy dữ liệu từ `{abs_export_dir}` vào {target_title} thành công!")
                                 except Exception as ex:
                                     st.error(f"Không thể gọi module tự động hóa của Mark-L: {ex}")
+                    
+                    # Trạng thái nạp & hình ảnh đã đóng gói hiển thị trên UI
+                    project_id = st.session_state.get("project_id")
+                    if project_id:
+                        import glob
+                        import json
+                        export_dir = f"exports/project_{project_id}"
+                        status_file = os.path.join(export_dir, "push_status.json")
+                        
+                        st.write("")
+                        if os.path.exists(status_file):
+                            try:
+                                with open(status_file, "r", encoding="utf-8") as sf:
+                                    status_data = json.load(sf)
+                                st.success(f"⚡ Trạng thái: Đã đẩy tự động vào Veo3 lúc {status_data.get('pushed_at', '')}")
+                            except:
+                                st.warning("⚡ Trạng thái: Chưa đẩy vào Veo3")
+                        else:
+                            st.info("⚡ Trạng thái: Chưa đẩy vào Veo3")
+                        
+                        # Hiển thị hình ảnh phân cảnh đã đóng gói (nếu có)
+                        if os.path.exists(export_dir):
+                            image_files = sorted(glob.glob(os.path.join(export_dir, "scene_*_*.png")) + 
+                                                 glob.glob(os.path.join(export_dir, "scene_*_*.jpg")) + 
+                                                 glob.glob(os.path.join(export_dir, "scene_*_*.jpeg")))
+                            if image_files:
+                                st.subheader("📸 Hình ảnh phân cảnh đã đóng gói:")
+                                img_cols = st.columns(4)
+                                for idx, img_path in enumerate(image_files):
+                                    with img_cols[idx % 4]:
+                                        img_name = os.path.basename(img_path)
+                                        try:
+                                            parts = img_name.split("_")
+                                            scene_title = parts[0].capitalize() + " " + parts[1]
+                                        except:
+                                            scene_title = img_name
+                                        st.image(img_path, caption=scene_title, use_container_width=True)
                 elif current == "script":
                     project_id = st.session_state.get("project_id")
                     if project_id:
