@@ -18,7 +18,7 @@ def generate_gpt_image_func(prompt: str) -> str:
         # Sử dụng API Key của OpenAI được thiết lập trong môi trường
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
-            return "ERROR: Thieu OPENAI_API_KEY trong moi truong. Vui long cau hinh API Key de tao anh."
+            return "ERROR: Thiếu OPENAI_API_KEY trong môi trường. Vui lòng cấu hình API Key để tạo ảnh."
 
         # Thêm chỉ thị loại bỏ chữ/text
         no_text_suffix = ", absolutely NO text, NO words, NO letters, NO signs, NO watermark, NO logo, NO labels, pure visual scene"
