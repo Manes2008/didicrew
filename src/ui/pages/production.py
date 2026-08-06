@@ -863,10 +863,10 @@ public class WinEnum {
                                     if "attempts" in metrics:
                                         st.caption(f"Số lần viết lại tự động: {metrics['attempts']}")
 
-                                    with st.expander("Xem du lieu phan tich tho (Raw JSON)", expanded=False):
+                                    with st.expander("Xem dữ liệu phân tích thô (Raw JSON)", expanded=False):
                                         st.json(metrics)
                             except Exception:
-                                st.warning("Khong the phan tich dinh dang JSON cua metrics. Dang hien thi du lieu tho:")
+                                st.warning("Không thể phân tích định dạng JSON của metrics. Đang hiển thị dữ liệu thô:")
                                 st.code(log.analysis_metrics, language="json")
 
                         # Nút phân tích lại cho bước 3 chưa có chỉ số Visual

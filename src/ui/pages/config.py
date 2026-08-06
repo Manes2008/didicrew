@@ -109,7 +109,7 @@ def render_config_page(db, selected_channel):
             key="cfg_gemini_key"
         )
 
-        if st.button("Luu API Keys", type="primary"):
+        if st.button("Lưu API Keys", type="primary"):
             saved = False
             if openai_key_input.strip():
                 try:
@@ -118,7 +118,7 @@ def render_config_page(db, selected_channel):
                     os.environ["OPENAI_API_KEY"] = openai_key_input.strip()
                     saved = True
                 except Exception as ex:
-                    st.error(f"Loi luu OpenAI Key: {ex}")
+                    st.error(f"Lỗi lưu OpenAI Key: {ex}")
             if gemini_key_input.strip():
                 try:
                     save_config_to_db(db, "gemini_api_key", gemini_key_input.strip(), encrypt=True)
@@ -126,12 +126,12 @@ def render_config_page(db, selected_channel):
                     os.environ["GEMINI_API_KEY"] = gemini_key_input.strip()
                     saved = True
                 except Exception as ex:
-                    st.error(f"Loi luu Gemini Key: {ex}")
+                    st.error(f"Lỗi lưu Gemini Key: {ex}")
             if saved:
-                st.success("Da ma hoa va luu API Keys vao database thanh cong!")
+                st.success("Đã mã hóa và lưu API Keys vào database thành công!")
                 st.rerun()
             else:
-                st.warning("Vui long nhap it nhat mot API Key de luu.")
+                st.warning("Vui lòng nhập ít nhất một API Key để lưu.")
 
     # 2. Cấu hình AI Model & Engines
     st.markdown('<div class="vc-eyebrow" style="margin-top:1.5rem;"><i class="bi bi-cpu"></i> Chon AI Model & Render Engines</div>', unsafe_allow_html=True)
@@ -180,8 +180,8 @@ def render_config_page(db, selected_channel):
             }
             st.session_state["image_engine"] = reverse_map[image_engine_option]
 
-        if st.button("Luu Cau Hinh Model", width="stretch"):
-            st.success("Da luu cau hinh AI Model thanh cong!")
+        if st.button("Lưu Cấu Hình Model", width="stretch"):
+            st.success("Đã lưu cấu hình AI Model thành công!")
             st.rerun()
 
     # ─── 3. Backup & Restore ───────────────────────────────────────────────
@@ -191,23 +191,23 @@ def render_config_page(db, selected_channel):
 
         # ── Tab Tao Backup ──
         with tab_bk:
-            st.info("Backup toan bo du lieu DB (bao gom anh, audio, video nhi phan) va file local vao 1 file ZIP.")
+            st.info("Backup toàn bộ dữ liệu DB (bao gồm ảnh, audio, video nhị phân) và file local vào 1 file ZIP.")
             col_bk1, col_bk2 = st.columns(2)
             with col_bk1:
-                include_files = st.checkbox("Bao gom file local (generated_images, videos, ...)", value=True, key="bk_include_files")
+                include_files = st.checkbox("Bao gồm file local (generated_images, videos, ...)", value=True, key="bk_include_files")
             with col_bk2:
-                st.caption("File ZIP co the dat 100MB+ neu co nhieu anh/video.")
+                st.caption("File ZIP có thể đạt 100MB+ nếu có nhiều ảnh/video.")
 
-            if st.button("Tao Backup ngay", icon=":material/backup:", type="primary", width="stretch"):
-                with st.spinner("Dang xuat du lieu, vui long cho..."):
+            if st.button("Tạo Backup ngay", icon=":material/backup:", type="primary", width="stretch"):
+                with st.spinner("Đang xuất dữ liệu, vui lòng chờ..."):
                     try:
                         from src.tools.backup_restore import create_backup
                         zip_bytes, stats = create_backup(db, include_local_files=include_files)
                         st.session_state["_backup_bytes"] = zip_bytes
                         st.session_state["_backup_stats"] = stats
-                        st.success(f"Tao backup thanh cong! Kich thuoc: {len(zip_bytes) / 1024:.1f} KB")
+                        st.success(f"Tạo backup thành công! Kích thước: {len(zip_bytes) / 1024:.1f} KB")
                     except Exception as ex:
-                        st.error(f"Loi tao backup: {ex}")
+                        st.error(f"Lỗi tạo backup: {ex}")
 
             if st.session_state.get("_backup_bytes"):
                 zip_bytes = st.session_state["_backup_bytes"]
@@ -223,7 +223,7 @@ def render_config_page(db, selected_channel):
                 )
                 # Hien thi thong ke
                 if stats:
-                    st.markdown("**Thong ke du lieu da backup:**")
+                    st.markdown("**Thống kê dữ liệu đã backup:**")
                     stat_rows = {k: v for k, v in stats.items() if k != "local_files" and not str(v).startswith("ERROR")}
                     if stat_rows:
                         col_s1, col_s2, col_s3 = st.columns(3)
@@ -237,8 +237,8 @@ def render_config_page(db, selected_channel):
 
         # ── Tab Restore ──
         with tab_rs:
-            st.warning("Restore se THEM cac record chua ton tai. Record da co (cung PK) se bi BO QUA (skip).")
-            uploaded = st.file_uploader("Chon file backup (.zip)", type=["zip"], key="rs_upload")
+            st.warning("Restore sẽ THÊM các record chưa tồn tại. Record đã có (cùng PK) sẽ bị BỎ QUA (skip).")
+            uploaded = st.file_uploader("Chọn file backup (.zip)", type=["zip"], key="rs_upload")
 
             if uploaded:
                 zip_bytes_up = uploaded.read()
@@ -247,30 +247,30 @@ def render_config_page(db, selected_channel):
                     from src.tools.backup_restore import get_backup_preview, restore_backup
                     preview = get_backup_preview(zip_bytes_up)
                     if "error" in preview:
-                        st.error(f"File backup khong hop le: {preview['error']}")
+                        st.error(f"File backup không hợp lệ: {preview['error']}")
                     else:
-                        with st.expander("Xem thong tin backup nay", expanded=True):
-                            st.markdown(f"- **Phien ban:** `{preview.get('backup_version', 'N/A')}`")
-                            st.markdown(f"- **Thoi diem tao:** `{preview.get('created_at', 'N/A')}`")
+                        with st.expander("Xem thông tin backup này", expanded=True):
+                            st.markdown(f"- **Phiên bản:** `{preview.get('backup_version', 'N/A')}`")
+                            st.markdown(f"- **Thời điểm tạo:** `{preview.get('created_at', 'N/A')}`")
                             bk_stats = preview.get("stats", {})
                             if bk_stats:
                                 stat_items = {k: v for k, v in bk_stats.items() if k != "local_files"}
-                                st.markdown("**Noi dung cac bang:**")
+                                st.markdown("**Nội dung các bảng:**")
                                 for tname, cnt in stat_items.items():
                                     st.caption(f"  {tname}: {cnt} records")
                                 local_fs = bk_stats.get("local_files", {})
                                 if local_fs:
                                     st.caption("File local: " + ", ".join(f"{k}={v}" for k, v in local_fs.items()))
 
-                        if st.button("Bat dau Restore", icon=":material/restore:", type="primary", width="stretch"):
-                            with st.spinner("Dang restore du lieu, vui long cho..."):
+                        if st.button("Bắt đầu Restore", icon=":material/restore:", type="primary", width="stretch"):
+                            with st.spinner("Đang restore dữ liệu, vui lòng chờ..."):
                                 try:
                                     result = restore_backup(db, zip_bytes_up, overwrite=False)
-                                    st.success("Restore hoan tat!")
+                                    st.success("Restore hoàn tất!")
                                     # Bao cao ket qua
                                     for tname, info in result.items():
                                         if tname == "local_files_restored":
-                                            st.caption(f"File local da phuc hoi: {info}")
+                                            st.caption(f"File local đã phục hồi: {info}")
                                         elif isinstance(info, dict):
                                             if "error" in info:
                                                 st.error(f"{tname}: {info['error']}")
@@ -279,8 +279,8 @@ def render_config_page(db, selected_channel):
                                                 skp = info.get('skipped', 0)
                                                 err = info.get('errors', 0)
                                                 color = "normal" if err == 0 else "inverse"
-                                                st.caption(f"{tname}: +{ins} them | {skp} bo qua | {err} loi")
+                                                st.caption(f"{tname}: +{ins} thêm | {skp} bỏ qua | {err} lỗi")
                                 except Exception as ex:
-                                    st.error(f"Loi restore: {ex}")
+                                    st.error(f"Lỗi restore: {ex}")
                 except ImportError:
                     st.error("Module backup_restore chua duoc cai dat.")

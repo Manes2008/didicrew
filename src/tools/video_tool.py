@@ -150,20 +150,20 @@ def generate_wan21_local_video(prompt: str, image_path: str = None) -> str:
                 del vae
             gc.collect()
             torch.cuda.empty_cache()
-            print(f"[WARNING] Tran VRAM GPU: {oom_err}")
-            return f"ERROR: Tran VRAM GPU (CUDA Out of Memory)! VRAM da cap phat qua muc cho phep. Vui long dong cac ung dung khac hoac dung engine Cloud."
+            print(f"[WARNING] Tràn VRAM GPU: {oom_err}")
+            return f"ERROR: Tràn VRAM GPU (CUDA Out of Memory)! VRAM đã cấp phát quá mức cho phép. Vui lòng đóng các ứng dụng khác hoặc dùng engine Cloud."
         except ImportError as imp_err:
-            return f"ERROR: Thieu thu vien diffusers hoac phu thuoc: {str(imp_err)}. Vui long chay: pip install -r requirements.txt"
+            return f"ERROR: Thiếu thư viện diffusers hoặc phụ thuộc: {str(imp_err)}. Vui lòng chạy: pip install -r requirements.txt"
         except Exception as model_err:
             err_str = str(model_err)
             if "File reconstruction error" in err_str or "Background writer channel closed" in err_str:
-                return "ERROR: File cache weights bi hong do ngat tai giua chung. Vui long chay: Remove-Item -Recurse -Force \"$env:USERPROFILE\\.cache\\huggingface\\hub\\models--Wan-AI--Wan2.1-T2V-1.3B-Diffusers\""
-            return f"ERROR: Khong the khoi tao pipeline Wan 2.1 Local: {err_str}. Vui long kiem tra lai thu vien diffusers va VRAM."
+                return "ERROR: File cache weights bị hỏng do ngắt tải giữa chừng. Vui lòng chạy: Remove-Item -Recurse -Force \"$env:USERPROFILE\\.cache\\huggingface\\hub\\models--Wan-AI--Wan2.1-T2V-1.3B-Diffusers\""
+            return f"ERROR: Không thể khởi tạo pipeline Wan 2.1 Local: {err_str}. Vui lòng kiểm tra lại thư viện diffusers và VRAM."
 
     except ImportError:
-        return "ERROR: Chưa cai dat thu vien torch / diffusers cho Wan 2.1 Local. Vui long chay: pip install torch diffusers transformers"
+        return "ERROR: Chưa cài đặt thư viện torch / diffusers cho Wan 2.1 Local. Vui lòng chạy: pip install torch diffusers transformers"
     except Exception as e:
-        return f"ERROR: Loi khi chay Wan 2.1 Local: {str(e)}"
+        return f"ERROR: Lỗi khi chạy Wan 2.1 Local: {str(e)}"
 
 import math
 
@@ -430,7 +430,7 @@ def _generate_pollo_video(prompt: str, image_path: str = None) -> str:
     try:
         api_key = config.POLLO_API_KEY
         if not api_key:
-            return "ERROR: Thieu POLLO_API_KEY trong moi truong. Vui long cau hinh API Key de tao video."
+            return "ERROR: Thiếu POLLO_API_KEY trong môi trường. Vui lòng cấu hình API Key để tạo video."
 
         url = "https://pollo.ai/api/platform/generation/minimax/minimax-hailuo-02"
         headers = {
