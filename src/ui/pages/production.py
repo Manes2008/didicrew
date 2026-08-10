@@ -7,14 +7,14 @@ from src.core.engine import run_stage
 
 # Các hằng số workflow
 STAGE_DISPLAY_NAMES = {
-    "script": "1. Viết kịch bản",
-    "visual": "2. Mô tả hình ảnh",
-    "image": "3. Tạo hình ảnh",
-    "voice": "4. Tạo giọng đọc",
-    "video": "5. Xuất Video"
+    "brief":  "1. Định hướng Sáng tạo",
+    "script": "2. Viết kịch bản",
+    "image":  "3. Tạo hình ảnh",
+    "voice":  "4. Tạo giọng đọc",
+    "video":  "5. Xuất Video"
 }
-STAGES_ORDER = ["script", "visual", "image", "voice", "video"]
-STAGE_ICONS = ["file-earmark-text", "eye", "image", "mic", "film"]
+STAGES_ORDER = ["brief", "script", "image", "voice", "video"]
+STAGE_ICONS = ["briefcase", "file-earmark-text", "image", "mic", "film"]
 DISPLAY_TO_TECH = {v: k for k, v in STAGE_DISPLAY_NAMES.items()}
 TECH_TO_DISPLAY = STAGE_DISPLAY_NAMES
 
@@ -138,7 +138,11 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                 st.session_state["project_id"] = selected_project.id
                 st.session_state["idea"] = selected_project.idea
                 if project_changed or "results" not in st.session_state:
-                    st.session_state["stage"] = selected_project.current_stage
+                    # Guard: nếu current_stage cũ (ví dụ 'visual') không còn trong STAGES_ORDER mới → fallback về 'brief'
+                    _loaded_stage = selected_project.current_stage
+                    if _loaded_stage not in STAGES_ORDER:
+                        _loaded_stage = "brief"
+                    st.session_state["stage"] = _loaded_stage
                     st.session_state["results"] = {}
                     for stage_rec in selected_project.stages:
                         if stage_rec.result_content:
@@ -250,7 +254,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                         idea=idea.strip(),
                         provider=provider,
                         model_name=model_name,
-                        current_stage="script",
+                        current_stage="brief",
                         status="pending"
                     )
                     db.add(new_proj)
@@ -300,7 +304,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                     st.session_state["project_id"] = new_proj.id
                     st.session_state["idea"] = idea.strip()
                     st.session_state["llm"] = get_llm(provider=provider, model_name=model_name, api_key=api_key, temperature=0.75)
-                    st.session_state["stage"] = "script"
+                    st.session_state["stage"] = "brief"
                     st.session_state["results"] = {}
                     st.success("Khởi tạo dự án thành công!")
                     st.rerun()
@@ -319,6 +323,10 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
     # WORKFLOW STEPPER MENU
     if "stage" in st.session_state and selected_project is not None:
         current = st.session_state["stage"]
+        # Guard: nếu stage không thuộc STAGES_ORDER mới (project cũ có stage 'visual') → fallback về 'brief'
+        if current not in STAGES_ORDER:
+            current = "brief"
+            st.session_state["stage"] = current
         current_idx = STAGES_ORDER.index(current)
 
         st.markdown("---")
@@ -800,6 +808,31 @@ public class WinEnum {
                                         st.success(f"Đã tự động đẩy dữ liệu từ `{abs_export_dir}` vào {target_title} thành công!")
                                 except Exception as ex:
                                     st.error(f"Không thể gọi module tự động hóa của Mark-L: {ex}")
+                elif current == "brief":
+                    st.markdown("### Brief Sáng tạo được AI tạo")
+                    # Cho phép chỉnh sửa Brief trước khi sang bước viết kịch bản
+                    edited_brief = st.text_area(
+                        "Chỉnh sửa Brief (nếu cần):",
+                        value=result_text,
+                        height=400,
+                        key="brief_edit_area",
+                        help="AI đã tự động sinh Brief. Bạn có thể chỉnh sửa trước khi sang bước viết kịch bản."
+                    )
+                    if edited_brief != result_text:
+                        if st.button("Ảp dụng chỉnh sửa Brief", icon=":material/save:", type="secondary"):
+                            st.session_state["results"]["brief"] = edited_brief
+                            project_id = st.session_state.get("project_id")
+                            if project_id:
+                                try:
+                                    brief_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="brief").first()
+                                    if brief_rec:
+                                        brief_rec.result_content = edited_brief
+                                        db.commit()
+                                        st.toast("Đã lưu Brief đã chỉnh sửa!", icon=":material/check_circle:")
+                                        st.rerun()
+                                except Exception as ex_brief:
+                                    db.rollback()
+                                    st.error(f"Lỗi lưu Brief: {ex_brief}")
                 elif current == "script":
                     project_id = st.session_state.get("project_id")
                     if project_id:

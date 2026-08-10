@@ -47,6 +47,7 @@ class WorkflowEngine:
         
         # Ánh xạ từ tên stage sang agent_id và task_id trong file cấu hình
         self.stage_mapping = {
+            "brief": ("brief_director", "brief_task"),
             "script": ("script_writer", "script_task"),
             "visual": ("visual_prompt_engineer", "visual_task"),
             "image": ("image_generation_specialist", "image_task"),
@@ -229,8 +230,8 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
             if stage_name == "video":
                 from src.tools.video_tool import generate_video_func
                 
-                # Ưu tiên lấy kịch bản chi tiết (visual prompt) thay vì chỉ câu ý tưởng ban đầu
-                visual_result = all_results.get("visual", "") if all_results else ""
+                # Ưu tiên lấy kịch bản chi tiết (script đã có visual description inline) thay vì stage visual riêng
+                visual_result = all_results.get("script", "") if all_results else ""
                 script_result = all_results.get("script", "") if all_results else ""
                 
                 # Trích xuất toàn bộ danh sách đường dẫn ảnh từ kết quả bước 3
@@ -280,6 +281,7 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                 "idea": idea_for_script,
                 "previous_result": previous_result if previous_result else "",
                 "markdown_template": f"\n[CAU TRUC DAU RA BAT BUOC - MARKDOWN TEMPLATE]:\nHay viet noi dung va tra ve ket qua tuan thu CHINH XAC theo cau truc template sau:\n{markdown_template}\n" if markdown_template and markdown_template.strip() else "",
+                "brief": "",
                 "script": "",
                 "visual": "",
                 "image": "",
