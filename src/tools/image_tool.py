@@ -47,80 +47,114 @@ def generate_gpt_image_func(prompt: str) -> str:
         client = OpenAI(api_key=api_key, base_url="https://api.openai.com/v1")
         
         scene_results = {}
-        pending_scenes = list(scene_prompts)
-        
         max_attempts = 3
-        attempt = 0
         
-        while pending_scenes and attempt < max_attempts:
-            attempt += 1
+        def generate_single_scene_image(scene_info, gen_id_ref=None) -> tuple[int, str, str | None]:
+            s_num, s_prompt = scene_info
             
-            def generate_single_scene_image(scene_info) -> tuple[int, str]:
-                s_num, s_prompt = scene_info
+            # Nếu có gen_id_ref từ Scene đầu tiên, thêm chỉ dẫn tham chiếu vào prompt
+            if gen_id_ref and s_num > 1:
+                refined_prompt = f"Using gen_id {gen_id_ref} as reference to maintain identical character, clothing, face features, and art style. {s_prompt[:25000]}{no_text_suffix}"
+            else:
                 refined_prompt = f"{s_prompt[:30000]}{no_text_suffix}"
+                
+            try:
                 try:
+                    # Thử tạo ảnh bằng gpt-image-2
+                    response = client.images.generate(
+                        model="gpt-image-2",
+                        prompt=refined_prompt,
+                        size="1024x1024",
+                        quality="medium",
+                        n=1
+                    )
+                except Exception as e2:
+                    # Nếu gpt-image-2 lỗi, tự động hạ cấp xuống gpt-image-1-mini
                     try:
-                        # Thử tạo ảnh bằng gpt-image-2
                         response = client.images.generate(
-                            model="gpt-image-2",
+                            model="gpt-image-1-mini",
                             prompt=refined_prompt,
                             size="1024x1024",
                             quality="medium",
                             n=1
                         )
-                    except Exception as e2:
-                        # Nếu gpt-image-2 lỗi, tự động hạ cấp xuống gpt-image-1-mini
-                        try:
-                            response = client.images.generate(
-                                model="gpt-image-1-mini",
-                                prompt=refined_prompt,
-                                size="1024x1024",
-                                quality="medium",
-                                n=1
-                            )
-                        except Exception as e1:
-                            return s_num, f"ERROR_IDX_{s_num}: gpt-image-2: {str(e2)} | gpt-image-1-mini: {str(e1)}"
-                    
-                    b64_data = response.data[0].b64_json
-                    if not b64_data:
-                        return s_num, f"ERROR_IDX_{s_num}: OpenAI khong tra ve du lieu anh."
-                    
-                    img_bytes = base64.b64decode(b64_data)
-                    img = Image.open(BytesIO(img_bytes))
-                    
-                    os.makedirs("generated_images", exist_ok=True)
-                    # Lưu tên file chứa scene_{s_num} để UI dễ đối chiếu
-                    file_path = f"generated_images/scene_{s_num}_image_{int(time.time())}.png"
-                    img.save(file_path)
-                    
-                    return s_num, file_path
-                except Exception as e:
-                    return s_num, f"ERROR_IDX_{s_num}: {str(e)}"
+                    except Exception as e1:
+                        return s_num, f"ERROR_IDX_{s_num}: gpt-image-2: {str(e2)} | gpt-image-1-mini: {str(e1)}", None
+                
+                b64_data = response.data[0].b64_json
+                if not b64_data:
+                    return s_num, f"ERROR_IDX_{s_num}: OpenAI khong tra ve du lieu anh.", None
+                
+                gen_id = getattr(response.data[0], "gen_id", None)
+                
+                img_bytes = base64.b64decode(b64_data)
+                img = Image.open(BytesIO(img_bytes))
+                
+                os.makedirs("generated_images", exist_ok=True)
+                # Lưu tên file chứa scene_{s_num} để UI dễ đối chiếu
+                file_path = f"generated_images/scene_{s_num}_image_{int(time.time())}.png"
+                img.save(file_path)
+                
+                return s_num, file_path, gen_id
+            except Exception as e:
+                return s_num, f"ERROR_IDX_{s_num}: {str(e)}", None
 
-            # Tạo song song các ảnh bằng ThreadPoolExecutor
-            with ThreadPoolExecutor(max_workers=min(len(pending_scenes), 4)) as executor:
-                batch_results = list(executor.map(generate_single_scene_image, pending_scenes))
+        # Sắp xếp để vẽ scene đầu tiên trước (thường là Scene 1)
+        sorted_scenes = sorted(scene_prompts, key=lambda x: x[0])
+        gen_id_ref = None
+        
+        if sorted_scenes:
+            first_scene = sorted_scenes[0]
+            first_scene_success = False
+            first_attempt = 0
             
-            next_pending = []
-            for s_num, res in batch_results:
-                if "ERROR_IDX_" in res:
-                    err_lower = res.lower()
+            # Thử sinh Scene đầu tiên (có retry rate-limit)
+            while first_attempt < max_attempts and not first_scene_success:
+                first_attempt += 1
+                s_num, res_path, gen_id = generate_single_scene_image(first_scene, None)
+                if "ERROR_IDX_" in res_path:
+                    err_lower = res_path.lower()
                     is_api_limit = "429" in err_lower or "quota" in err_lower or "limit" in err_lower or "exhausted" in err_lower
-                    
-                    # Nếu gặp lỗi rate limit / quota, ta sẽ đưa vào danh sách thử lại cho vòng sau
-                    if is_api_limit and attempt < max_attempts:
-                        s_prompt = next(p[1] for p in pending_scenes if p[0] == s_num)
-                        next_pending.append((s_num, s_prompt))
-                        scene_results[s_num] = res
-                    else:
-                        scene_results[s_num] = res
+                    scene_results[s_num] = res_path
+                    if not is_api_limit:
+                        break
+                    if first_attempt < max_attempts:
+                        time.sleep(2)
                 else:
-                    scene_results[s_num] = res
+                    scene_results[s_num] = res_path
+                    gen_id_ref = gen_id
+                    first_scene_success = True
             
-            pending_scenes = next_pending
-            if pending_scenes:
-                # Đợi 2 giây trước khi gửi lại request lần tiếp theo
-                time.sleep(2)
+            # Sinh song song các Scene còn lại
+            other_scenes = sorted_scenes[1:]
+            if other_scenes:
+                pending_scenes = list(other_scenes)
+                attempt = 0
+                
+                while pending_scenes and attempt < max_attempts:
+                    attempt += 1
+                    
+                    def run_batch_task(scene_info):
+                        return generate_single_scene_image(scene_info, gen_id_ref)
+                        
+                    with ThreadPoolExecutor(max_workers=min(len(pending_scenes), 4)) as executor:
+                         batch_results = list(executor.map(run_batch_task, pending_scenes))
+                    
+                    next_pending = []
+                    for s_num, res_path, gen_id in batch_results:
+                        if "ERROR_IDX_" in res_path:
+                            err_lower = res_path.lower()
+                            is_api_limit = "429" in err_lower or "quota" in err_lower or "limit" in err_lower or "exhausted" in err_lower
+                            scene_results[s_num] = res_path
+                            if is_api_limit and attempt < max_attempts:
+                                s_prompt = next(p[1] for p in pending_scenes if p[0] == s_num)
+                                next_pending.append((s_num, s_prompt))
+                        else:
+                            scene_results[s_num] = res_path
+                    
+                    pending_scenes = next_pending
+                    if pending_scenes:
+                        time.sleep(2)
 
         # Định dạng dòng trả về để tương thích ngược
         output_lines = []

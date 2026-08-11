@@ -1,20 +1,87 @@
+brief_task:
+  description: |
+    Dựa trên ý tưởng ban đầu: "{idea}", và bối cảnh kênh: {channel_name} — {channel_description}.
+    Mục tiêu kênh: {channel_goal}.
+
+    Hãy xây dựng một bản CREATIVE BRIEF hoàn chỉnh, súc tích và chuyên nghiệp gồm đầy đủ các mục:
+
+    1. **MỤC ĐÍCH NỘI DUNG**
+       - Platform mục tiêu: TikTok / Reels / Shorts
+       - Mục tiêu video: Giải trí / Cảm xúc / Lan truyền / Giáo dục
+       - Thông điệp cốt lõi (Key Message) cần truyền tải
+
+    2. **ĐỐI TƯỢNG XEM MỤC TIÊU**
+       - Độ tuổi, giới tính, sở thích
+       - Hành vi xem video (xem nhanh, xem đến cuối, chia sẻ...)
+
+    3. **HỒ SƠ NHÂN VẬT CHÍNH (CHARACTER PROFILE)**
+       - Tên nhân vật, giới tính, độ tuổi
+       - Ngoại hình chi tiết: chiều cao, vóc dáng, màu tóc, kiểu tóc
+       - Trang phục đặc trưng cho video này
+       - Biểu cảm / tính cách chủ đạo
+
+    4. **BỐI CẢNH & KHÔNG GIAN CHÍNH**
+       - Địa điểm chính (1-2 địa điểm tối đa để giữ nhất quán)
+       - Thời gian trong ngày, ánh sáng tổng thể
+       - Không khí chủ đạo của không gian
+
+    5. **TONE & MOOD**
+       - Cảm xúc chủ đạo người xem cảm nhận được
+       - Nhịp điệu: chậm rãi / năng động / kịch tính
+       - Bảng màu chủ đạo
+
+    6. **PHONG CÁCH NGHỆ THUẬT (ART STYLE — dùng cho sinh ảnh AI)**
+       - Phong cách: anime / semi-realistic / cinematic live-action / illustration
+       - Kỹ thuật camera: góc quay, lens style (35mm, wide, close-up)
+       - Các từ khóa style tiếng Anh để dùng nhất quán trong mọi visual prompt
+       - TUYỆT ĐỐI TRÁNH: "photorealistic", "8k", "hyper-detailed", "unreal engine"
+
+    {markdown_template}
+  expected_output: "Bản Creative Brief hoàn chỉnh định dạng Markdown với đầy đủ 6 mục: Mục đích, Đối tượng, Nhân vật, Bối cảnh, Tone/Mood, Art Style."
+
 script_task:
   description: |
-    Dựa trên ý tưởng: "{idea}", hãy viết một kịch bản video ngắn (TikTok/Reels/Shorts, thời lượng dự kiến {target_duration} giây) cực kỳ hấp dẫn và có tính lan truyền cao.
-    Kịch bản bắt buộc phải được trình bày theo cấu trúc Markdown chuyên nghiệp gồm các mục sau:
-    
-    1. **TÊN DỰ ÁN & THÔNG TIN CHUNG** (Tên video, Định dạng, Thời lượng dự kiến).
-    2. **CHIẾN LƯỢC ĐẦU 3 GIÂY (VIRAL HOOK)**: Nêu rõ câu thoại mở đầu và mô tả hành động nhằm thu hút sự chú ý của người xem ngay lập tức (sử dụng câu hỏi gây tò mò, sự thật bất ngờ hoặc tình huống kịch tính).
-    3. **BẢNG PHÂN CẢNH CHI TIẾT (SCENE-BY-SCENE TABLE)**: Trình bày dạng bảng Markdown có các cột:
-       - **Phân cảnh** (Scene 1, Scene 2, Scene 3...).
-       - **Thời lượng** (Duration, ví dụ: 5s, 6s...).
-       - **Mô tả hình ảnh (Visual)**: Chi tiết bối cảnh, nhân vật, biểu cảm, góc máy và chuyển động camera.
-       - **Lời thoại / Thuyết minh (Voiceover)**: Lời thoại tiếng Việt tương ứng cần đọc.
-       - **Hiệu ứng âm thanh & Nhạc (SFX/BGM)**: Gợi ý nhạc nền hoặc hiệu ứng âm thanh cụ thể cho cảnh đó.
-    
-    Yêu cầu nội dung kịch bản phải nhất quán, thông điệp rõ ràng, nhịp điệu nhanh và có lời kêu gọi hành động (CTA) mạnh mẽ ở cuối.
+    Dựa trên CREATIVE BRIEF đã định hướng: "{previous_result}"
+    Và ý tưởng gốc: "{idea}"
+
+    Hãy viết kịch bản video ngắn hoàn chỉnh với CÁC YÊU CẦU BẮT BUỘC SAU:
+
+    **[CẤU TRÚC THỜI LƯỢNG — BẮT BUỘC THỰC HIỆN]**
+    - Tổng thời lượng mục tiêu: {target_duration} giây
+    - Mỗi scene trung bình: ~8 giây (có thể dao động 5-12 giây tùy nội dung cảnh)
+    - Tổng số scene cần có: tự tính theo công thức ({target_duration} ÷ 8), làm tròn — ĐÂY LÀ QUY TẮC LINH HOẠT, không cố định
+    - Scene đầu (Hook): 3-5 giây
+    - Đảm bảo tổng thời lượng cộng tất cả các scene phải ≈ {target_duration} giây
+
+    **[PHẦN 1 — TÊN DỰ ÁN & HOOK]**
+    - Tên video, định dạng, thời lượng dự kiến
+    - CHIẾN LƯỢC HOOK 3 GIÂY ĐẦU: câu thoại mở đầu + mô tả hành động thu hút ngay lập tức
+
+    **[PHẦN 2 — BẢNG PHÂN CẢNH CHI TIẾT]**
+    Trình bày bảng Markdown với 5 cột:
+    | Scene | Thời lượng | Visual Description (EN) | Voiceover (VI) | SFX/BGM |
+
+    QUY TẮC CỘT VISUAL DESCRIPTION (tiếng Anh, dùng để sinh ảnh AI):
+    - Scene 1: Bắt đầu bằng [ESTABLISHING] + mô tả toàn cảnh + nhân vật + ánh sáng + phong cách
+    - Scene 2 trở đi: Bắt đầu bằng transition keyword: [CONTINUATION] / [CUT TO] / [PAN TO] / [CLOSE-UP ON] / [FADE TO]
+    - Mỗi scene phải nhắc lại: tên nhân vật, trang phục đặc trưng từ Brief để đảm bảo character consistency
+    - Mô tả đủ: bối cảnh, hành động nhân vật, biểu cảm, góc máy, ánh sáng
+    - Cuối mỗi visual description: thêm `→ leads to Scene X` để chỉ dẫn chuyển cảnh
+
+    **[PHẦN 3 — VEO3 SCRIPT (Mô tả tình huống chi tiết cho Veo3)]**
+    Viết dưới dạng văn xuôi liên tục (KHÔNG phải bảng), mô tả toàn bộ video như một đạo diễn quan sát:
+    - Viết thành đoạn văn liền mạch từ đầu đến cuối, KHÔNG chia thành các mục rời
+    - Mô tả CỤ THỂ: hành động nhân vật từng giây, di chuyển, biểu cảm thay đổi theo thời gian
+    - Mô tả chuyển cảnh liền mạch: camera di chuyển thế nào, ánh sáng thay đổi thế nào
+    - Mô tả âm thanh nền, nhạc, không khí cảm xúc xuyên suốt
+    - Kết thúc bằng cảnh CTA và cảm xúc người xem cảm nhận được
+    - KHÔNG đề cập đến hình ảnh AI, không dùng từ "scene", "cảnh" — viết như mô tả thực tế
+
+    **[PHẦN 4 — CTA]**
+    - Lời kêu gọi hành động mạnh mẽ phù hợp platform
+
     {markdown_template}
-  expected_output: "Bản kịch bản chi tiết định dạng Markdown chuyên nghiệp gồm cấu trúc Hook, bảng phân cảnh (Visual, Voiceover, SFX/BGM, Duration) và Call to Action (CTA)."
+  expected_output: "Kịch bản hoàn chỉnh với tổng thời lượng ≈ {target_duration}s gồm: Hook, bảng phân cảnh (số scene tự tính = {target_duration}÷8, mỗi scene ~8s linh hoạt, cột Visual EN với transition keywords + character consistency), Veo3 Script prose narrative liên tục, và CTA."
 
 visual_task:
   description: |

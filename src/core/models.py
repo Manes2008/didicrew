@@ -83,7 +83,7 @@ class Project(Base):
     idea = Column(Text, nullable=False)
     provider = Column(String(50), nullable=False)
     model_name = Column(String(50), nullable=False)
-    current_stage = Column(String(20), default="script")
+    current_stage = Column(String(20), default="brief")
     status = Column(String(20), default="pending")
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
