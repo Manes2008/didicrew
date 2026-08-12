@@ -201,13 +201,54 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
 
             # Chạy trực tiếp sinh ảnh bằng code Python thuần túy không qua Agent
             if stage_name == "image":
-                full_prompt = previous_result if previous_result else idea_for_script
+                # Chay ngam buoc visual de toi uu hoa hinh anh chi tiet tu kich ban
+                print("[LOG] Dang chay ngam Agent Visual Prompt Engineer de toi uu hoa prompt hinh anh...")
+                visual_prompt = self.run_stage(
+                    stage_name="visual",
+                    idea=idea,
+                    previous_result=previous_result,
+                    llm=llm,
+                    all_results=all_results,
+                    context=context
+                )
+                
+                # Luu stage visual vao DB ProjectStage de phuc vu xuat du lieu
+                if project_id:
+                    db_session = get_db_session()
+                    try:
+                        from src.core.models import ProjectStage
+                        visual_stage_rec = db_session.query(ProjectStage).filter_by(
+                            project_id=int(project_id),
+                            stage_name="visual"
+                        ).first()
+                        if not visual_stage_rec:
+                            visual_stage_rec = ProjectStage(
+                                project_id=int(project_id),
+                                stage_name="visual",
+                                result_content=visual_prompt,
+                                status="completed"
+                            )
+                            db_session.add(visual_stage_rec)
+                        else:
+                            visual_stage_rec.result_content = visual_prompt
+                            visual_stage_rec.status = "completed"
+                        db_session.commit()
+                    except Exception as ex_db_vis:
+                        db_session.rollback()
+                        print(f"[WARN] Khong the luu ProjectStage visual: {ex_db_vis}")
+                    finally:
+                        db_session.close()
+
+                if all_results is not None:
+                    all_results["visual"] = visual_prompt
+
+                full_prompt = visual_prompt
                 import re
 
                 image_engine = context.get("image_engine", "openai") if context else "openai"
 
                 if image_engine in ("sd1.5_local", "markl_local"):
-                    # Backward-compat: engine local chỉ nhận 1 prompt nên vẫn trích Scene 1
+                    # Backward-compat: engine local chi nhan 1 prompt nen van trich Scene 1
                     scene1_match = re.search(r"(?:Scene|Cảnh)\s*1[\s*:\-\u2013\.]+(.*?)(?=(?:Scene|Cảnh)\s*2[\s*:\-\u2013\.]+|\Z)", full_prompt, re.DOTALL | re.IGNORECASE)
                     if scene1_match:
                         profile_match = re.search(r"(?:Character Profile|Hồ sơ nhân vật|Profile|Nhân vật)[\s*:\-\u2013\.]+(.*?)(?=(?:Art Style|Phong cách|Scene)\s*|\Z)", full_prompt, re.DOTALL | re.IGNORECASE)
@@ -225,7 +266,7 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                     from src.tools.image_tool import generate_local_image_sd_func
                     return generate_local_image_sd_func(local_prompt, use_gpu=(image_engine == "markl_local"))
                 else:
-                    # OpenAI: truyền toàn bộ visual prompt; generate_gpt_image_func tự tách scene và sinh ảnh song song
+                    # OpenAI: truyen toan bo visual prompt; generate_gpt_image_func tu tach scene va sinh anh song song
                     if custom_template and custom_template.strip():
                         full_prompt = f"{custom_template.strip()}\n\n{full_prompt}"
                     from src.tools.image_tool import generate_gpt_image_func
