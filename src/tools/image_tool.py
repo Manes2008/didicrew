@@ -12,6 +12,79 @@ from crewai.tools import tool
 
 from concurrent.futures import ThreadPoolExecutor
 
+def extract_scenes_from_script(script_text: str) -> list[tuple[int, str]]:
+    import re
+    scenes_data = {}
+    
+    # 1. Parse theo khoi block Canh cua Phan 3 de tim Combined Prompt
+    # Tach cac phan theo Cảnh
+    scene_blocks = re.split(r"-?\s*\*?\*?\s*(?:Cảnh|Scene)\s*(\d+)\s*\*?\*?\s*[:\-–\.\s\n]+", script_text, flags=re.IGNORECASE)
+    
+    if len(scene_blocks) > 1:
+        for i in range(1, len(scene_blocks), 2):
+            try:
+                s_num = int(scene_blocks[i])
+                block_content = scene_blocks[i+1]
+                
+                # Tim cac truong con thong qua regex
+                visual_match = re.search(r"Visual(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                voice_match = re.search(r"Voiceover(?:\s*\(VI\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                sfx_match = re.search(r"SFX/BGM\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                detail_match = re.search(r"Veo3\s*Detail\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                combined_match = re.search(r"Combined\s*Prompt(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                
+                visual_en = visual_match.group(1).strip() if visual_match else ""
+                voice_vi = voice_match.group(1).strip() if voice_match else ""
+                sfx = sfx_match.group(1).strip() if sfx_match else ""
+                detail = detail_match.group(1).strip() if detail_match else ""
+                combined = combined_match.group(1).strip() if combined_match else ""
+                
+                # Uu tien Combined Prompt tu AI
+                if combined:
+                    prompt = combined
+                else:
+                    # Neu chua co Combined Prompt thi tu gop thong tin
+                    parts = []
+                    if visual_en: parts.append(visual_en)
+                    if detail: parts.append(detail)
+                    # Them ca Voiceover neu can lam ro thong tin bo sung
+                    if voice_vi: parts.append(f"Voiceover: {voice_vi}")
+                    if sfx: parts.append(f"Audio: {sfx}")
+                    prompt = ". ".join(parts)
+                    
+                if prompt.strip():
+                    scenes_data[s_num] = prompt
+            except Exception as ex_block:
+                print(f"[WARN] Loi parse block canh {scene_blocks[i]}: {ex_block}")
+                
+    # 2. Fallback 1: Parse bảng phân cảnh ở Phần 2 nếu không parse được khối Phần 3
+    if not scenes_data:
+        lines = script_text.split("\n")
+        for line in lines:
+            line_strip = line.strip()
+            if not line_strip.startswith("|") or not line_strip.endswith("|"):
+                continue
+            parts = [p.strip() for p in line_strip.split("|")[1:-1]]
+            if len(parts) >= 3:
+                s_num_str = parts[0]
+                if s_num_str.isdigit():
+                    s_num = int(s_num_str)
+                    scenes_data[s_num] = parts[2]
+                    
+    # 3. Fallback 2: Regex co ban cho toan kịch bản
+    final_scenes = []
+    if scenes_data:
+        for s_num in sorted(scenes_data.keys()):
+            final_scenes.append((s_num, scenes_data[s_num]))
+    else:
+        scenes = re.findall(r"(?:Scene|Cảnh)\s*(\d+)[\s*:\-–\.]+(.*?)(?=(?:Scene|Cảnh)\s*\d+[\s*:\-–\.]+|\Z)", script_text, re.DOTALL | re.IGNORECASE)
+        if scenes:
+            final_scenes = [(int(s_num), s_desc.strip()) for s_num, s_desc in scenes]
+        else:
+            final_scenes = [(1, script_text)]
+            
+    return final_scenes
+
 def generate_gpt_image_func(prompt: str) -> str:
     """Hàm Python thuần túy để tạo hình ảnh bằng gpt-image-2 và tải về máy local cho tất cả các cảnh, có cơ chế retry khi cạn quota."""
     try:
@@ -31,11 +104,8 @@ def generate_gpt_image_func(prompt: str) -> str:
         profile_text = profile_match.group(1).strip() if profile_match else ""
         style_text = style_match.group(1).strip() if style_match else ""
         
-        scenes = re.findall(r"(?:Scene|Cảnh)\s*(\d+)[\s*:\-–\.]+(.*?)(?=(?:Scene|Cảnh)\s*\d+[\s*:\-–\.]+|\Z)", prompt, re.DOTALL | re.IGNORECASE)
-        
-        if not scenes:
-            # Fallback nếu không trích xuất được scene nào thì coi cả prompt là 1 scene
-            scenes = [("1", prompt)]
+        # Su dung bo parse thong minh de trich xuat cac canh
+        scenes = extract_scenes_from_script(prompt)
 
         scene_prompts = []
         for s_num, s_desc in scenes:

@@ -181,8 +181,15 @@ def render_config_page(db, selected_channel):
             st.session_state["image_engine"] = reverse_map[image_engine_option]
 
         if st.button("Lưu Cấu Hình Model", width="stretch"):
-            st.success("Đã lưu cấu hình AI Model thành công!")
-            st.rerun()
+            try:
+                save_config_to_db(db, "provider", provider, encrypt=False)
+                save_config_to_db(db, "model_name", model_name, encrypt=False)
+                save_config_to_db(db, "video_engine", st.session_state.get("video_engine", "wan2.1_local"), encrypt=False)
+                save_config_to_db(db, "image_engine", st.session_state.get("image_engine", "openai"), encrypt=False)
+                st.success("Đã lưu cấu hình AI Model và Engines thành công!")
+                st.rerun()
+            except Exception as ex:
+                st.error(f"Lỗi khi lưu cấu hình: {ex}")
 
     # ─── 3. Backup & Restore ───────────────────────────────────────────────
     st.markdown('<div class="vc-eyebrow" style="margin-top:1.5rem;"><i class="bi bi-database"></i> Backup & Restore Du lieu</div>', unsafe_allow_html=True)

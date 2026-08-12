@@ -810,32 +810,42 @@ public class WinEnum {
                                     st.error(f"Không thể gọi module tự động hóa của Mark-L: {ex}")
                 elif current == "brief":
                     st.markdown("### Brief Sáng tạo được AI tạo")
-                    # Cho phép chỉnh sửa Brief trước khi sang bước viết kịch bản
-                    edited_brief = st.text_area(
-                        "Chỉnh sửa Brief (nếu cần):",
-                        value=result_text,
-                        height=400,
-                        key="brief_edit_area",
-                        help="AI đã tự động sinh Brief. Bạn có thể chỉnh sửa trước khi sang bước viết kịch bản."
-                    )
-                    if edited_brief != result_text:
-                        if st.button("Ảp dụng chỉnh sửa Brief", icon=":material/save:", type="secondary"):
-                            st.session_state["results"]["brief"] = edited_brief
+                    
+                    # Hien thi 2 che do: Xem truc quan va Chinh sua (Raw)
+                    tab_visual, tab_raw = st.tabs(["Xem trực quan", "Chỉnh sửa (Raw)"])
+                    with tab_visual:
+                        # Lay gia tri da chinh sua neu co, fallback ve result_text
+                        visual_text = st.session_state.get("brief_edit_area", result_text)
+                        st.markdown(visual_text)
+                        
+                    with tab_raw:
+                        edited_brief = st.text_area(
+                            "Chỉnh sửa Brief (nếu cần):",
+                            value=result_text,
+                            height=400,
+                            key="brief_edit_area",
+                            help="AI đã tự động sinh Brief. Bạn có thể chỉnh sửa trước khi sang bước viết kịch bản."
+                        )
+                        
+                    if "brief_edit_area" in st.session_state and st.session_state["brief_edit_area"] != result_text:
+                        if st.button("Áp dụng chỉnh sửa Brief", icon=":material/save:", type="secondary"):
+                            st.session_state["results"]["brief"] = st.session_state["brief_edit_area"]
                             project_id = st.session_state.get("project_id")
                             if project_id:
                                 try:
                                     brief_rec = db.query(ProjectStage).filter_by(project_id=project_id, stage_name="brief").first()
                                     if brief_rec:
-                                        brief_rec.result_content = edited_brief
+                                        brief_rec.result_content = st.session_state["brief_edit_area"]
                                         db.commit()
                                         st.toast("Đã lưu Brief đã chỉnh sửa!", icon=":material/check_circle:")
                                         st.rerun()
                                 except Exception as ex_brief:
                                     db.rollback()
                                     st.error(f"Lỗi lưu Brief: {ex_brief}")
-                elif current == "script":
+                                    
+                    # Bo phan tich Admin cho Brief
                     project_id = st.session_state.get("project_id")
-                    if project_id:
+                    if st.session_state.get("user_role") == "ADMIN" and project_id:
                         from src.core.models import PromptOptimizationLog
                         log1 = db.query(PromptOptimizationLog).filter_by(
                             project_id=project_id,
@@ -843,12 +853,15 @@ public class WinEnum {
                         ).order_by(PromptOptimizationLog.created_at.desc()).first()
                         
                         if log1:
+                            st.write("")
                             with st.container(border=True):
                                 status_label = "Đạt chuẩn" if log1.is_standardized else "Cần tối ưu"
                                 status_color = "green" if log1.is_standardized else "orange"
-                                st.markdown(f"### <i class='bi bi-lightbulb-fill'></i> Ý tưởng đã tối ưu hóa & Phân tích ban đầu <span style='font-size:0.85rem; padding: 2px 8px; border-radius: 4px; background-color: {status_color}; color: white; margin-left: 10px;'>{status_label}</span>", unsafe_allow_html=True)
+                                st.markdown(f"##### <i class='bi bi-lightbulb-fill'></i> Phân tích tự động tối ưu hóa Brief <span style='font-size:0.8rem; padding: 2px 6px; border-radius: 4px; background-color: {status_color}; color: white; margin-left: 10px;'>{status_label}</span>", unsafe_allow_html=True)
                                 
-                                st.markdown("**Nội dung ý tưởng sau tối ưu:**")
+                                st.markdown("**Ý tưởng ban đầu:**")
+                                st.caption(log1.user_input_content)
+                                st.markdown("**Brief sau tối ưu:**")
                                 st.info(log1.adjusted_prompt)
                                 
                                 if log1.analysis_metrics:
@@ -856,15 +869,16 @@ public class WinEnum {
                                         metrics = json.loads(log1.analysis_metrics)
                                         col_m1, col_m2, col_m3 = st.columns(3)
                                         with col_m1:
-                                            st.markdown(f"<i class='bi bi-chat-quote'></i> **Tông giọng:**  \n`{metrics.get('tone', 'N/A')}`", unsafe_allow_html=True)
+                                            st.markdown(f"<i class='bi bi-chat-quote'></i> **Tông giọng:** `{metrics.get('tone', 'N/A')}`", unsafe_allow_html=True)
                                         with col_m2:
-                                            st.markdown(f"<i class='bi bi-key'></i> **Mật độ từ khóa:**  \n`{metrics.get('keyword_density', 'N/A')}`", unsafe_allow_html=True)
+                                            st.markdown(f"<i class='bi bi-key'></i> **Mật độ từ khóa:** `{metrics.get('keyword_density', 'N/A')}`", unsafe_allow_html=True)
                                         with col_m3:
-                                            st.markdown(f"<i class='bi bi-alarm'></i> **Thời lượng dự kiến:**  \n`{metrics.get('estimated_duration', 'N/A')}`", unsafe_allow_html=True)
+                                            st.markdown(f"<i class='bi bi-alarm'></i> **Thời lượng dự kiến:** `{metrics.get('estimated_duration', 'N/A')}`", unsafe_allow_html=True)
                                     except Exception:
                                         pass
-                            
-                            st.markdown("### <i class='bi bi-file-earmark-text-fill'></i> Kịch bản chi tiết được tạo", unsafe_allow_html=True)
+                                        
+                elif current == "script":
+                    st.markdown("### <i class='bi bi-file-earmark-text-fill'></i> Kịch bản chi tiết được tạo", unsafe_allow_html=True)
                     render_text_output(result_text)
                 else:
                     render_text_output(result_text)

@@ -48,8 +48,8 @@ script_task:
 
     **[CẤU TRÚC THỜI LƯỢNG — BẮT BUỘC THỰC HIỆN]**
     - Tổng thời lượng mục tiêu: {target_duration} giây
-    - Mỗi scene trung bình: ~8 giây (có thể dao động 5-12 giây tùy nội dung cảnh)
-    - Tổng số scene cần có: tự tính theo công thức ({target_duration} ÷ 8), làm tròn — ĐÂY LÀ QUY TẮC LINH HOẠT, không cố định
+    - Mỗi scene trung bình: ~4 giây đến 5 giây (có thể dao động 3-6 giây tùy nội dung cảnh)
+    - Tổng số scene cần có: tự tính theo công thức ({target_duration} ÷ 4.5), làm tròn — ĐÂY LÀ QUY TẮC LINH HOẠT, không cố định
     - Scene đầu (Hook): 3-5 giây
     - Đảm bảo tổng thời lượng cộng tất cả các scene phải ≈ {target_duration} giây
 
@@ -62,26 +62,28 @@ script_task:
     | Scene | Thời lượng | Visual Description (EN) | Voiceover (VI) | SFX/BGM |
 
     QUY TẮC CỘT VISUAL DESCRIPTION (tiếng Anh, dùng để sinh ảnh AI):
+    - TĂNG ĐỘ CHI TIẾT TỐI ĐA: Mỗi mô tả tiếng Anh phải dài ít nhất 3-4 câu chi tiết.
+    - Phải mô tả cụ thể về: di chuyển camera (Ví dụ: slow zoom in, cinematic tracking, gentle pan left/right), điều kiện ánh sáng & màu sắc (Ví dụ: golden hour backlight, volumetric sunbeams), biểu cảm nhỏ của nhân vật (Ví dụ: eyes widening in surprise, a subtle nostalgic smile), và chi tiết bối cảnh/hậu cảnh.
+    - TĂNG TÍNH LIÊN KẾT: Cảnh sau phải liên kết mượt mà và đồng bộ góc máy với cảnh trước (Ví dụ: "matching the camera angle of the previous shot...", "continuing the tracking motion from Scene X...").
     - Scene 1: Bắt đầu bằng [ESTABLISHING] + mô tả toàn cảnh + nhân vật + ánh sáng + phong cách
     - Scene 2 trở đi: Bắt đầu bằng transition keyword: [CONTINUATION] / [CUT TO] / [PAN TO] / [CLOSE-UP ON] / [FADE TO]
     - Mỗi scene phải nhắc lại: tên nhân vật, trang phục đặc trưng từ Brief để đảm bảo character consistency
-    - Mô tả đủ: bối cảnh, hành động nhân vật, biểu cảm, góc máy, ánh sáng
     - Cuối mỗi visual description: thêm `→ leads to Scene X` để chỉ dẫn chuyển cảnh
 
     **[PHẦN 3 — VEO3 SCRIPT (Mô tả tình huống chi tiết cho Veo3)]**
-    Viết dưới dạng văn xuôi liên tục (KHÔNG phải bảng), mô tả toàn bộ video như một đạo diễn quan sát:
-    - Viết thành đoạn văn liền mạch từ đầu đến cuối, KHÔNG chia thành các mục rời
-    - Mô tả CỤ THỂ: hành động nhân vật từng giây, di chuyển, biểu cảm thay đổi theo thời gian
-    - Mô tả chuyển cảnh liền mạch: camera di chuyển thế nào, ánh sáng thay đổi thế nào
-    - Mô tả âm thanh nền, nhạc, không khí cảm xúc xuyên suốt
-    - Kết thúc bằng cảnh CTA và cảm xúc người xem cảm nhận được
-    - KHÔNG đề cập đến hình ảnh AI, không dùng từ "scene", "cảnh" — viết như mô tả thực tế
+    Với mỗi cảnh, hãy gộp tất cả các yếu tố: Visual Description, Voiceover, SFX/BGM và chi tiết tình huống lại thành một prompt duy nhất cho từng cảnh. Định dạng đầu ra nghiêm ngặt cho mỗi cảnh như sau:
+    - **Cảnh X**:
+      * **Visual (EN)**: [Mô tả hình ảnh bằng tiếng Anh từ bảng phân cảnh Phần 2, bắt đầu bằng từ khóa chuyển cảnh như [CONTINUATION], [CUT TO]...]
+      * **Voiceover (VI)**: [Lời thoại thuyết minh bằng tiếng Việt từ Phần 2]
+      * **SFX/BGM**: [Nhạc nền và hiệu ứng âm thanh từ Phần 2]
+      * **Veo3 Detail**: [Mô tả chi tiết chuyển động, biểu cảm, di chuyển camera của cảnh bằng tiếng Việt]
+      * **Combined Prompt (EN)**: [Đoạn văn tiếng Anh liền mạch, nghệ thuật và giàu tính liên kết được kết hợp tự nhiên từ Visual (EN) và mô tả hành động từ Veo3 Detail (dịch sang tiếng Anh). Prompt này phải chứa từ khóa chuyển cảnh ở đầu, giữ nguyên hồ sơ nhân vật/phong cách và kết thúc bằng hướng chuyển tiếp trơn tru sang cảnh tiếp theo (Ví dụ: "...transitioning smoothly to Scene Y"). Tuyệt đối KHÔNG viết các trường rời rạc mà phải tạo thành một mô tả hành động điện ảnh hoàn chỉnh.]
 
     **[PHẦN 4 — CTA]**
     - Lời kêu gọi hành động mạnh mẽ phù hợp platform
 
     {markdown_template}
-  expected_output: "Kịch bản hoàn chỉnh với tổng thời lượng ≈ {target_duration}s gồm: Hook, bảng phân cảnh (số scene tự tính = {target_duration}÷8, mỗi scene ~8s linh hoạt, cột Visual EN với transition keywords + character consistency), Veo3 Script prose narrative liên tục, và CTA."
+  expected_output: "Kịch bản hoàn chỉnh với tổng thời lượng ≈ {target_duration}s gồm: Hook, bảng phân cảnh (số scene tự tính = {target_duration}÷4.5, mỗi scene ~4-5s linh hoạt, cột Visual EN với transition keywords + character consistency), Veo3 Script phân tách rõ ràng theo từng cảnh dưới dạng prompt gộp (Combined Prompt EN) liền mạch chứa chuyển cảnh, và CTA."
 
 visual_task:
   description: |
