@@ -52,6 +52,34 @@ selected_nav = render_sidebar(_client_ip)
 
 # 7. Khởi tạo database session và các kênh
 db = get_db_session()
+
+# Tự động nạp cấu hình từ DB nếu chưa được nạp trong phiên làm việc này
+if not st.session_state.get("_global_keys_loaded"):
+    from src.ui.pages.config import load_config_from_db
+    db_openai = load_config_from_db(db, "openai_api_key")
+    db_gemini = load_config_from_db(db, "gemini_api_key")
+    db_provider = load_config_from_db(db, "provider")
+    db_model = load_config_from_db(db, "model_name")
+    db_video = load_config_from_db(db, "video_engine")
+    db_image = load_config_from_db(db, "image_engine")
+
+    if db_openai:
+        st.session_state["custom_openai_key"] = db_openai
+        os.environ["OPENAI_API_KEY"] = db_openai
+    if db_gemini:
+        st.session_state["custom_gemini_key"] = db_gemini
+        os.environ["GEMINI_API_KEY"] = db_gemini
+    if db_provider:
+        st.session_state["provider"] = db_provider
+    if db_model:
+        st.session_state["model_name"] = db_model
+    if db_video:
+        st.session_state["video_engine"] = db_video
+    if db_image:
+        st.session_state["image_engine"] = db_image
+        
+    st.session_state["_global_keys_loaded"] = True
+
 try:
     channels = db.query(Channel).all()
     if not channels:

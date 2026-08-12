@@ -85,6 +85,9 @@ class WorkflowEngine:
             finally:
                 db.close()
 
+        if adjusted_desc and task_id in self.tasks_config:
+            self.tasks_config[task_id]["description"] = adjusted_desc
+
         return agent_id, task_id
 
     def _clean_json_response(self, text: str) -> str:
@@ -103,6 +106,8 @@ class WorkflowEngine:
         """
         try:
             project_id = context.get("project_id") if context else None
+            # Kích hoạt Feedback Loop và tối ưu cấu hình trước khi chạy
+            self._pre_optimize_config(stage_name, {}, project_id)
             stage_cfg = context.get("stage_config") if context else None
             custom_template = stage_cfg.get("markdown_template") if stage_cfg else None
             
@@ -231,7 +236,7 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                 from src.tools.video_tool import generate_video_func
                 
                 # Ưu tiên lấy kịch bản chi tiết (script đã có visual description inline) thay vì stage visual riêng
-                visual_result = all_results.get("script", "") if all_results else ""
+                visual_result = all_results.get("visual", "") if all_results else ""
                 script_result = all_results.get("script", "") if all_results else ""
                 
                 # Trích xuất toàn bộ danh sách đường dẫn ảnh từ kết quả bước 3
@@ -309,6 +314,7 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                         stage_metric_attr = {
                             "script": "step_2_script_metrics",
                             "visual": "step_3_visual_metrics",
+                            "image": "step_3_visual_metrics",
                             "voice": "step_4_audio_metrics",
                             "video": "step_5_render_metrics",
                         }.get(stage_name, "step_1_idea_metrics")
