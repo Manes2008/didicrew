@@ -52,10 +52,11 @@ script_task:
     - Tổng số scene cần có: tự tính theo công thức ({target_duration} / 3.0), làm tròn - đây là yêu cầu bắt buộc để tăng số lượng cảnh lên, tạo nhịp độ nhanh và lôi cuốn
     - Scene đầu (Hook): 2-3 giây
     - Đảm bảo tổng thời lượng cộng tất cả các scene phải xấp xỉ {target_duration} giây
+    - [MẬT ĐỘ TỪ VÀ THỜI LƯỢNG ĐỌC]: Tốc độ đọc tiếng Việt tự nhiên là khoảng 2.5 từ/giây. Video {target_duration} giây cần tổng lượng voiceover xấp xỉ ({target_duration} * 2.5) từ (ví dụ: video 30s cần khoảng 75 từ, video 60s cần khoảng 150 từ). Bạn phải phân bổ đều số từ này trên tất cả các cảnh (mỗi cảnh 2-4s tương ứng 5-10 từ) để đảm bảo kịch bản đủ dài và không bị quá ngắn.
 
     **[LỜI MỞ ĐẦU VÀ KẾT THÚC - BẮT BUỘC]**
-    - Scene đầu tiên (Scene 1): Bắt đầu bằng lời mở đầu giới thiệu ngắn gọn, tạo hook cuốn hút ngay lập tức để giới thiệu chủ đề video.
-    - Scene cuối cùng (Scene cuối): Phải chứa lời kết thúc cô đọng, đúc kết thông điệp cốt lõi của video, kết hợp với lời kêu gọi hành động (CTA).
+    - Scene đầu tiên (Scene 1): Bắt đầu bằng lời mở đầu giới thiệu ngắn gọn, tạo hook cuốn hút ngay lập tức để giới thiệu chủ đề video (Nội dung chính là HOOK ở Phần 1).
+    - Scene cuối cùng (Scene cuối): Phải chứa lời kết thúc cô đọng, đúc kết thông điệp cốt lõi của video, kết hợp với lời kêu gọi hành động (Nội dung chính là CTA ở Phần 4).
 
     **[PHÂN ĐỊNH LỜI DẪN CHUYỆN VÀ THOẠI NHÂN VẬT - QUAN TRỌNG]**
     - Phải có dẫn chuyện (Voiceover / Narrator) chính xác kết nối cốt truyện, liên kết mạch câu chuyện xuyên suốt từ cảnh đầu đến cảnh cuối.
@@ -69,7 +70,7 @@ script_task:
 
     **[PHẦN 1 - TÊN DỰ ÁN & HOOK]**
     - Tên video, định dạng, thời lượng dự kiến
-    - CHIẾN LƯỢC HOOK 3 GIÂY ĐẦU: câu thoại mở đầu + mô tả hành động thu hút ngay lập tức
+    - CHIẾN LƯỢC HOOK 3 GIÂY ĐẦU: câu thoại mở đầu + mô tả hành động thu hút ngay lập tức (Nội dung này phải đồng bộ và được sử dụng làm Voiceover cho Scene 1)
 
     **[PHẦN 2 - BẢNG PHÂN CẢNH CHI TIẾT]**
     Trình bày bảng Markdown với 5 cột:
@@ -91,10 +92,10 @@ script_task:
       * **Voiceover (VI)**: [Lời thoại thuyết minh hoặc thoại nhân vật bằng tiếng Việt từ Phần 2]
       * **SFX/BGM**: [Nhạc nền và hiệu ứng âm thanh từ Phần 2]
       * **Veo3 Detail**: [Mô tả chi tiết chuyển động, biểu cảm, di chuyển camera của cảnh bằng tiếng Việt]
-      * **Combined Prompt (EN)**: [Đoạn văn tiếng Anh liền mạch, nghệ thuật và giàu tính liên kết được kết hợp tự nhiên từ Visual (EN) và mô tả hành động từ Veo3 Detail (dịch sang tiếng Anh). Prompt này phải chứa từ khóa chuyển cảnh ở đầu, giữ nguyên hồ sơ nhân vật/phong cách và kết thúc bằng hướng chuyển tiếp trơn tru sang cảnh tiếp theo (Ví dụ: "...transitioning smoothly to Scene Y"). Tuyệt đối KHÔNG viết các trường rời rạc mà phải tạo thành một mô tả hành động điện ảnh hoàn chỉnh.]
+      * **Combined Prompt (EN)**: [Đoạn văn tiếng Anh liền mạch, nghệ thuật và giàu tính liên kết được kết hợp tự nhiên từ Visual (EN) và mô tả hành động từ Veo3 Detail (dịch sang tiếng Anh). Prompt này phải chứa từ khóa chuyển cảnh ở đầu, giữ nguyên hồ sơ nhân vật/phong cách và kết thúc bằng hướng chuyển tiếp trơn tru sang cảnh tiếp theo (Ví dụ: "...transitioning smoothly to Scene Y"). Tuyệt đối KHÔNG viết các trường rời rạc mà phải tạo thành một mô tả hành động điện ảnh hoàn chỉnh. Đối với Cảnh 1, prompt phải thể hiện rõ nét yếu tố thiết lập bối cảnh lôi cuốn thị giác (Hook). Đối với Cảnh cuối, prompt phải kết thúc bằng hành động kết bài hoặc kêu gọi trực quan đồng bộ với CTA ở Phần 4.]
 
     **[PHẦN 4 - CTA]**
-    - Lời kêu gọi hành động mạnh mẽ phù hợp platform
+    - Lời kêu gọi hành động mạnh mẽ phù hợp platform (Nội dung này phải đồng bộ và được sử dụng làm Voiceover cho Scene cuối)
 
     {markdown_template}
   expected_output: "Kịch bản hoàn chỉnh với tổng thời lượng xấp xỉ {target_duration}s gồm: Hook (lời mở đầu), bảng phân cảnh (số scene tự tính = {target_duration}/3.0, mỗi scene 2-4s linh hoạt, cột Visual EN với transition keywords + character consistency, cột Voiceover phân định rõ dẫn chuyện và thoại), Veo3 Script phân tách rõ ràng theo từng cảnh dưới dạng prompt gộp (Combined Prompt EN) liền mạch và không trùng lặp hình ảnh thoại, lời kết thúc và CTA."
@@ -130,13 +131,15 @@ image_task:
 voice_task:
   description: |
     Dựa trên kịch bản gốc ở bước 1: "{script}".
-    Hãy lọc và kết hợp toàn bộ phần Lời thoại/Thuyết minh (Voiceover) của các phân cảnh thành một đoạn văn thuyết minh tiếng Việt liền mạch để đọc voiceover.
+    Hãy lọc, phân loại và kết hợp toàn bộ phần Lời thoại/Thuyết minh (Voiceover) của các phân cảnh để chuẩn bị cho việc lồng tiếng.
     
     Yêu cầu kết quả đầu ra:
-    1. **VĂN BẢN ĐỌC LIỀN MẠCH**: Chỉ chứa văn bản cần đọc trực tiếp (không bao gồm tên phân cảnh, mô tả hình ảnh, hay ký hiệu đặc biệt).
-    2. **ĐỀ XUẤT GIỌNG ĐỌC**: Gợi ý các tham số cấu hình ElevenLabs (ví dụ: Tên giọng đọc, độ ổn định Stability, độ rõ Clarity) phù hợp nhất với tone & mood của kịch bản.
+    1. **PHÂN CHIA VĂN BẢN ĐỌC CHI TIẾT**: Tách biệt rõ ràng phần văn bản đọc theo vai:
+       - [NARRATOR]: Lời dẫn chuyện đóng vai trò dẫn dắt và kết nối câu chuyện.
+       - [DIALOGUE - Tên nhân vật]: Lời thoại riêng của nhân vật (để trong ngoặc kép).
+    2. **ĐỀ XUẤT GIỌNG ĐỌC RIÊNG BIỆT**: Gợi ý chi tiết cấu hình ElevenLabs khác nhau cho từng vai (giọng đọc riêng cho Người dẫn chuyện và giọng đọc riêng cho từng nhân vật phát biểu) để đảm bảo không bị trùng giọng đọc.
     {markdown_template}
-  expected_output: "Văn bản voiceover hoàn chỉnh liền mạch bằng tiếng Việt + cấu hình giọng đọc ElevenLabs đề xuất."
+  expected_output: "Văn bản lồng tiếng hoàn chỉnh phân chia rõ ràng theo vai (Narrator và Nhân vật) + đề xuất cấu hình giọng đọc ElevenLabs riêng biệt cho từng vai."
 
 editor_task:
   description: |
