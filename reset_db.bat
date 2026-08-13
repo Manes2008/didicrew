@@ -1,7 +1,7 @@
 @echo off
 echo [VideoCrew] Dang kiem tra moi truong ao (virtual environment)...
 
-set VENV_PATH=""
+set VENV_PATH=
 
 if exist venv (
     set VENV_PATH=venv
@@ -11,7 +11,7 @@ if exist venv (
     set VENV_PATH=env
 )
 
-if %VENV_PATH% == "" (
+if "%VENV_PATH%"=="" (
     echo [ERROR] Khong tim thay thu muc moi truong ao (venv, .venv, env).
     echo Vui long kiem tra lai moi truong tren server.
     pause
