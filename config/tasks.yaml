@@ -46,18 +46,32 @@ script_task:
 
     Hãy viết kịch bản video ngắn hoàn chỉnh với CÁC YÊU CẦU BẮT BUỘC SAU:
 
-    **[CẤU TRÚC THỜI LƯỢNG — BẮT BUỘC THỰC HIỆN]**
+    **[CẤU TRÚC THỜI LƯỢNG - BẮT BUỘC THỰC HIỆN]**
     - Tổng thời lượng mục tiêu: {target_duration} giây
-    - Mỗi scene trung bình: ~4 giây đến 5 giây (có thể dao động 3-6 giây tùy nội dung cảnh)
-    - Tổng số scene cần có: tự tính theo công thức ({target_duration} ÷ 4.5), làm tròn — ĐÂY LÀ QUY TẮC LINH HOẠT, không cố định
-    - Scene đầu (Hook): 3-5 giây
-    - Đảm bảo tổng thời lượng cộng tất cả các scene phải ≈ {target_duration} giây
+    - Mỗi scene trung bình: 2 giây đến 4 giây (dao động từ 2-4s cho mỗi phân cảnh)
+    - Tổng số scene cần có: tự tính theo công thức ({target_duration} / 3.0), làm tròn - đây là yêu cầu bắt buộc để tăng số lượng cảnh lên, tạo nhịp độ nhanh và lôi cuốn
+    - Scene đầu (Hook): 2-3 giây
+    - Đảm bảo tổng thời lượng cộng tất cả các scene phải xấp xỉ {target_duration} giây
 
-    **[PHẦN 1 — TÊN DỰ ÁN & HOOK]**
+    **[LỜI MỞ ĐẦU VÀ KẾT THÚC - BẮT BUỘC]**
+    - Scene đầu tiên (Scene 1): Bắt đầu bằng lời mở đầu giới thiệu ngắn gọn, tạo hook cuốn hút ngay lập tức để giới thiệu chủ đề video.
+    - Scene cuối cùng (Scene cuối): Phải chứa lời kết thúc cô đọng, đúc kết thông điệp cốt lõi của video, kết hợp với lời kêu gọi hành động (CTA).
+
+    **[PHÂN ĐỊNH LỜI DẪN CHUYỆN VÀ THOẠI NHÂN VẬT - QUAN TRỌNG]**
+    - Phải có dẫn chuyện (Voiceover / Narrator) chính xác kết nối cốt truyện, liên kết mạch câu chuyện xuyên suốt từ cảnh đầu đến cảnh cuối.
+    - Dẫn chuyện phải đóng vai trò dẫn dắt mạch truyện và kéo các cảnh lại với nhau.
+    - Lời thoại nhân vật (Character Dialogue): Chỉ dành riêng cho nhân vật khi họ phát biểu. Đặt lời thoại nhân vật trong dấu ngoặc kép (Ví dụ: Nhân vật A nói: "...").
+    - Đảm bảo nhân vật chỉ thoại phần thoại riêng của họ, tuyệt đối KHÔNG cho nhân vật tự nói luôn lời cốt chuyện hay tự đọc lời dẫn chuyện.
+
+    **[CHỐNG TRÙNG LẶP HÌNH ẢNH NHÂN VẬT THOẠI]**
+    - Visual Description cho mỗi cảnh phải mô tả hình ảnh nhân vật với biểu cảm, hành động hoặc bối cảnh biến đổi khác biệt để đảm bảo khi AI sinh ảnh không bị trùng lặp tư thế hay hình ảnh nhân vật.
+    - Đảm bảo các cảnh có sự tiếp nối mượt mà nhưng khác biệt rõ ràng về hành vi và góc máy.
+
+    **[PHẦN 1 - TÊN DỰ ÁN & HOOK]**
     - Tên video, định dạng, thời lượng dự kiến
     - CHIẾN LƯỢC HOOK 3 GIÂY ĐẦU: câu thoại mở đầu + mô tả hành động thu hút ngay lập tức
 
-    **[PHẦN 2 — BẢNG PHÂN CẢNH CHI TIẾT]**
+    **[PHẦN 2 - BẢNG PHÂN CẢNH CHI TIẾT]**
     Trình bày bảng Markdown với 5 cột:
     | Scene | Thời lượng | Visual Description (EN) | Voiceover (VI) | SFX/BGM |
 
@@ -68,22 +82,22 @@ script_task:
     - Scene 1: Bắt đầu bằng [ESTABLISHING] + mô tả toàn cảnh + nhân vật + ánh sáng + phong cách
     - Scene 2 trở đi: Bắt đầu bằng transition keyword: [CONTINUATION] / [CUT TO] / [PAN TO] / [CLOSE-UP ON] / [FADE TO]
     - Mỗi scene phải nhắc lại: tên nhân vật, trang phục đặc trưng từ Brief để đảm bảo character consistency
-    - Cuối mỗi visual description: thêm `→ leads to Scene X` để chỉ dẫn chuyển cảnh
+    - Cuối mỗi visual description: thêm "leads to Scene X" để chỉ dẫn chuyển cảnh
 
-    **[PHẦN 3 — VEO3 SCRIPT (Mô tả tình huống chi tiết cho Veo3)]**
+    **[PHẦN 3 - VEO3 SCRIPT (Mô tả tình huống chi tiết cho Veo3)]**
     Với mỗi cảnh, hãy gộp tất cả các yếu tố: Visual Description, Voiceover, SFX/BGM và chi tiết tình huống lại thành một prompt duy nhất cho từng cảnh. Định dạng đầu ra nghiêm ngặt cho mỗi cảnh như sau:
     - **Cảnh X**:
       * **Visual (EN)**: [Mô tả hình ảnh bằng tiếng Anh từ bảng phân cảnh Phần 2, bắt đầu bằng từ khóa chuyển cảnh như [CONTINUATION], [CUT TO]...]
-      * **Voiceover (VI)**: [Lời thoại thuyết minh bằng tiếng Việt từ Phần 2]
+      * **Voiceover (VI)**: [Lời thoại thuyết minh hoặc thoại nhân vật bằng tiếng Việt từ Phần 2]
       * **SFX/BGM**: [Nhạc nền và hiệu ứng âm thanh từ Phần 2]
       * **Veo3 Detail**: [Mô tả chi tiết chuyển động, biểu cảm, di chuyển camera của cảnh bằng tiếng Việt]
       * **Combined Prompt (EN)**: [Đoạn văn tiếng Anh liền mạch, nghệ thuật và giàu tính liên kết được kết hợp tự nhiên từ Visual (EN) và mô tả hành động từ Veo3 Detail (dịch sang tiếng Anh). Prompt này phải chứa từ khóa chuyển cảnh ở đầu, giữ nguyên hồ sơ nhân vật/phong cách và kết thúc bằng hướng chuyển tiếp trơn tru sang cảnh tiếp theo (Ví dụ: "...transitioning smoothly to Scene Y"). Tuyệt đối KHÔNG viết các trường rời rạc mà phải tạo thành một mô tả hành động điện ảnh hoàn chỉnh.]
 
-    **[PHẦN 4 — CTA]**
+    **[PHẦN 4 - CTA]**
     - Lời kêu gọi hành động mạnh mẽ phù hợp platform
 
     {markdown_template}
-  expected_output: "Kịch bản hoàn chỉnh với tổng thời lượng ≈ {target_duration}s gồm: Hook, bảng phân cảnh (số scene tự tính = {target_duration}÷4.5, mỗi scene ~4-5s linh hoạt, cột Visual EN với transition keywords + character consistency), Veo3 Script phân tách rõ ràng theo từng cảnh dưới dạng prompt gộp (Combined Prompt EN) liền mạch chứa chuyển cảnh, và CTA."
+  expected_output: "Kịch bản hoàn chỉnh với tổng thời lượng xấp xỉ {target_duration}s gồm: Hook (lời mở đầu), bảng phân cảnh (số scene tự tính = {target_duration}/3.0, mỗi scene 2-4s linh hoạt, cột Visual EN với transition keywords + character consistency, cột Voiceover phân định rõ dẫn chuyện và thoại), Veo3 Script phân tách rõ ràng theo từng cảnh dưới dạng prompt gộp (Combined Prompt EN) liền mạch và không trùng lặp hình ảnh thoại, lời kết thúc và CTA."
 
 visual_task:
   description: |
