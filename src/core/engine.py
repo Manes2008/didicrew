@@ -60,6 +60,79 @@ def validate_script_content(script_text: str, target_dur_str: str) -> dict:
     }
 
 
+def parse_markdown_table_durations(script_text: str) -> list[float]:
+    import re
+    durations = []
+    lines = script_text.split("\n")
+    for line in lines:
+        line_strip = line.strip()
+        if "|" in line_strip:
+            parts = [p.strip() for p in line_strip.split("|")]
+            if parts and parts[0] == "":
+                parts = parts[1:]
+            if parts and parts[-1] == "":
+                parts = parts[:-1]
+            if len(parts) >= 2:
+                s_num_str = parts[0]
+                dur_str = parts[1]
+                if re.search(r"\d+", s_num_str) and not re.search(r"[-:]{3,}", s_num_str):
+                    dur_match = re.search(r"(\d+\.?\d*)", dur_str)
+                    if dur_match:
+                        try:
+                            durations.append(float(dur_match.group(1)))
+                        except ValueError:
+                            pass
+        elif "\t" in line_strip:
+            parts = [p.strip() for p in line_strip.split("\t")]
+            if len(parts) >= 2:
+                s_num_str = parts[0]
+                dur_str = parts[1]
+                if re.search(r"^\d+$", s_num_str) or re.search(r"^(?:Canh|Scene)\s*\d+$", s_num_str, re.IGNORECASE):
+                    dur_match = re.search(r"(\d+\.?\d*)", dur_str)
+                    if dur_match:
+                        try:
+                            durations.append(float(dur_match.group(1)))
+                        except ValueError:
+                            pass
+    return durations
+
+def validate_script_content(script_text: str, target_dur_str: str) -> dict:
+    import re
+    issues = []
+    
+    durations = parse_markdown_table_durations(script_text)
+    scenes_cnt = len(durations)
+    total_dur_actual = sum(durations)
+    
+    try:
+        target_dur = float(re.findall(r"\d+", str(target_dur_str))[0])
+    except Exception:
+        target_dur = 30.0
+        
+    expected_scenes_min = max(2, int(target_dur / 4.0)) # 60s thi phai co it nhat 15 canh (neu moi canh 2-4s)
+    
+    if scenes_cnt == 0:
+        scenes_cnt = len(re.findall(r"(?:Canh|Scene)\s*\d+", script_text, re.IGNORECASE))
+        total_dur_actual = scenes_cnt * 3.0
+        issues.append("Khong the parse duoc Bang phan canh Markdown hoac thieu cot thoi luong.")
+        
+    if scenes_cnt < expected_scenes_min:
+        issues.append(f"So luong canh ({scenes_cnt}) it hon yeu cau toi thieu ({expected_scenes_min} canh cho {target_dur}s).")
+        
+    if abs(total_dur_actual - target_dur) > 5.0:
+        issues.append(f"Tong thoi luong cong don cac canh ({total_dur_actual}s) bi lech qua nhieu so voi muc tieu {target_dur}s.")
+        
+    if not re.search(r"(?:Canh|Scene)\s*1\b", script_text, re.IGNORECASE):
+        issues.append("Thieu Scene 1 de lam loi mo dau gioi thieu.")
+        
+    return {
+        "is_valid": len(issues) == 0,
+        "scenes_count": scenes_cnt,
+        "total_duration": total_dur_actual,
+        "issues": issues
+    }
+
+
 class WorkflowEngine:
     """
     Bộ điều phối chính (Engine) chịu trách nhiệm chạy các Task tuần tự trong quy trình VideoCrew.
@@ -468,14 +541,25 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                 except Exception as e_eval:
                     print(f"[WARN] Loi danh gia kịch bản: {e_eval}")
 
-                # Vòng lặp sửa lỗi nếu điểm chuyển cảnh dưới 8
-                while transition_score < 8 and attempts < 2:
-                    attempts += 1
-                    prompt_rewrite = f"""Dựa trên kịch bản gốc: "{final_script}"
-Điểm liền mạch hiện tại: {transition_score}/10 (chưa đạt yêu cầu tối thiểu là 8/10).
-Phản hồi đánh giá của đạo diễn: {feedback}
+                # Chay validate ban dau
+                validation_res = validate_script_content(final_script, target_dur)
 
-Hãy viết lại kịch bản trên để sửa chữa các điểm chuyển cảnh bị rời rạc, làm cho câu chuyện liền mạch, hấp dẫn và mượt mà hơn. Đảm bảo giữ cấu trúc phân cảnh chi tiết của kịch bản.
+                # Vòng lặp sửa lỗi nếu điểm chuyển cảnh dưới 8 hoặc validator phát hiện không hợp lệ
+                while (transition_score < 8 or not validation_res["is_valid"]) and attempts < 2:
+                    attempts += 1
+                    err_feedback = ""
+                    if not validation_res["is_valid"]:
+                        err_feedback = f" Cac loi nghiem ngat tu Validator: {', '.join(validation_res['issues'])}."
+                    
+                    prompt_rewrite = f"""Dựa trên kịch bản gốc: "{final_script}"
+Điểm liền mạch hiện tại: {transition_score}/10 (chấm điểm bởi Đạo diễn AI).
+Phản hồi đánh giá của đạo diễn: {feedback}.{err_feedback}
+
+Hãy viết lại kịch bản trên để sửa chữa các lỗi này. Yêu cầu BẮT BUỘC:
+1. Bạn phải TĂNG SỐ LƯỢNG PHÂN CẢNH bằng cách chia nhỏ các phân cảnh hiện tại hoặc sáng tạo thêm các phân đoạn diễn biến trung gian mới. Tổng số cảnh phải đạt xấp xỉ {target_dur}/3.0 cảnh (Ví dụ: video 60s bắt buộc phải có từ 15 đến 20 phân cảnh, video 30s cần từ 8 đến 10 cảnh). Tuyệt đối không giữ nguyên số cảnh cũ.
+2. Thời lượng mỗi cảnh từ 2-4s và tổng thời lượng cộng dồn của tất cả các cảnh phải xấp xỉ đúng bằng {target_dur} giây (tuyệt đối không được thiếu thời lượng).
+3. Lời dẫn chuyện (Voiceover) đóng vai trò kết nối, nhân vật chỉ thoại, không đọc lời dẫn.
+4. Viết lại cấu trúc bảng phân cảnh chi tiết và bổ sung thêm Veo3 Script cho tương thích với số lượng cảnh mới tăng thêm.
 """
                     try:
                         final_script = llm.call(messages=[{"role": "user", "content": prompt_rewrite}])
@@ -487,10 +571,19 @@ Hãy viết lại kịch bản trên để sửa chữa các điểm chuyển c�
                         transition_score = int(data_eval.get("transition_score", 10))
                         feedback = data_eval.get("feedback", "")
                         metrics_step2 = data_eval.get("metrics", {})
+                        
+                        # Chay lại validator
+                        validation_res = validate_script_content(final_script, target_dur)
                     except Exception as e_rewrite:
                         print(f"[WARN] Loi trong vong lap sua kich ban: {e_rewrite}")
                         break
 
+                # In ket qua validate cuoi cung truoc khi luu
+                if not validation_res["is_valid"]:
+                    print(f"[VALIDATOR WARN] Kich ban cuoi cung van chua dat chuan: {validation_res['issues']}")
+                else:
+                    print(f"[VALIDATOR SUCCESS] Kich ban hop le voi {validation_res['scenes_count']} canh, tong thoi luong {validation_res['total_duration']}s.")
+                
                 # Lưu log bước 2 vào DB
                 if project_id:
                     db = get_db_session()
@@ -507,7 +600,7 @@ Hãy viết lại kịch bản trên để sửa chữa các điểm chuyển c�
                                 "attempts": attempts,
                                 "metrics": metrics_step2
                             }, ensure_ascii=False),
-                            is_standardized=(transition_score >= 8)
+                            is_standardized=(transition_score >= 8 and validation_res["is_valid"])
                         )
                         db.add(log2)
                         db.commit()
@@ -516,15 +609,6 @@ Hãy viết lại kịch bản trên để sửa chữa các điểm chuyển c�
                     finally:
                         db.close()
                 
-                # Chay validation phan tich kich ban
-                try:
-                    validation_res = validate_script_content(final_script, target_dur)
-                    if not validation_res["is_valid"]:
-                        print(f"[VALIDATOR WARN] Kich ban chua dat chuan: {validation_res['issues']}")
-                    else:
-                        print(f"[VALIDATOR SUCCESS] Kich ban hop le voi {validation_res['scenes_count']} canh.")
-                except Exception as e_val_run:
-                    print(f"[WARN] Loi khi chay validator: {e_val_run}")
                 return final_script
 
             # B3: Đánh giá chỉ số chất lượng Visual Prompt & Độ đồng nhất nhân vật
