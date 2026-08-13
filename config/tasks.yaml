@@ -113,12 +113,12 @@ visual_task:
          * Tuyệt đối tránh các từ khóa AI sáo rỗng tạo cảm giác nhựa và giả tạo (như "photorealistic", "hyper-detailed", "8k", "unreal engine").
          * Nếu là phong cách đời thực, hãy sử dụng các thuật ngữ nhiếp ảnh thực tế (như "candid street photography", "shot on 35mm film", "natural soft lighting", "documentary style").
          * Tập trung mô tả chi tiết không hoàn hảo: các chuyển động ngẫu hứng, biểu cảm tự nhiên (nhân vật không nhìn trực diện ống kính), bối cảnh đời thường có chiều sâu thực tế.
-    3. **DANH SÁCH PROMPT CHI TIẾT BẰNG TIẾNG ANH (VISUAL PROMPTS)**: Với mỗi Cảnh (Scene) từ kịch bản, hãy viết một prompt mô tả hình ảnh hoàn chỉnh bằng tiếng Anh theo cấu trúc: `[Phong cách nghệ thuật] + [Hồ sơ nhân vật] + [Mô tả chi tiết bối cảnh, hoạt động của nhân vật, góc máy cận cảnh/trung cảnh, ánh sáng, cảm xúc]`.
+    3. **DANH SÁCH PROMPT CHI TIẾT BẰNG TIẾNG ANH (VISUAL PROMPTS)**: Với mỗi Phân cảnh Veo3 đã gộp ở Phần 3 của kịch bản, hãy trích xuất và tối ưu hóa Combined Visual (EN) thành một prompt mô tả hình ảnh hoàn chỉnh bằng tiếng Anh theo cấu trúc: `[Phong cách nghệ thuật] + [Hồ sơ nhân vật] + [Nội dung Combined Visual (EN) của phân cảnh đó]`. Prompt này sẽ đại diện cho hình ảnh nền/khởi đầu cho video 8s tương ứng của phân cảnh đó.
     
-    Yêu cầu đầu ra phải được định dạng Markdown rõ ràng và nghiêm ngặt cho mỗi cảnh:
-    `Scene [Số]: [Nội dung prompt tiếng Anh của cảnh đó]`
+    Yêu cầu đầu ra phải được định dạng Markdown rõ ràng và nghiêm ngặt cho mỗi phân cảnh:
+    `Scene [Số]: [Nội dung prompt tiếng Anh của phân cảnh gộp đó]`
     {markdown_template}
-  expected_output: "Hồ sơ nhân vật, phong cách nghệ thuật và danh sách Visual Prompt chi tiết bằng tiếng Anh định dạng Markdown rõ ràng cho mỗi phân cảnh."
+  expected_output: "Hồ sơ nhân vật, phong cách nghệ thuật và danh sách Visual Prompt chi tiết bằng tiếng Anh định dạng Markdown rõ ràng cho mỗi phân cảnh gộp 8s."
 
 image_task:
   description: |
