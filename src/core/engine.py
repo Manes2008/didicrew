@@ -552,6 +552,8 @@ Các tiêu chí đánh giá bắt buộc:
 2) Lời mở đầu & Lời kết thúc: Phải có lời dẫn dắt giới thiệu chủ đề (Lời mở đầu) ở cảnh 1 và lời đúc kết thông điệp kèm CTA (Lời kết thúc) ở cảnh cuối.
 3) Phân định Thoại & Dẫn chuyện: Lời dẫn chuyện (Voiceover) của người dẫn chuyện đóng vai trò kết nối liền mạch. Nhân vật chỉ nói câu thoại của họ (đặt trong dấu ngoặc kép), tuyệt đối không tự nói lời cốt chuyện hay tự dẫn chuyện.
 4) Chống trùng lặp visual: Visual Description của các cảnh nhân vật thoại phải khác biệt nhau về góc máy, biểu cảm, hoặc hành động, không bị lặp lại hình ảnh.
+5) Độ sâu cảm xúc & Điện ảnh (Cinematic & Emotional Depth): Tránh các câu thoại sáo rỗng, giáo điều hay khẩu hiệu. Lời thoại/lời dẫn dắt phải giàu chất tự sự, sâu sắc và chạm tới cảm xúc người xem. Visual Description (tiếng Anh) của mỗi cảnh phải chi tiết điện ảnh (dài ít nhất 3-4 câu mô tả cụ thể về góc máy di chuyển, biểu cảm nhỏ của nhân vật như mắt run rẩy, ánh sáng tương phản, khói bụi). Tuyệt đối cấm các mô tả hình ảnh tĩnh (như nhân vật chỉ đứng nhìn, đứng im). Nếu các mô tả hình ảnh chỉ vỏn vẹn 1-2 câu ngắn ngủi, bị tĩnh hoặc câu thoại mang tính khẩu hiệu sáo rỗng, điểm bắt buộc phải dưới 8.
+6) Gộp phân cảnh Veo3 & Tách thoại rõ ràng: Phần 3 (Veo3 Script) bắt buộc phải được gộp từ các cảnh ngắn 2-4s thành các Phân cảnh Veo3 lớn dài xấp xỉ 8 giây (Ví dụ: video 60s gộp thành khoảng 7-8 phân cảnh). Lời thoại/lời dẫn (Voiceover / Dialogue (VI)) trong mỗi phân cảnh Veo3 lớn phải phân tách rõ vai bằng thẻ [NARRATOR] hoặc [DIALOGUE - Tên nhân vật]. Tuyệt đối không để nhân vật tự đọc lời dẫn chuyện hay tự đọc lời cốt chuyện. Nếu phát hiện sai sót phân vai thoại hoặc không gộp cảnh 8s, điểm bắt buộc phải dưới 8.
 
 Hãy chấm điểm "transition_score" từ 1 đến 10. Điểm này đại diện cho sự tuân thủ tất cả các tiêu chí trên và tính liền mạch của kịch bản. Nếu bất kỳ tiêu chí nào không đạt, điểm phải dưới 8 để yêu cầu viết lại.
 Đồng thời đánh giá tone, mật độ từ khóa và thời lượng ước tính.
@@ -594,7 +596,9 @@ Hãy viết lại kịch bản trên để sửa chữa các lỗi này. Yêu c�
 1. Bạn phải TĂNG SỐ LƯỢNG PHÂN CẢNH bằng cách chia nhỏ các phân cảnh hiện tại hoặc sáng tạo thêm các phân đoạn diễn biến trung gian mới. Tổng số cảnh phải đạt xấp xỉ {target_dur}/3.0 cảnh (Ví dụ: video 60s bắt buộc phải có từ 15 đến 20 phân cảnh, video 30s cần từ 8 đến 10 cảnh). Tuyệt đối không giữ nguyên số cảnh cũ.
 2. Thời lượng mỗi cảnh từ 2-4s và tổng thời lượng cộng dồn của tất cả các cảnh phải xấp xỉ đúng bằng {target_dur} giây (tuyệt đối không được thiếu thời lượng).
 3. Lời dẫn chuyện (Voiceover) đóng vai trò kết nối, nhân vật chỉ thoại, không đọc lời dẫn.
-4. Viết lại cấu trúc bảng phân cảnh chi tiết và bổ sung thêm Veo3 Script cho tương thích với số lượng cảnh mới tăng thêm.
+4. TĂNG ĐỘ SÂU NGHỆ THUẬT: Viết lại toàn bộ lời thoại/lời thuyết minh tự sự giàu cảm xúc, bỏ hẳn các câu thoại giáo điều/khẩu hiệu. Đồng thời, mở rộng Visual Description (EN) của mỗi cảnh thành một đoạn văn 3-4 câu tiếng Anh mô tả chi tiết điện ảnh (góc máy di chuyển camera, biểu cảm nhỏ, ánh sáng nghệ thuật, không gian bối cảnh xung quanh). Tuyệt đối cấm các mô tả hình ảnh tĩnh (như nhân vật chỉ đứng nhìn, đứng im), nhân vật phải có hành động cụ thể, biểu cảm động.
+5. GỘP CẢNH 8S & TÁCH THOẠI VEO3 SCRIPT: Viết lại cấu trúc Veo3 Script ở Phần 3 để gộp các cảnh ngắn 2-4s liền kề ở Phần 2 thành các Phân cảnh Veo3 lớn dài xấp xỉ 8 giây. Trong mỗi phân cảnh Veo3 lớn, phần Voiceover / Dialogue (VI) bắt buộc phải gắn thẻ vai rõ ràng: [NARRATOR] hoặc [DIALOGUE - Tên nhân vật] để phân định độc lập người dẫn chuyện và câu thoại nhân vật, nghiêm cấm gán nhầm lời dẫn chuyện cho nhân vật nói.
+6. Viết lại cấu trúc bảng phân cảnh chi tiết và bổ sung thêm Veo3 Script cho tương thích với số lượng cảnh mới tăng thêm.
 """
                     try:
                         final_script = llm.call(messages=[{"role": "user", "content": prompt_rewrite}])

@@ -79,26 +79,26 @@ script_task:
     QUY TẮC CỘT VISUAL DESCRIPTION (tiếng Anh, dùng để sinh ảnh AI):
     - TĂNG ĐỘ CHI TIẾT TỐI ĐA: Mỗi mô tả tiếng Anh phải dài ít nhất 3-4 câu chi tiết.
     - Phải mô tả cụ thể về: di chuyển camera (Ví dụ: slow zoom in, cinematic tracking, gentle pan left/right), điều kiện ánh sáng & màu sắc (Ví dụ: golden hour backlight, volumetric sunbeams), biểu cảm nhỏ của nhân vật (Ví dụ: eyes widening in surprise, a subtle nostalgic smile), và chi tiết bối cảnh/hậu cảnh.
+    - CẤM MÔ TẢ TĨNH (CHỐNG BỊ ĐƠ HÌNH): Tuyệt đối không viết mô tả tĩnh như nhân vật chỉ đứng nhìn, đứng im. Mỗi cảnh phải chứa hành động động (Action/Movement) cụ thể (Ví dụ: running through mud, hands trembling while holding a photo, looking up suddenly as explosions light up the sky).
     - TĂNG TÍNH LIÊN KẾT: Cảnh sau phải liên kết mượt mà và đồng bộ góc máy với cảnh trước (Ví dụ: "matching the camera angle of the previous shot...", "continuing the tracking motion from Scene X...").
     - Scene 1: Bắt đầu bằng [ESTABLISHING] + mô tả toàn cảnh + nhân vật + ánh sáng + phong cách
     - Scene 2 trở đi: Bắt đầu bằng transition keyword: [CONTINUATION] / [CUT TO] / [PAN TO] / [CLOSE-UP ON] / [FADE TO]
     - Mỗi scene phải nhắc lại: tên nhân vật, trang phục đặc trưng từ Brief để đảm bảo character consistency
     - Cuối mỗi visual description: thêm "leads to Scene X" để chỉ dẫn chuyển cảnh
 
-    **[PHẦN 3 - VEO3 SCRIPT (Mô tả tình huống chi tiết cho Veo3)]**
-    Với mỗi cảnh, hãy gộp tất cả các yếu tố: Visual Description, Voiceover, SFX/BGM và chi tiết tình huống lại thành một prompt duy nhất cho từng cảnh. Định dạng đầu ra nghiêm ngặt cho mỗi cảnh như sau:
-    - **Cảnh X**:
-      * **Visual (EN)**: [Mô tả hình ảnh bằng tiếng Anh từ bảng phân cảnh Phần 2, bắt đầu bằng từ khóa chuyển cảnh như [CONTINUATION], [CUT TO]...]
-      * **Voiceover (VI)**: [Lời thoại thuyết minh hoặc thoại nhân vật bằng tiếng Việt từ Phần 2]
-      * **SFX/BGM**: [Nhạc nền và hiệu ứng âm thanh từ Phần 2]
-      * **Veo3 Detail**: [Mô tả chi tiết chuyển động, biểu cảm, di chuyển camera của cảnh bằng tiếng Việt]
-      * **Combined Prompt (EN)**: [Đoạn văn tiếng Anh liền mạch, nghệ thuật và giàu tính liên kết được kết hợp tự nhiên từ Visual (EN) và mô tả hành động từ Veo3 Detail (dịch sang tiếng Anh). Prompt này phải chứa từ khóa chuyển cảnh ở đầu, giữ nguyên hồ sơ nhân vật/phong cách và kết thúc bằng hướng chuyển tiếp trơn tru sang cảnh tiếp theo (Ví dụ: "...transitioning smoothly to Scene Y"). Tuyệt đối KHÔNG viết các trường rời rạc mà phải tạo thành một mô tả hành động điện ảnh hoàn chỉnh. Đối với Cảnh 1, prompt phải thể hiện rõ nét yếu tố thiết lập bối cảnh lôi cuốn thị giác (Hook). Đối với Cảnh cuối, prompt phải kết thúc bằng hành động kết bài hoặc kêu gọi trực quan đồng bộ với CTA ở Phần 4.]
+    **[PHẦN 3 - VEO3 SCRIPT (Gộp phân cảnh theo nhịp 8 giây của Veo3 - QUAN TRỌNG)]**
+    Vì mỗi video do công cụ Veo3 sinh ra có thời lượng mặc định là 8 giây, bạn bắt buộc phải GỘP các cảnh ngắn (2-4s) liền kề từ Phần 2 lại với nhau thành các Phân cảnh Veo3 lớn dài xấp xỉ 8 giây (Ví dụ: Cảnh 1 (3s) + Cảnh 2 (5s) -> Gộp thành Phân cảnh Veo3 1 (8s); video 60s sẽ được gộp lại thành khoảng 7-8 phân cảnh Veo3 lớn). Định dạng đầu ra nghiêm ngặt cho mỗi phân cảnh lớn sau khi gộp như sau:
+    - **Phân cảnh Veo3 X (Gộp từ Cảnh A, B...)**:
+      * **Combined Visual (EN)**: [Đoạn văn tiếng Anh liền mạch, nghệ thuật và giàu tính liên kết dài ít nhất 4-5 câu, kết hợp tự nhiên mô tả hình ảnh và chuyển động của các cảnh thành phần A, B... từ bảng phân cảnh Phần 2. Prompt này phải chứa từ khóa chuyển cảnh ở đầu (Ví dụ: [ESTABLISHING], [CONTINUATION]...), giữ nguyên hồ sơ nhân vật/phong cách nhất quán và kết thúc bằng hướng chuyển tiếp trơn tru sang cảnh tiếp theo. Tuyệt đối KHÔNG viết các trường rời rạc mà phải tạo thành một mô tả hành động điện ảnh hoàn chỉnh. Đối với Phân cảnh 1, prompt phải thể hiện rõ nét yếu tố thiết lập bối cảnh lôi cuốn thị giác (Hook). Đối với Phân cảnh cuối, prompt phải kết thúc bằng hành động kết bài hoặc kêu gọi trực quan đồng bộ với CTA ở Phần 4.]
+      * **Voiceover / Dialogue (VI)**: [Toàn bộ phần thuyết minh và thoại nhân vật của các cảnh thành phần A, B... viết liền nhau. Phải ghi rõ thẻ vai nghiêm ngặt: [NARRATOR]: Lời thuyết minh/lời dẫn; hoặc [DIALOGUE - Tên nhân vật]: "Lời thoại nhân vật trong ngoặc kép". Tuyệt đối không để nhân vật tự nói lời dẫn chuyện hay tự đọc lời cốt truyện.]
+      * **SFX/BGM**: [Nhạc nền và hiệu ứng âm thanh tương ứng từ Phần 2]
+      * **Veo3 Detail**: [Mô tả chi tiết tiến trình hành động, biểu cảm, di chuyển camera của nhân vật từ giây 0 đến giây 8 bằng tiếng Việt để hỗ trợ sinh chuyển động.]
 
     **[PHẦN 4 - CTA]**
     - Lời kêu gọi hành động mạnh mẽ phù hợp platform (Nội dung này phải đồng bộ và được sử dụng làm Voiceover cho Scene cuối)
 
     {markdown_template}
-  expected_output: "Kịch bản hoàn chỉnh với tổng thời lượng xấp xỉ {target_duration}s gồm: Hook (lời mở đầu), bảng phân cảnh (số scene tự tính = {target_duration}/3.0, mỗi scene 2-4s linh hoạt, cột Visual EN với transition keywords + character consistency, cột Voiceover phân định rõ dẫn chuyện và thoại), Veo3 Script phân tách rõ ràng theo từng cảnh dưới dạng prompt gộp (Combined Prompt EN) liền mạch và không trùng lặp hình ảnh thoại, lời kết thúc và CTA."
+  expected_output: "Kịch bản hoàn chỉnh với tổng thời lượng xấp xỉ {target_duration}s gồm: Hook (lời mở đầu), bảng phân cảnh (số scene tự tính = {target_duration}/3.0, mỗi scene 2-4s linh hoạt, cột Visual EN với transition keywords + character consistency, cột Voiceover phân định rõ dẫn chuyện và thoại), Veo3 Script phân tách rõ ràng theo từng phân cảnh gộp (Combined Visual EN) liền mạch dài 8s và phân vai thoại rõ ràng, lời kết thúc và CTA."
 
 visual_task:
   description: |

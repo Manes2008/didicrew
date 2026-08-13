@@ -34,6 +34,49 @@ def render_text_output(result_text: str):
             cleaned = cleaned[:-3]
         return cleaned.strip()
 
+    import json
+    escaped_text = json.dumps(result_text)
+    
+    copy_button_html = f"""
+    <div style="text-align: right; margin-bottom: 8px;">
+        <button id="copy-btn" onclick="copyText()" style="
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.3s;
+        ">
+            Sao chép Kịch bản (Copy Script)
+        </button>
+    </div>
+    <script>
+        function copyText() {{
+            var text = {escaped_text};
+            var dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+            
+            var btn = document.getElementById("copy-btn");
+            btn.innerHTML = "Đã sao chép! (Copied)";
+            btn.style.backgroundColor = "#28a745";
+            setTimeout(function() {{
+                btn.innerHTML = "Sao chép Kịch bản (Copy Script)";
+                btn.style.backgroundColor = "#007bff";
+            }}, 2000);
+        }}
+    </script>
+    """
+
+    st.components.v1.html(copy_button_html, height=45)
+
     tab_visual, tab_copy = st.tabs(["Xem trực quan", "Sao chép (Raw Markdown)"])
     with tab_visual:
         st.markdown(clean_markdown_for_display(result_text))

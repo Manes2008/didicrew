@@ -17,8 +17,8 @@ def extract_scenes_from_script(script_text: str) -> list[tuple[int, str]]:
     scenes_data = {}
     
     # 1. Parse theo khoi block Canh cua Phan 3 de tim Combined Prompt
-    # Tach cac phan theo Cảnh
-    scene_blocks = re.split(r"-?\s*\*?\*?\s*(?:Cảnh|Scene)\s*(\d+)\s*\*?\*?\s*[:\-–\.\s\n]+", script_text, flags=re.IGNORECASE)
+    # Tach cac phan theo Phân cảnh Veo3 hoac Cảnh
+    scene_blocks = re.split(r"-?\s*\*?\*?\s*(?:Phân\s*cảnh\s*Veo3|Cảnh\s*Veo3|Phân\s*cảnh|Cảnh|Scene)\s*(\d+)\s*(?:\([^)]*\))?\s*\*?\*?\s*[:\-–\.\s\n]+", script_text, flags=re.IGNORECASE)
     
     if len(scene_blocks) > 1:
         for i in range(1, len(scene_blocks), 2):
@@ -27,11 +27,11 @@ def extract_scenes_from_script(script_text: str) -> list[tuple[int, str]]:
                 block_content = scene_blocks[i+1]
                 
                 # Tim cac truong con thong qua regex
-                visual_match = re.search(r"Visual(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
-                voice_match = re.search(r"Voiceover(?:\s*\(VI\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                visual_match = re.search(r"(?:Combined\s+)?Visual(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                voice_match = re.search(r"Voiceover(?:\s*/\s*Dialogue)?(?:\s*\(VI\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
                 sfx_match = re.search(r"SFX/BGM\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
                 detail_match = re.search(r"Veo3\s*Detail\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
-                combined_match = re.search(r"Combined\s*Prompt(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                combined_match = re.search(r"Combined\s+(?:Prompt|Visual)(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
                 
                 visual_en = visual_match.group(1).strip() if visual_match else ""
                 voice_vi = voice_match.group(1).strip() if voice_match else ""
@@ -39,15 +39,15 @@ def extract_scenes_from_script(script_text: str) -> list[tuple[int, str]]:
                 detail = detail_match.group(1).strip() if detail_match else ""
                 combined = combined_match.group(1).strip() if combined_match else ""
                 
-                # Uu tien Combined Prompt tu AI
+                # Uu tien Combined Prompt hoac Combined Visual tu AI
                 if combined:
                     prompt = combined
+                elif visual_en:
+                    prompt = visual_en
                 else:
-                    # Neu chua co Combined Prompt thi tu gop thong tin
+                    # Neu chua co thi tu gop thong tin
                     parts = []
-                    if visual_en: parts.append(visual_en)
                     if detail: parts.append(detail)
-                    # Them ca Voiceover neu can lam ro thong tin bo sung
                     if voice_vi: parts.append(f"Voiceover: {voice_vi}")
                     if sfx: parts.append(f"Audio: {sfx}")
                     prompt = ". ".join(parts)
