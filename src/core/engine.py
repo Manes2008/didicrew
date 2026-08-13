@@ -174,13 +174,21 @@ Kiểm tra xem nó đã có đầy đủ thông tin về các yếu tố:
 Nếu thiếu bất kỳ thông tin nào, hãy tự động bổ sung hoặc làm rõ để tạo nên một prompt kịch bản chi tiết và hấp dẫn nhất.
 Đồng thời, đánh giá các bộ chỉ số: tone, keyword_density, estimated_duration.
 
+[KẾT NỐI Ý TƯỞNG VỚI LỜI THOẠI VÀ DẪN CHUYỆN - BẮT BUỘC]:
+- Trong nội dung ý tưởng đã tối ưu (adjusted_prompt), bạn phải phác thảo rõ ràng mạch dẫn chuyện (storyline) phân chia theo từng phân đoạn ngắn từ 2-4 giây.
+- Ước lượng số lượng từ voiceover tương ứng với tổng thời lượng (tỷ lệ khoảng 2.5 từ/giây, ví dụ video 60s cần khoảng 150 từ tổng cộng, video 30s cần khoảng 75 từ) và phân bổ đều cho các phân đoạn để đảm bảo kịch bản đủ dài.
+- Định hình rõ ràng lời dẫn chuyện (Voiceover của Narrator) đóng vai trò kết nối, dẫn dắt cốt truyện liền mạch xuyên suốt các cảnh.
+- Gợi ý cụ thể nội dung thoại của nhân vật (Dialogue) và đặt trong dấu ngoặc kép (Ví dụ: Nhân vật nói: "..."). Nhân vật chỉ thoại, không tự đọc lời cốt chuyện hay tự dẫn chuyện.
+- Mô tả visual cho các phân đoạn thoại nhân vật phải khác biệt nhau (góc máy, bối cảnh, cử chỉ) để tránh trùng lặp hình ảnh.
+- Bắt buộc định hình lời mở đầu giới thiệu ở phân đoạn đầu tiên và lời kết thúc đúc kết thông điệp cùng CTA ở phân đoạn cuối cùng.
+
 [CHỈ THỊ QUAN TRỌNG VỀ ĐỘ DÀI VÀ CHI TIẾT]:
 - TUYỆT ĐỐI KHÔNG tóm tắt, viết tắt hay cắt bớt bất kỳ chi tiết, cốt truyện hoặc thông tin sự kiện nào từ ý tưởng gốc của người dùng.
 - Hãy tối ưu hóa bằng cách GIỮ NGUYÊN nội dung gốc và PHÁT TRIỂN THÊM các chi tiết cụ thể (nhân vật, cảm xúc, biểu cảm, không gian bối cảnh, âm thanh) để làm cho ý tưởng trở nên phong phú hơn, dài hơn và sẵn sàng cho việc viết kịch bản chi tiết.
 
 [ĐỊNH HƯỚNG THỜI LƯỢNG]:
 - Video này có mục tiêu thời lượng là {target_dur} giây.
-- Hãy điều chỉnh độ dài và độ chi tiết của ý tưởng đã tối ưu (adjusted_prompt) và ước lượng thời lượng (estimated_duration) sao cho phù hợp nhất với mục tiêu {target_dur} giây này (ví dụ: video dài cần nhiều chi tiết và phân cảnh hơn, video ngắn cần cô đọng nhưng vẫn giàu mô tả).
+- Hãy điều chỉnh độ dài và độ chi tiết của ý tưởng đã tối ưu (adjusted_prompt) và ước lượng thời lượng (estimated_duration) sao cho phù hợp nhất với mục tiêu {target_dur} giây này (ví dụ: video dài cần nhiều chi tiết và phân cảnh hơn, video ngắn cần cô động nhưng vẫn giàu mô tả).
 
 Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên bản (không nằm trong khối markdown ```json), bao gồm các trường sau:
 {{
@@ -432,7 +440,7 @@ Hãy đánh giá kịch bản chi tiết sau đây dựa trên các tiêu chí n
 "{final_script}"
 
 Các tiêu chí đánh giá bắt buộc:
-1) Thời lượng và Số cảnh: Mỗi cảnh trung bình phải dài 2-4 giây. Tổng số cảnh phải xấp xỉ {target_dur}/3.0 (Ví dụ: video 30s cần khoảng 8-10 cảnh).
+1) Thời lượng, Số cảnh và Lượng từ: Mỗi cảnh trung bình phải dài 2-4 giây. Tổng số cảnh phải xấp xỉ {target_dur}/3.0. Tổng lượng từ voiceover của toàn bộ kịch bản phải xấp xỉ {target_dur} * 2.5 từ (ví dụ: video 60s cần khoảng 150 từ) để đảm bảo kịch bản đủ dài, không bị quá ngắn.
 2) Lời mở đầu & Lời kết thúc: Phải có lời dẫn dắt giới thiệu chủ đề (Lời mở đầu) ở cảnh 1 và lời đúc kết thông điệp kèm CTA (Lời kết thúc) ở cảnh cuối.
 3) Phân định Thoại & Dẫn chuyện: Lời dẫn chuyện (Voiceover) của người dẫn chuyện đóng vai trò kết nối liền mạch. Nhân vật chỉ nói câu thoại của họ (đặt trong dấu ngoặc kép), tuyệt đối không tự nói lời cốt chuyện hay tự dẫn chuyện.
 4) Chống trùng lặp visual: Visual Description của các cảnh nhân vật thoại phải khác biệt nhau về góc máy, biểu cảm, hoặc hành động, không bị lặp lại hình ảnh.
