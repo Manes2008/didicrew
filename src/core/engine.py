@@ -155,6 +155,41 @@ class WorkflowEngine:
             "voice": ("voiceover_specialist", "voice_task"),
             "video": ("video_editor", "editor_task")  # Tạm giữ agent cho tương thích nếu cần, nhưng sẽ bị đè bởi code Python thuần
         }
+        
+        # Tu dong reset DB sequences de tranh loi UniqueViolation khoa chinh
+        self._auto_reset_db_sequences()
+
+    def _auto_reset_db_sequences(self):
+        try:
+            from sqlalchemy import text
+            db = get_db_session()
+            sql = """
+            DO $$
+            DECLARE
+                r RECORD;
+            BEGIN
+                FOR r IN
+                    SELECT table_name, column_name, column_default
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND column_default LIKE 'nextval(%'
+                LOOP
+                    EXECUTE 'SELECT setval(\'\'\' || 
+                            pg_get_serial_sequence(r.table_name, r.column_name) || 
+                            \'\'\', COALESCE((SELECT MAX(' || quote_ident(r.column_name) || ') FROM ' || quote_ident(r.table_name) || '), 1));';
+                END LOOP;
+            END $$;
+            """
+            db.execute(text(sql))
+            db.commit()
+            print("[INFO] Auto-reset database sequences successfully.")
+        except Exception as e:
+            if 'db' in locals():
+                db.rollback()
+            print(f"[WARN] Cannot auto-reset database sequences: {e}")
+        finally:
+            if 'db' in locals():
+                db.close()
 
     def _pre_optimize_config(self, stage_name: str, inputs: dict, project_id: int = None) -> tuple:
         """
