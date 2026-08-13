@@ -83,6 +83,89 @@ def render_text_output(result_text: str):
     with tab_copy:
         st.code(result_text, language="markdown")
 
+    # Render danh sach copy nhanh tung canh cho Veo3 Script
+    render_veo3_quick_copier(result_text)
+
+def render_veo3_quick_copier(script_text: str):
+    import re
+    import json
+    
+    scene_blocks = re.split(r"-?\s*\*?\s*(?:Phân\s*cảnh\s*Veo3|Cảnh\s*Veo3|Phân\s*cảnh|Cảnh|Scene)\s*(\d+)\s*(?:\([^)]*\))?\s*\\*?\\*?\\s*[:\-–\.\s\n]+", script_text, flags=re.IGNORECASE)
+    
+    scenes = []
+    if len(scene_blocks) > 1:
+        for i in range(1, len(scene_blocks), 2):
+            try:
+                s_num = int(scene_blocks[i])
+                block_content = scene_blocks[i+1]
+                
+                combined_match = re.search(r"Combined\s+(?:Prompt|Visual)(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                visual_match = re.search(r"(?:Combined\s+)?Visual(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                
+                prompt = ""
+                if combined_match:
+                    prompt = combined_match.group(1).strip()
+                elif visual_match:
+                    prompt = visual_match.group(1).strip()
+                
+                if prompt:
+                    scenes.append((s_num, prompt))
+            except Exception:
+                pass
+                
+    if not scenes:
+        return
+        
+    st.markdown("---")
+    with st.expander("📋 **Trích xuất nhanh Prompt Veo3 từng cảnh**", expanded=True):
+        st.info("Nhấp vào nút bên cạnh mỗi cảnh để sao chép nhanh Prompt tiếng Anh sang phần mềm Veo3.")
+        
+        for s_num, prompt in scenes:
+            col_info, col_btn = st.columns([5, 2])
+            with col_info:
+                st.markdown(f"**Phân cảnh {s_num}:**")
+                st.caption(prompt)
+            with col_btn:
+                btn_id = f"copy-btn-scene-{s_num}"
+                escaped_prompt = json.dumps(prompt)
+                
+                copy_js_html = f"""
+                <button id="{btn_id}" onclick="copySceneText()" style="
+                    background-color: #28a745;
+                    color: white;
+                    border: none;
+                    padding: 6px 12px;
+                    text-align: center;
+                    font-size: 12px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    border-radius: 4px;
+                    width: 100%;
+                ">
+                    Sao chép Prompt
+                </button>
+                <script>
+                    function copySceneText() {{
+                        var text = {escaped_prompt};
+                        var dummy = document.createElement("textarea");
+                        document.body.appendChild(dummy);
+                        dummy.value = text;
+                        dummy.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(dummy);
+                        
+                        var btn = document.getElementById("{btn_id}");
+                        btn.innerHTML = "Đã chép!";
+                        btn.style.backgroundColor = "#155724";
+                        setTimeout(function() {{
+                            btn.innerHTML = "Sao chép Prompt";
+                            btn.style.backgroundColor = "#28a745";
+                        }}, 1500);
+                    }}
+                </script>
+                """
+                st.components.v1.html(copy_js_html, height=38)
+
 def render_production_page(db, api_key, provider, model_name, selected_channel):
     # Workspace Dự Án hiện tại
     with st.container(border=True):
