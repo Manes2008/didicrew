@@ -32,6 +32,34 @@ class StepContext:
         except Exception:
             return cls("", json_str)
 
+def validate_script_content(script_text: str, target_dur_str: str) -> dict:
+    import re
+    issues = []
+    
+    # Dem so luong canh
+    scenes_cnt = len(re.findall(r"(?:Canh|Scene)\s*\d+", script_text, re.IGNORECASE))
+    
+    try:
+        target_dur = float(re.findall(r"\d+", str(target_dur_str))[0])
+    except Exception:
+        target_dur = 30.0
+        
+    expected_scenes_min = max(2, int(target_dur / 4.0)) # 30s thi it nhat 7 canh
+    
+    if scenes_cnt < expected_scenes_min:
+        issues.append(f"So luong canh ({scenes_cnt}) it hon yeu cau toi thieu ({expected_scenes_min} canh cho {target_dur}s).")
+        
+    # Kiem tra xem co loi mo dau (Scene 1) va loi ket thuc (Scene cuoi) hay khong
+    if not re.search(r"(?:Canh|Scene)\s*1", script_text, re.IGNORECASE):
+        issues.append("Thieu Scene 1 de lam loi mo dau gioi thieu.")
+        
+    return {
+        "is_valid": len(issues) == 0,
+        "scenes_count": scenes_cnt,
+        "issues": issues
+    }
+
+
 class WorkflowEngine:
     """
     Bộ điều phối chính (Engine) chịu trách nhiệm chạy các Task tuần tự trong quy trình VideoCrew.
@@ -392,6 +420,7 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
 
             # B2: Đánh giá transition_score và thực hiện Self-Correction Loop cho kịch bản chi tiết
             if stage_name == "script" and llm:
+                target_dur = context.get("target_duration", "30") if context else "30"
                 transition_score = 10
                 feedback = ""
                 metrics_step2 = {}
@@ -399,16 +428,22 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                 final_script = script_output
 
                 prompt_eval = f"""Bạn là một chuyên gia đạo diễn phim ngắn. 
-Hãy đánh giá tính liền mạch và độ mượt mà khi chuyển tiếp giữa các phân cảnh trong kịch bản sau:
+Hãy đánh giá kịch bản chi tiết sau đây dựa trên các tiêu chí nghiêm ngặt sau:
 "{final_script}"
 
-Hãy chấm điểm "transition_score" từ 1 đến 10 (trong đó 10 là cực kỳ liền mạch; dưới 8 là cần sửa đổi).
+Các tiêu chí đánh giá bắt buộc:
+1) Thời lượng và Số cảnh: Mỗi cảnh trung bình phải dài 2-4 giây. Tổng số cảnh phải xấp xỉ {target_dur}/3.0 (Ví dụ: video 30s cần khoảng 8-10 cảnh).
+2) Lời mở đầu & Lời kết thúc: Phải có lời dẫn dắt giới thiệu chủ đề (Lời mở đầu) ở cảnh 1 và lời đúc kết thông điệp kèm CTA (Lời kết thúc) ở cảnh cuối.
+3) Phân định Thoại & Dẫn chuyện: Lời dẫn chuyện (Voiceover) của người dẫn chuyện đóng vai trò kết nối liền mạch. Nhân vật chỉ nói câu thoại của họ (đặt trong dấu ngoặc kép), tuyệt đối không tự nói lời cốt chuyện hay tự dẫn chuyện.
+4) Chống trùng lặp visual: Visual Description của các cảnh nhân vật thoại phải khác biệt nhau về góc máy, biểu cảm, hoặc hành động, không bị lặp lại hình ảnh.
+
+Hãy chấm điểm "transition_score" từ 1 đến 10. Điểm này đại diện cho sự tuân thủ tất cả các tiêu chí trên và tính liền mạch của kịch bản. Nếu bất kỳ tiêu chí nào không đạt, điểm phải dưới 8 để yêu cầu viết lại.
 Đồng thời đánh giá tone, mật độ từ khóa và thời lượng ước tính.
 
 Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên bản (không nằm trong khối markdown ```json), bao gồm các trường sau:
 {{
   "transition_score": 8,
-  "feedback": "Nhận xét chi tiết về phần chuyển tiếp giữa các phân cảnh",
+  "feedback": "Nhận xét chi tiết các điểm chưa đạt chuẩn hoặc cần cải thiện",
   "metrics": {{
     "tone": "Tông giọng",
     "keyword_density": "Mật độ từ khóa",
@@ -473,6 +508,15 @@ Hãy viết lại kịch bản trên để sửa chữa các điểm chuyển c�
                     finally:
                         db.close()
                 
+                # Chay validation phan tich kich ban
+                try:
+                    validation_res = validate_script_content(final_script, target_dur)
+                    if not validation_res["is_valid"]:
+                        print(f"[VALIDATOR WARN] Kich ban chua dat chuan: {validation_res['issues']}")
+                    else:
+                        print(f"[VALIDATOR SUCCESS] Kich ban hop le voi {validation_res['scenes_count']} canh.")
+                except Exception as e_val_run:
+                    print(f"[WARN] Loi khi chay validator: {e_val_run}")
                 return final_script
 
             # B3: Đánh giá chỉ số chất lượng Visual Prompt & Độ đồng nhất nhân vật
