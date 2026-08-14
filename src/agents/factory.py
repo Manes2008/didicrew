@@ -41,13 +41,15 @@ class AgentFactory:
             if stage_cfg.get("backstory"):
                 backstory = stage_cfg["backstory"]
 
-        # Format lại text nếu có context
-        from collections import defaultdict
-        safe_context = defaultdict(str, context if context else {})
-        
-        role = role.format_map(safe_context)
-        goal = goal.format_map(safe_context)
-        backstory = backstory.format_map(safe_context)
+        # Format lai text an toan neu co context
+        if context:
+            for k, v in context.items():
+                if isinstance(v, (str, int, float)):
+                    placeholder = f"{{{k}}}"
+                    val_str = str(v)
+                    role = role.replace(placeholder, val_str)
+                    goal = goal.replace(placeholder, val_str)
+                    backstory = backstory.replace(placeholder, val_str)
         
         # Gán tool sinh ảnh nếu là Image Generation Specialist
         tools = []

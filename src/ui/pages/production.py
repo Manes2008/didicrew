@@ -1145,16 +1145,18 @@ public class WinEnum {
 
                             if _needs_reanalyze:
                                 if st.button("Phân tích lại chỉ số Visual", key=f"reanalyze_visual_{log.id}"):
-                                    _api_key = _os.getenv("OPENAI_API_KEY", "")
+                                    _provider = selected_project.provider if selected_project else st.session_state.get("provider", "OpenAI")
+                                    _model_name = selected_project.model_name if selected_project else st.session_state.get("model_name", "gpt-4o-mini")
+                                    _api_key = api_key or (_os.getenv("OPENAI_API_KEY", "") if _provider == "OpenAI" else _os.getenv("GEMINI_API_KEY", ""))
                                     if not _api_key:
-                                        st.error("Chưa cấu hình OPENAI_API_KEY trong .env")
+                                        st.error(f"Chưa cấu hình API Key cho {_provider}")
                                     else:
                                         try:
-                                            from crewai import LLM
+                                            from src.core.llm_provider import get_llm
                                             from src.core.engine import WorkflowEngine
                                             from src.core.models import get_db_session
                                             import json as _json_inner
-                                            _llm = LLM(model="gpt-4o-mini", api_key=_api_key)
+                                            _llm = get_llm(provider=_provider, model_name=_model_name, api_key=_api_key)
                                             _engine = WorkflowEngine()
                                             _eval_prompt = (
                                                 "You are a Visual Prompt Quality Evaluator for AI Image/Video generation.\n"
