@@ -32,34 +32,6 @@ class StepContext:
         except Exception:
             return cls("", json_str)
 
-def validate_script_content(script_text: str, target_dur_str: str) -> dict:
-    import re
-    issues = []
-    
-    # Dem so luong canh
-    scenes_cnt = len(re.findall(r"(?:Canh|Scene)\s*\d+", script_text, re.IGNORECASE))
-    
-    try:
-        target_dur = float(re.findall(r"\d+", str(target_dur_str))[0])
-    except Exception:
-        target_dur = 30.0
-        
-    expected_scenes_min = max(2, int(target_dur / 4.0)) # 30s thi it nhat 7 canh
-    
-    if scenes_cnt < expected_scenes_min:
-        issues.append(f"So luong canh ({scenes_cnt}) it hon yeu cau toi thieu ({expected_scenes_min} canh cho {target_dur}s).")
-        
-    # Kiem tra xem co loi mo dau (Scene 1) va loi ket thuc (Scene cuoi) hay khong
-    if not re.search(r"(?:Canh|Scene)\s*1", script_text, re.IGNORECASE):
-        issues.append("Thieu Scene 1 de lam loi mo dau gioi thieu.")
-        
-    return {
-        "is_valid": len(issues) == 0,
-        "scenes_count": scenes_cnt,
-        "issues": issues
-    }
-
-
 def parse_markdown_table_durations(script_text: str) -> list[float]:
     import re
     durations = []
@@ -227,14 +199,27 @@ class WorkflowEngine:
         return agent_id, task_id
 
     def _clean_json_response(self, text: str) -> str:
+        import re
         cleaned = text.strip()
-        if cleaned.startswith("```json"):
-            cleaned = cleaned[7:]
-        elif cleaned.startswith("```"):
-            cleaned = cleaned[3:]
-        if cleaned.endswith("```"):
-            cleaned = cleaned[:-3]
-        return cleaned.strip()
+        # Trich xuat block ```json ... ``` neu co
+        match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", cleaned, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        # Trich xuat block {...} dau tien neu co
+        match_obj = re.search(r"(\{[\s\S]*\})", cleaned)
+        if match_obj:
+            return match_obj.group(1).strip()
+        return cleaned
+
+    def _safe_format(self, template: str, **kwargs) -> str:
+        """
+        Thay the an toan cac bien dang {key} trong template ma khong bi loi boi cac ky tu ngoac nhon {}.
+        """
+        result = template
+        for key, value in kwargs.items():
+            placeholder = f"{{{key}}}"
+            result = result.replace(placeholder, str(value) if value is not None else "")
+        return result
 
     def run_stage(self, stage_name: str, idea: str, previous_result: str = None, llm=None, all_results: dict = None, context: dict = None) -> str:
         """
@@ -520,7 +505,7 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
             if viral_blueprint_hint:
                 format_kwargs["idea"] = format_kwargs["idea"] + viral_blueprint_hint
             
-            formatted_description = description_template.format(**format_kwargs)
+            formatted_description = self._safe_format(description_template, **format_kwargs)
             
             # Khởi tạo Task
             task = Task(
@@ -599,6 +584,7 @@ Hãy viết lại kịch bản trên để sửa chữa các lỗi này. Yêu c�
 4. TĂNG ĐỘ SÂU NGHỆ THUẬT & TRÁNH TRỐNG THOẠI: Viết lại toàn bộ lời thoại/lời thuyết minh tự sự giàu cảm xúc, bỏ hẳn các câu thoại giáo điều/khẩu hiệu. BẮT BUỘC 100% các cảnh ở Phần 2 đều phải có voiceover (thuyết minh [NARRATOR] hoặc thoại [DIALOGUE]), tuyệt đối không được để trống voiceover ở bất kỳ cảnh nào. Đồng thời, mở rộng Visual Description (EN) của mỗi cảnh thành một đoạn văn 3-4 câu tiếng Anh mô tả chi tiết điện ảnh (góc máy di chuyển camera, biểu cảm nhỏ, ánh sáng nghệ thuật, không gian bối cảnh xung quanh). Tuyệt đối cấm các mô tả hình ảnh tĩnh (như nhân vật chỉ đứng nhìn, đứng im), nhân vật phải có hành động cụ thể, biểu cảm động.
 5. GỘP CẢNH 8S & TÁCH THOẠI VEO3 SCRIPT: Viết lại cấu trúc Veo3 Script ở Phần 3 để gộp các cảnh ngắn 2-4s liền kề ở Phần 2 thành các Phân cảnh Veo3 lớn dài xấp xỉ 8 giây. Trong mỗi phân cảnh Veo3 lớn, phần Voiceover / Dialogue (VI) bắt buộc phải gắn thẻ vai rõ ràng: [NARRATOR] hoặc [DIALOGUE - Tên nhân vật]. Đảm bảo lượng thoại cho mỗi phân cảnh Veo3 8s bắt buộc phải đạt từ **18 đến 26 từ** (tốc độ đọc nhanh kịch tính ~3 từ/giây). Nếu cảnh thành phần bị thiếu thoại, bạn phải tự động viết thêm lời thuyết minh dẫn dắt lấp đầy khoảng lặng của phân cảnh 8s, tuyệt đối không để thoại quá ngắn dưới 12 từ.
 6. Viết lại cấu trúc bảng phân cảnh chi tiết và bổ sung thêm Veo3 Script cho tương thích với số lượng cảnh mới tăng thêm.
+[QUY TẮC ĐẦU RA]: CHỈ trả về nội dung kịch bản hoàn chỉnh (bắt đầu từ Phần 1 đến Phần 4), TUYỆT ĐỐI KHÔNG thêm bất kỳ lời chào, lời dẫn hay giải thích nào ở đầu/cuối phản hồi.
 """
                     try:
                         final_script = llm.call(messages=[{"role": "user", "content": prompt_rewrite}])
