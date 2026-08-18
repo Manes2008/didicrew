@@ -166,7 +166,121 @@ def render_veo3_quick_copier(script_text: str):
                 """
                 st.components.v1.html(copy_js_html, height=38)
 
+
+SUB_STEP_LABELS = {
+    "b1_analysis":   "B1: Phan tich y tuong",
+    "crew_kickoff":  "Agent CrewAI kickoff",
+    "b3_eval":       "B3: Danh gia kich ban",
+    "b4_rewrite_1":  "B4: Viet lai lan 1",
+    "b5_eval_1":     "B5: Danh gia lai lan 1",
+    "b4_rewrite_2":  "B4: Viet lai lan 2",
+    "b5_eval_2":     "B5: Danh gia lai lan 2",
+    "visual_eval":   "Danh gia Visual Prompt",
+    "dalle_generate": "Sinh anh DALL-E",
+    "video_render_wan2.1_local": "Render Video (Wan2.1 Local)",
+    "video_render_markl_local":  "Render Video (Mark-L Local)",
+    "video_render_pollo_api":    "Render Video (Pollo API)",
+}
+
+STAGE_DISPLAY_MAP = {
+    "brief":  "1. Dinh huong Sang tao",
+    "script": "2. Viet kich ban",
+    "visual": "2b. Visual (chay ngam)",
+    "image":  "3. Tao hinh anh",
+    "voice":  "4. Tao giong doc",
+    "video":  "5. Xuat Video",
+}
+
+def render_token_cost_panel(db, project_id: int, stage_name: str):
+    """
+    Hien thi bang thong ke token / thoi gian / chi phi (USD) sau khi chay xong 1 buoc.
+    Truy van tu bang request_cost_log.
+    """
+    try:
+        import src.core.token_tracker as _tt
+        rows = _tt.get_stage_summary(project_id, stage_name)
+
+        # Voi stage image, tong hop ca visual (chay ngam)
+        if stage_name == "image":
+            rows_visual = _tt.get_stage_summary(project_id, "visual")
+            rows = rows_visual + rows
+
+        if not rows:
+            return
+
+        total_input  = sum(r["input_tokens"]  for r in rows)
+        total_output = sum(r["output_tokens"] for r in rows)
+        total_tokens = sum(r["total_tokens"]  for r in rows)
+        total_cost   = sum(r["cost_usd"]      for r in rows)
+        total_time   = sum(r["elapsed_seconds"] for r in rows)
+
+        stage_label = STAGE_DISPLAY_MAP.get(stage_name, stage_name)
+        with st.expander(f"Thong ke Token & Chi phi — Buoc: {stage_label}", expanded=False):
+            # Cac chi so tong hop
+            col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+            col_m1.metric("Tong tokens", f"{total_tokens:,}")
+            col_m2.metric("Input tokens", f"{total_input:,}")
+            col_m3.metric("Output tokens", f"{total_output:,}")
+            col_m4.metric("Thoi gian", f"{total_time:.1f}s")
+
+            col_cost = st.columns(1)[0]
+            col_cost.metric("Chi phi (USD)", f"${total_cost:.6f}")
+
+            # Bang chi tiet tung request
+            import pandas as pd
+            table_rows = []
+            for r in rows:
+                step_display = SUB_STEP_LABELS.get(r["sub_step_name"], r["sub_step_name"])
+                cost_str = f"${r['cost_usd']:.6f}" if r["cost_usd"] > 0 else "$0 (local)"
+                table_rows.append({
+                    "Sub-step": step_display,
+                    "Model": r["model_name"] or "-",
+                    "Input T.": r["input_tokens"],
+                    "Output T.": r["output_tokens"],
+                    "Thoi gian (s)": f"{r['elapsed_seconds']:.1f}",
+                    "Chi phi": cost_str,
+                })
+            df = pd.DataFrame(table_rows)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+
+    except Exception as ex:
+        st.caption(f"[TokenPanel] Khong the tai du lieu: {ex}")
+
+
+def render_project_cost_summary(project_id: int):
+    """Hien thi tong chi phi + token toan du an (tat ca stages)."""
+    try:
+        import src.core.token_tracker as _tt
+        summary = _tt.get_project_summary(project_id)
+        grand = summary.get("grand_total", {})
+        stages = summary.get("stages", {})
+        if not stages:
+            return
+
+        st.markdown("---")
+        with st.expander("Tong chi phi toan du an (tat ca buoc)", expanded=True):
+            col_g1, col_g2, col_g3 = st.columns(3)
+            col_g1.metric("Tong tokens", f"{grand.get('total_tokens', 0):,}")
+            col_g2.metric("Tong thoi gian", f"{grand.get('elapsed_seconds', 0):.1f}s")
+            col_g3.metric("Tong chi phi (USD)", f"${grand.get('cost_usd', 0):.6f}")
+
+            import pandas as pd
+            stage_rows = []
+            for sn, sv in stages.items():
+                stage_rows.append({
+                    "Buoc": STAGE_DISPLAY_MAP.get(sn, sn),
+                    "Requests": sv["requests_count"],
+                    "Tong tokens": sv["total_tokens"],
+                    "Thoi gian (s)": f"{sv['elapsed_seconds']:.1f}",
+                    "Chi phi (USD)": f"${sv['cost_usd']:.6f}",
+                })
+            st.dataframe(pd.DataFrame(stage_rows), use_container_width=True, hide_index=True)
+    except Exception as ex:
+        st.caption(f"[CostSummary] {ex}")
+
+
 def render_production_page(db, api_key, provider, model_name, selected_channel):
+
     # Workspace Dự Án hiện tại
     with st.container(border=True):
         from src.core.models import Channel, VideoDurationConfig
@@ -520,7 +634,9 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                         "video_engine": st.session_state.get("video_engine", "wan2.1_local"),
                         "image_engine": st.session_state.get("image_engine", "openai"),
                         "project_id": st.session_state.get("project_id"),
-                        "target_duration": target_duration_str
+                        "target_duration": target_duration_str,
+                        "model_name": st.session_state.get("model_name", model_name),
+                        "provider": provider,
                     }
 
                     if stage_config:
@@ -603,6 +719,13 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                                         db.add(media_rec)
 
                             db.commit()
+                            # Hien thi bang thong ke token ngay sau khi luu
+                            _proj_id_track = st.session_state.get("project_id")
+                            if _proj_id_track:
+                                render_token_cost_panel(db, _proj_id_track, current)
+                                # Neu la buoc cuoi (video), hien thi tong chi phi toan du an
+                                if current == "video":
+                                    render_project_cost_summary(_proj_id_track)
                             st.rerun()
                         except Exception as ex:
                             db.rollback()
@@ -613,6 +736,13 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                 result_text = st.session_state["results"][current]
                 st.markdown("---")
                 st.markdown('<div class="vc-result-header"><i class="bi bi-check2-square"></i> Kết quả output</div>', unsafe_allow_html=True)
+
+                # Hien thi panel token & chi phi cho buoc hien tai (neu co du lieu)
+                _proj_id_panel = st.session_state.get("project_id")
+                if _proj_id_panel:
+                    render_token_cost_panel(db, _proj_id_panel, current)
+                    if current == "video":
+                        render_project_cost_summary(_proj_id_panel)
 
                 if current == "image":
                     # Ưu tiên hiển thị từ dữ liệu nhị phân trong DB
@@ -631,6 +761,7 @@ def render_production_page(db, api_key, provider, model_name, selected_channel):
                             _re_img.DOTALL | _re_img.IGNORECASE
                         ):
                             scene_descriptions[int(m.group(1))] = m.group(2).strip()[:300]
+
 
                     def _extract_img_paths_with_scene(text):
                         paths = []  # list of (scene_num, path)

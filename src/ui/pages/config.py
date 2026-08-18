@@ -291,3 +291,79 @@ def render_config_page(db, selected_channel):
                                     st.error(f"Lỗi restore: {ex}")
                 except ImportError:
                     st.error("Module backup_restore chua duoc cai dat.")
+
+    # ─── 4. Thong ke Token & Chi phi Du an ──────────────────────────────────────
+    st.markdown('<div class="vc-eyebrow" style="margin-top:1.5rem;"><i class="bi bi-graph-up-arrow"></i> Thong ke Token & Chi phi Du an</div>', unsafe_allow_html=True)
+    with st.container(border=True):
+        st.caption("Tong hop so luong token, thoi gian xu ly va chi phi AI (USD) cho tung du an da chay.")
+
+        try:
+            import src.core.token_tracker as _tt
+            import pandas as pd
+
+            all_proj_summary = _tt.get_all_projects_summary(limit=100)
+
+            if not all_proj_summary:
+                st.info("Chua co du lieu token tracking. Hay chay it nhat 1 buoc san xuat video.")
+            else:
+                # Tinh tong toan he thong
+                grand_tokens = sum(p["total_tokens"] for p in all_proj_summary)
+                grand_cost   = sum(p["cost_usd"] for p in all_proj_summary)
+                grand_time   = sum(p["elapsed_seconds"] for p in all_proj_summary)
+
+                col_gs1, col_gs2, col_gs3 = st.columns(3)
+                col_gs1.metric("Tong tokens (toan HT)", f"{grand_tokens:,}")
+                col_gs2.metric("Tong thoi gian (toan HT)", f"{grand_time:.0f}s")
+                col_gs3.metric("Tong chi phi (toan HT)", f"${grand_cost:.4f}")
+
+                st.markdown("**Chi tiet tung du an:**")
+
+                # Lay ten du an tu DB
+                from src.core.models import Project
+                proj_ideas = {p.id: p.idea[:40] + "..." for p in db.query(Project).all()}
+
+                table_rows = []
+                for p in all_proj_summary:
+                    pid = p["project_id"]
+                    idea_text = proj_ideas.get(pid, f"Du an #{pid}")
+                    table_rows.append({
+                        "Du an": f"#{pid} - {idea_text}",
+                        "Requests": p["requests_count"],
+                        "Tong tokens": f"{p['total_tokens']:,}",
+                        "Thoi gian (s)": f"{p['elapsed_seconds']:.1f}",
+                        "Chi phi (USD)": f"${p['cost_usd']:.6f}",
+                    })
+
+                df_all = pd.DataFrame(table_rows)
+                st.dataframe(df_all, use_container_width=True, hide_index=True)
+
+                # Nut xem chi tiet tung du an
+                st.markdown("**Xem chi tiet token tung buoc:**")
+                proj_options = [f"#{p['project_id']} - {proj_ideas.get(p['project_id'], '')}" for p in all_proj_summary]
+                selected_proj_str = st.selectbox("Chon du an", proj_options, key="cfg_proj_token_select")
+                if selected_proj_str:
+                    sel_pid = int(selected_proj_str.split(" - ")[0].replace("#", ""))
+                    STAGE_LIST = ["brief", "script", "visual", "image", "voice", "video"]
+                    STAGE_LABELS = {
+                        "brief": "1. Dinh huong", "script": "2. Kich ban",
+                        "visual": "2b. Visual", "image": "3. Hinh anh",
+                        "voice": "4. Giong doc", "video": "5. Video",
+                    }
+                    for sn in STAGE_LIST:
+                        rows = _tt.get_stage_summary(sel_pid, sn)
+                        if rows:
+                            with st.expander(f"Buoc {STAGE_LABELS.get(sn, sn)} ({len(rows)} requests)", expanded=False):
+                                detail_rows = []
+                                for r in rows:
+                                    detail_rows.append({
+                                        "Sub-step": r["sub_step_name"],
+                                        "Model": r["model_name"] or "-",
+                                        "In Tokens": r["input_tokens"],
+                                        "Out Tokens": r["output_tokens"],
+                                        "Time (s)": f"{r['elapsed_seconds']:.1f}",
+                                        "Cost": f"${r['cost_usd']:.6f}" if r["cost_usd"] > 0 else "$0",
+                                    })
+                                st.dataframe(pd.DataFrame(detail_rows), use_container_width=True, hide_index=True)
+
+        except Exception as ex_stat:
+            st.warning(f"Khong the tai du lieu thong ke: {ex_stat}")

@@ -93,6 +93,7 @@ class Project(Base):
     duration_config = relationship("VideoDurationConfig", uselist=False, back_populates="project", cascade="all, delete-orphan")
     prompt_logs = relationship("PromptOptimizationLog", back_populates="project", cascade="all, delete-orphan")
     video_analysis_logs = relationship("VideoAnalysisLog", back_populates="project", cascade="all, delete-orphan")
+    request_cost_logs = relationship("RequestCostLog", back_populates="project", cascade="all, delete-orphan")
 
     @validates("idea")
     def validate_idea(self, key, idea):
@@ -248,6 +249,26 @@ class VideoAnalysisLog(Base):
     project = relationship("Project", back_populates="video_analysis_logs")
 
 
+class RequestCostLog(Base):
+    """Luu log chi phi token, thoi gian va gia tien cho tung AI request trong quy trinh san xuat."""
+    __tablename__ = "request_cost_log"
+
+    id               = Column(Integer, primary_key=True, autoincrement=True)
+    project_id       = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    stage_name       = Column(String(50), nullable=False)    # brief, script, image, voice, video
+    sub_step_name    = Column(String(100), nullable=False)   # b1_analysis, crew_kickoff, b3_eval...
+    model_name       = Column(String(100), nullable=True)
+    provider         = Column(String(50), nullable=True)
+    input_tokens     = Column(Integer, default=0)
+    output_tokens    = Column(Integer, default=0)
+    total_tokens     = Column(Integer, default=0)
+    cost_usd         = Column(Float, default=0.0)
+    elapsed_seconds  = Column(Float, default=0.0)
+    created_at       = Column(DateTime, default=datetime.datetime.utcnow)
+
+    project = relationship("Project", back_populates="request_cost_logs")
+
+
 class SystemConfig(Base):
     """Bảng lưu cấu hình hệ thống persistent (API keys mã hóa, v.v.)"""
     __tablename__ = "system_configs"
@@ -257,3 +278,4 @@ class SystemConfig(Base):
     value = Column(Text, nullable=True)  # Giá trị đã mã hóa (Fernet)
     is_encrypted = Column(Boolean, default=False)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
