@@ -4,9 +4,11 @@
 import os
 import yaml
 import json
+import time
 from crewai import Task, Crew
 from src.agents.factory import AgentFactory
 from src.core.models import get_db_session, PromptOptimizationLog, VideoAnalysisLog
+import src.core.token_tracker as token_tracker
 
 class StepContext:
     """
@@ -227,6 +229,8 @@ class WorkflowEngine:
         """
         try:
             project_id = context.get("project_id") if context else None
+            model_name = context.get("model_name", "gpt-4o-mini") if context else "gpt-4o-mini"
+            provider = context.get("provider", "") if context else ""
             # Kích hoạt Feedback Loop và tối ưu cấu hình trước khi chạy
             self._pre_optimize_config(stage_name, {}, project_id)
             stage_cfg = context.get("stage_config") if context else None
@@ -295,7 +299,15 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
 }}
 """
                     try:
-                        resp = llm.call(messages=[{"role": "user", "content": prompt_analysis}])
+                        resp, _ = token_tracker.track_llm_call(
+                            llm,
+                            [{"role": "user", "content": prompt_analysis}],
+                            sub_step_name="b1_analysis",
+                            stage_name=stage_name,
+                            project_id=project_id,
+                            model_name=model_name,
+                            provider=provider,
+                        )
                         data = json.loads(self._clean_json_response(resp))
                         adjusted_prompt = data.get("adjusted_prompt", idea)
                         is_standardized = data.get("is_standardized", False)
@@ -399,7 +411,22 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                     if custom_template and custom_template.strip():
                         full_prompt = f"{custom_template.strip()}\n\n{full_prompt}"
                     from src.tools.image_tool import generate_gpt_image_func
-                    return generate_gpt_image_func(full_prompt)
+                    import re as _re_img_count
+                    t_img_start = time.monotonic()
+                    img_result = generate_gpt_image_func(full_prompt)
+                    t_img_elapsed = round(time.monotonic() - t_img_start, 3)
+                    # Dem so luong anh da sinh duoc
+                    num_images_generated = len(_re_img_count.findall(r"generated_images", img_result))
+                    if num_images_generated == 0:
+                        num_images_generated = 1
+                    token_tracker.track_dalle_generation(
+                        num_images=num_images_generated,
+                        project_id=project_id,
+                        stage_name="image",
+                        sub_step_name="dalle_generate",
+                        elapsed_seconds=t_img_elapsed,
+                    )
+                    return img_result
             
             # Chạy trực tiếp sinh video
             if stage_name == "video":
@@ -430,9 +457,17 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
 
                 video_engine = context.get("video_engine", "wan2.1_local") if context else "wan2.1_local"
                 prompt = visual_result if visual_result else (script_result if script_result else idea_for_script)
-                
+
                 # Truyền danh sách ảnh vào để mỗi phân cảnh sử dụng ảnh tương ứng
-                return generate_video_func(prompt, image_path=image_paths, voice_path=voice_path, engine=video_engine)
+                t_vid_start = time.monotonic()
+                vid_result = generate_video_func(prompt, image_path=image_paths, voice_path=voice_path, engine=video_engine)
+                t_vid_elapsed = round(time.monotonic() - t_vid_start, 3)
+                token_tracker.track_video_render(
+                    project_id=project_id,
+                    engine_name=video_engine,
+                    elapsed_seconds=t_vid_elapsed,
+                )
+                return vid_result
 
             if stage_name not in self.stage_mapping:
                 return f"Stage '{stage_name}' chưa được hỗ trợ."
@@ -516,7 +551,15 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
             
             # Thực thi tác vụ bằng agent
             crew = Crew(agents=[agent], tasks=[task], verbose=False)
-            script_result_raw = crew.kickoff()
+            _crew_raw, _ = token_tracker.track_crew_kickoff(
+                crew,
+                sub_step_name="crew_kickoff",
+                stage_name=stage_name,
+                project_id=project_id,
+                model_name=model_name,
+                provider=provider,
+            )
+            script_result_raw = _crew_raw
             script_output = str(script_result_raw)
 
             # B2: Đánh giá transition_score và thực hiện Self-Correction Loop cho kịch bản chi tiết
@@ -555,7 +598,15 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
 }}
 """
                 try:
-                    resp_eval = llm.call(messages=[{"role": "user", "content": prompt_eval}])
+                    resp_eval, _ = token_tracker.track_llm_call(
+                        llm,
+                        [{"role": "user", "content": prompt_eval}],
+                        sub_step_name="b3_eval",
+                        stage_name=stage_name,
+                        project_id=project_id,
+                        model_name=model_name,
+                        provider=provider,
+                    )
                     data_eval = json.loads(self._clean_json_response(resp_eval))
                     transition_score = int(data_eval.get("transition_score", 10))
                     feedback = data_eval.get("feedback", "")
@@ -587,16 +638,32 @@ Hãy viết lại kịch bản trên để sửa chữa các lỗi này. Yêu c�
 [QUY TẮC ĐẦU RA]: CHỈ trả về nội dung kịch bản hoàn chỉnh (bắt đầu từ Phần 1 đến Phần 4), TUYỆT ĐỐI KHÔNG thêm bất kỳ lời chào, lời dẫn hay giải thích nào ở đầu/cuối phản hồi.
 """
                     try:
-                        final_script = llm.call(messages=[{"role": "user", "content": prompt_rewrite}])
-                        
+                        final_script, _ = token_tracker.track_llm_call(
+                            llm,
+                            [{"role": "user", "content": prompt_rewrite}],
+                            sub_step_name=f"b4_rewrite_{attempts}",
+                            stage_name=stage_name,
+                            project_id=project_id,
+                            model_name=model_name,
+                            provider=provider,
+                        )
+
                         # Đánh giá lại kịch bản mới
                         prompt_eval_again = prompt_eval.replace(script_output, final_script)
-                        resp_eval = llm.call(messages=[{"role": "user", "content": prompt_eval_again}])
+                        resp_eval, _ = token_tracker.track_llm_call(
+                            llm,
+                            [{"role": "user", "content": prompt_eval_again}],
+                            sub_step_name=f"b5_eval_{attempts}",
+                            stage_name=stage_name,
+                            project_id=project_id,
+                            model_name=model_name,
+                            provider=provider,
+                        )
                         data_eval = json.loads(self._clean_json_response(resp_eval))
                         transition_score = int(data_eval.get("transition_score", 10))
                         feedback = data_eval.get("feedback", "")
                         metrics_step2 = data_eval.get("metrics", {})
-                        
+
                         # Chay lại validator
                         validation_res = validate_script_content(final_script, target_dur)
                     except Exception as e_rewrite:
@@ -661,7 +728,15 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
 }}
 """
                 try:
-                    resp_eval_vis = llm.call(messages=[{"role": "user", "content": prompt_eval_visual}])
+                    resp_eval_vis, _ = token_tracker.track_llm_call(
+                        llm,
+                        [{"role": "user", "content": prompt_eval_visual}],
+                        sub_step_name="visual_eval",
+                        stage_name=stage_name,
+                        project_id=project_id,
+                        model_name=model_name,
+                        provider=provider,
+                    )
                     data_eval_vis = json.loads(self._clean_json_response(resp_eval_vis))
                     character_consistency = int(data_eval_vis.get("character_consistency", 8))
                     art_style_match = int(data_eval_vis.get("art_style_match", 8))
