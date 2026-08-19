@@ -117,7 +117,7 @@ def render_veo3_quick_copier(script_text: str):
         return
         
     st.markdown("---")
-    with st.expander("📋 **Trích xuất nhanh Prompt Veo3 từng cảnh**", expanded=True):
+    with st.expander("**Trích xuất nhanh Prompt Veo3 từng cảnh**", expanded=True):
         st.info("Nhấp vào nút bên cạnh mỗi cảnh để sao chép nhanh Prompt tiếng Anh sang phần mềm Veo3.")
         
         for s_num, prompt in scenes:
@@ -1283,7 +1283,6 @@ public class WinEnum {
                                         st.error(f"Chưa cấu hình API Key cho {_provider}")
                                     else:
                                         try:
-                                            from src.core.llm_provider import get_llm
                                             from src.core.engine import WorkflowEngine
                                             from src.core.models import get_db_session
                                             import json as _json_inner
