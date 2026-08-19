@@ -14,184 +14,175 @@ brief_task:
        - Độ tuổi, giới tính, sở thích
        - Hành vi xem video (xem nhanh, xem đến cuối, chia sẻ...)
 
-    3. **HỒ SƠ NHÂN VẬT CHÍNH (CHARACTER PROFILE)**
+    3. **HỒ SƠ NHÂN VẬT CHỦ ĐẠO (MASTER CHARACTER PROFILE)**
        - Tên nhân vật, giới tính, độ tuổi
-       - Ngoại hình chi tiết: chiều cao, vóc dáng, màu tóc, kiểu tóc
-       - Trang phục đặc trưng cho video này
+       - Ngoại hình chi tiết nhất quán: chiều cao, vóc dáng, màu tóc, kiểu tóc, màu da, đôi mắt
+       - Trang phục đặc trưng cố định (Signature Outfit) xuyên suốt video
        - Biểu cảm / tính cách chủ đạo
 
-    4. **BỐI CẢNH & KHÔNG GIAN CHÍNH**
-       - Địa điểm chính (1-2 địa điểm tối đa để giữ nhất quán)
-       - Thời gian trong ngày, ánh sáng tổng thể
-       - Không khí chủ đạo của không gian
+    4. **BỐI CẢNH & KHÔNG GIAN CHÍNH (MASTER ENVIRONMENT)**
+       - Địa điểm chính (1-2 địa điểm tối đa để giữ nhất quán tuyệt đối)
+       - Thời gian trong ngày, phong cách ánh sáng tổng thể (lighting style)
+       - Không khí và gam màu chủ đạo của không gian
 
     5. **TONE & MOOD**
        - Cảm xúc chủ đạo người xem cảm nhận được
        - Nhịp điệu: chậm rãi / năng động / kịch tính
-       - Bảng màu chủ đạo
+       - Bảng màu chủ đạo (Color Palette)
 
-    6. **PHONG CÁCH NGHỆ THUẬT (ART STYLE — dùng cho sinh ảnh AI)**
-       - Phong cách: anime / semi-realistic / cinematic live-action / illustration
-       - Kỹ thuật camera: góc quay, lens style (35mm, wide, close-up)
-       - Các từ khóa style tiếng Anh để dùng nhất quán trong mọi visual prompt
+    6. **PHONG CÁCH NGHỆ THUẬT & TOKENS CHUẨN (MASTER ART STYLE TOKENS)**
+       - Phong cách: cinematic live-action / anime / semi-realistic / 3d animation
+       - Kỹ thuật camera: góc quay điện ảnh, lens style (35mm, 50mm, anamorphic, Arri Alexa look)
+       - Master Style Keywords (tiếng Anh) dùng cố định làm "mỏ neo" cho tất cả visual prompts
        - TUYỆT ĐỐI TRÁNH: "photorealistic", "8k", "hyper-detailed", "unreal engine"
 
     {markdown_template}
-  expected_output: "Bản Creative Brief hoàn chỉnh định dạng Markdown với đầy đủ 6 mục: Mục đích, Đối tượng, Nhân vật, Bối cảnh, Tone/Mood, Art Style."
+  expected_output: "Bản Creative Brief hoàn chỉnh định dạng Markdown với đầy đủ 6 mục: Mục đích, Đối tượng, Hồ sơ nhân vật chủ đạo, Bối cảnh chính, Tone/Mood, Master Art Style Tokens."
 
 script_task:
   description: |
     Dựa trên CREATIVE BRIEF đã định hướng: "{previous_result}"
     Và ý tưởng gốc: "{idea}"
 
-    Hãy viết kịch bản video ngắn hoàn chỉnh. Lưu ý: Tool AI sinh video của bạn chỉ hỗ trợ tối đa 8 giây/lần sinh ở chế độ START-END (1 Ảnh đầu + 1 Ảnh cuối + 1 Prompt). Do đó, video dài {target_duration}s sẽ được chia thành nhiều CHUNK (mỗi chunk 8 giây).
+    Hãy viết kịch bản video ngắn hoàn chỉnh tối ưu cho công cụ sinh video AI thế hệ mới (Google Veo 3 / Runway Gen-3 / Kling).
+    Tổng thời lượng mục tiêu: {target_duration} giây.
 
-    **[CẤU TRÚC THỜI LƯỢNG & CHIA CHUNK - BẮT BUỘC]**
+    **[CẤU TRÚC PHÂN BỔ THỜI LƯỢNG & NHỊP ĐIỆU]**
     - Tổng thời lượng: {target_duration} giây.
-    - Số lượng CHUNK cần có: `ceil({target_duration} / 8.0)` (làm tròn lên). Ví dụ: 60s -> 8 Chunks (7 chunk 8s + 1 chunk 4s).
-    - Mỗi CHUNK sẽ được AI sinh ra từ 1 cặp ảnh Start-End. Do đó, tổng số ảnh cần sinh = Số chunk * 2.
-    - Bên trong mỗi CHUNK (8s), chia thành các scene nhỏ (2-4s) để tạo nhịp nhanh.
-
-    **[MẬT ĐỘ TỪ VOICEOVER - BẮT BUỘC NGHIÊM NGẶT]**
-    - Tốc độ đọc tiếng Việt nhanh kịch tính: **4 từ/giây** (tăng từ 3.5 lên 4 để khớp nhịp TikTok).
-    - Tổng video {target_duration}s cần tổng voiceover xấp xỉ ({target_duration} * 4) từ.
-    - Phân bổ cứng theo thời lượng cảnh: cảnh 2s ≥ 8 từ; cảnh 3s ≥ 12 từ; cảnh 4s ≥ 16 từ. **TUYỆT ĐỐI KHÔNG ĐỂ TRỐNG CỘT VOICEOVER Ở BẤT KỲ CẢNH NÀO**.
+    - Chia video thành các cảnh nhỏ linh hoạt từ 2-4 giây để giữ nhịp nhanh, cuốn hút.
+    - Tốc độ đọc tiếng Việt: **3.5 - 4 từ/giây**. Tổng số từ voiceover xấp xỉ ({target_duration} * 4) từ.
 
     **[PHÂN ĐỊNH LỜI DẪN CHUYỆN VÀ THOẠI NHÂN VẬT]**
-    - Phải có [NARRATOR] dẫn dắt mạch chuyện xuyên suốt.
-    - Lời thoại nhân vật [DIALOGUE - Tên] phải giàu tâm lý, băn khoăn, quyết định hoặc bột phát, đặt trong dấu ngoặc kép.
-    - KHÔNG cho nhân vật tự đọc lời dẫn chuyện.
+    - [NARRATOR]: Lời dẫn chuyện lôi cuốn, đóng vai trò dẫn dắt mạch cảm xúc xuyên suốt.
+    - [DIALOGUE - Tên]: Lời thoại nhân vật ngắn gọn, giàu cảm xúc, đặt trong dấu ngoặc kép.
 
     **[PHẦN 1 - TÊN DỰ ÁN & HOOK]**
     - Tên video, định dạng, thời lượng.
-    - CHIẾN LƯỢC HOOK 3 GIÂY ĐẦU: Câu thoại gây sốc + hành động mạnh. (Áp dụng cho giây 0-3 của CHUNK 01).
+    - CHIẾN LƯỢC HOOK 3 GIÂY ĐẦU: Hình ảnh hành động mạnh mẽ + câu thoại/lời dẫn gây sốc ngay giây 0-3.
 
-    **[PHẦN 2 - BẢNG PHÂN CẢNH CHI TIẾT (THEO SCENE NHỎ 2-4s)]**
-    Trình bày bảng Markdown với 5 cột:
+    **[PHẦN 2 - BẢNG PHÂN CẢNH CHI TIẾT]**
+    Trình bày bảng Markdown chuẩn 5 cột (bắt buộc để hệ thống đo đạc thời lượng chính xác):
     | Scene | Thời lượng | Visual Description (EN) | Voiceover (VI) | SFX/BGM |
-    (Áp dụng đúng các quy tắc Visual Description đã nêu: transition keywords, hành động động, chi tiết ánh sáng, kết thúc bằng "leads to Scene X").
+    |---|---|---|---|---|
+    | Cảnh 1 | 3s | [Prompt mô tả hành động, camera, ánh sáng] | [NARRATOR]: Lời dẫn mở đầu... | Âm thanh mở màn kịch tính |
+    | Cảnh 2 | 3s | ... | ... | ... |
 
-    **[PHẦN 3 - AI VIDEO GENERATION SCRIPT (Gộp theo CHUNK 8s - QUAN TRỌNG)]**
-    Căn cứ vào giới hạn 8s của Tool, bạn **BẮT BUỘC** gộp các Scene nhỏ ở Phần 2 thành các CHUNK 8s.
-    Định dạng đầu ra cho MỖI CHUNK như sau:
+    **[PHẦN 3 - TRÍCH XUẤT PROMPT VEO3 CHI TIẾT TỪNG CẢNH (QUAN TRỌNG)]**
+    Với mỗi cảnh, trích xuất đoạn Prompt tiếng Anh chuẩn cho Veo 3 (Text-to-Video hoặc Image-to-Video với Reference Frame) theo định dạng:
 
-    - **CHUNK X (từ giây A đến giây B)**:
-      * **Mô tả khung hình START (Frame 0s)**: [Trích xuất trạng thái của nhân vật, bối cảnh, ánh sáng tại giây đầu tiên của CHUNK này. Mô tả bằng tiếng Anh, dài 3-4 câu, tập trung vào tư thế đứng, biểu cảm mặc định và bố cục tổng thể].
-      * **Mô tả khung hình END (Frame 8s)**: [Trích xuất trạng thái của nhân vật, bối cảnh, ánh sáng tại giây cuối cùng của CHUNK này. Mô tả bằng tiếng Anh, dài 3-4 câu, phải có sự thay đổi RÕ RỆT về hành động/biểu cảm so với START để AI có động lực suy diễn chuyển động].
-      * **Prompt chính cho Video (8s)**: [Đoạn văn tiếng Anh LIỀN MẠCH, DÀI 8-12 CÂU, mô tả toàn bộ hành trình chuyển động từ START đến END. Phải bao gồm: loại camera (dolly in/out, tracking), sự thay đổi ánh sáng (ví dụ: light shifts from warm to cold), biểu cảm vi biểu (micro-expression), và các chi tiết môi trường (bụi, khói, gió). Kết thúc bằng từ khóa "transitions seamlessly to next CHUNK"].
-      * **Voiceover / Dialogue (VI)**: [Gộp toàn bộ Voiceover và Dialogue của các scene con trong CHUNK này. Yêu cầu tổng số từ đạt 28-32 từ (tương đương 4 từ/s * 8s). Phải ghi rõ thẻ [NARRATOR] và [DIALOGUE - Tên]. Nếu thiếu, tự động thêm lời dẫn để lấp đầy].
-      * **SFX/BGM**: [Nhạc nền và hiệu ứng âm thanh đặc trưng cho chunk này].
+    - **Phân cảnh Veo3 1 (0s - 3s)**:
+      * **Combined Visual (EN)**: [Prompt tiếng Anh hoàn chỉnh 4-6 câu kết hợp: Master Art Style + Character Profile + Dynamic Camera Movement (ví dụ: cinematic slow dolly in, steadycam tracking, eye-level shot) + Action & Micro-expressions + Lighting Transition + Environment details].
+      * **Voiceover / Dialogue (VI)**: [Đoạn thoại/lời dẫn của cảnh này].
+      * **SFX/BGM**: [Hiệu ứng âm thanh].
+
+    - **Phân cảnh Veo3 2 (3s - 6s)**:
+      * **Combined Visual (EN)**: [Prompt tiếng Anh chi tiết cho cảnh 2, nối tiếp chuyển động từ cảnh 1].
+      * **Voiceover / Dialogue (VI)**: [...]
+      * **SFX/BGM**: [...]
+
+    (Lặp lại đầy đủ cho tất cả các cảnh đến hết thời lượng {target_duration}s).
 
     **[PHẦN 4 - CTA (KẾT THÚC)]**
-    - Lời kêu gọi hành động mạnh mẽ. Nội dung này sẽ nằm trong CHUNK cuối cùng (giây cuối của video).
+    - Lời kêu gọi hành động (Call To Action) ấn tượng ở cảnh cuối cùng.
     {markdown_template}
-  expected_output: "Kịch bản hoàn chỉnh dạng Markdown. Bao gồm: Hook, bảng phân cảnh chi tiết, và đặc biệt là phần CHUNK 8s đã được tách rời với START/END Frame rõ ràng để chuẩn bị cho việc sinh ảnh."
+  expected_output: "Kịch bản hoàn chỉnh dạng Markdown gồm: Hook, Bảng phân cảnh chi tiết chuẩn 5 cột, và Danh sách Prompt Veo3 từng cảnh sẵn sàng đưa vào công cụ sinh video."
 
 visual_task:
   description: |
-    Dựa trên Phần 3 (AI Video Generation Script) của kịch bản: "{previous_result}".
-    Bạn là Visual Prompt Engineer. Nhiệm vụ cụ thể:
+    Dựa trên CREATIVE BRIEF và KỊCH BẢN: "{previous_result}".
+    Bạn là Visual Prompt Engineer chuyên gia về độ nhất quán nhân vật (Character Consistency).
 
-    1. **HỒ SƠ NHÂN VẬT (CHARACTER PROFILE)**: Tổng hợp và định nghĩa lại ngoại hình nhân vật để đảm bảo sự nhất quán tuyệt đối (tóc, quần áo, màu da) trong tất cả prompt.
-
-    2. **PHONG CÁCH NGHỆ THUẬT (ART STYLE)**: Phân tích "{channel_description}" để chọn phong cách. 
-       - QUY TẮC VÀNG: Thay vì dùng "photorealistic", hãy dùng "cinematic still", "shot on Arri Alexa", "35mm film grain", "natural lighting", "documentary portrait" để ảnh trông tự nhiên, không bị nhựa.
-
-    3. **SINH CẶP PROMPT START-END CHO TỪNG CHUNK**:
-       Với MỖI CHUNK đã định nghĩa ở trên, bạn phải viết **2 Prompt sinh ảnh riêng biệt** (dành cho DALL-E/Midjourney) theo cấu trúc:
-       `[Art Style Keywords] + [Character Profile] + [Mô tả START Frame hoặc END Frame] + [Camera Angle] + [Lighting] + [Negative Prompt: text, signature, blurry, distorted, 8k, hyperdetailed]`
+    **CHIẾN LƯỢC TỐI ƯU CHI PHÍ & NHẤT QUÁN DỮ LIỆU**:
+    Thay vì tạo hàng chục ảnh lẻ gây biến dạng mặt và tốn kém chi phí, bạn sẽ tạo:
+    1. **1 Master Character Reference Sheet Prompt**: Mô tả nhân vật ở dạng Multi-Angle (chân dung cận cảnh, toàn thân, góc nghiêng 45 độ) hoặc 1 chân dung điện ảnh chuẩn với trang phục cố định để làm mỏ neo hình ảnh (Reference Anchor) cho Veo 3.
+    2. **1 Master Environment/Keyframe Prompt**: Khung cảnh bối cảnh chính với ánh sáng và bảng màu chuẩn.
+    3. **Tóm tắt danh sách Prompt Veo 3**: Bộ từ khóa mô tả chuyển động và camera cho từng phân cảnh.
 
     **Định dạng đầu ra BẮT BUỘC (Markdown)**:
-    ### CHARACTER CONSISTENCY PROFILE
-    (Tóm tắt nhân vật để tham chiếu)
-    ### ART STYLE FIXED
-    (Các từ khóa style dùng chung)
-    ### VISUAL PROMPTS FOR AI IMAGE GENERATION
-    | CHUNK | START Prompt (EN) | END Prompt (EN) |
-    |---|---|---|
-    | CHUNK_01 | [Prompt dài 4-6 câu] | [Prompt dài 4-6 câu] |
-    | CHUNK_02 | ... | ... |
-    | ... | ... | ... |
+    ### 1. MASTER CHARACTER REFERENCE SHEET PROMPT (Dùng tạo ảnh mỏ neo)
+    - **Prompt (EN)**: `[Master Art Style] + Character Sheet multi-angle portrait, full body and 45-degree angle, consistent facial features, signature outfit [chi tiết quần áo], neutral studio/cinematic lighting, clean composition, high coherence, shot on 50mm lens, film aesthetic --ar 16:9`
+
+    ### 2. MASTER ENVIRONMENT PROMPT (Dùng tạo ảnh bối cảnh nền)
+    - **Prompt (EN)**: `[Master Art Style] + Cinematic environment establishing shot of [Bối cảnh chính], atmospheric lighting, volumetric smoke/dust, deep depth of field --ar 16:9`
+
+    ### 3. VEO3 DYNAMIC SCENE PROMPTS TABLE
+    | Scene | Thời lượng | Veo3 Dynamic Prompt (EN) | Ghi chú Camera & Lighting |
+    |---|---|---|---|
+    | Scene 1 | 3s | [Prompt kết hợp Master Character + Action + Camera Movement] | Dolly in, Warm golden hour |
+    | Scene 2 | 3s | ... | Tracking shot, Soft shadows |
 
     {markdown_template}
-  expected_output: "Bảng Markdown chứa cặp Prompt Start-End cho toàn bộ các CHUNK, đảm bảo tính đồng bộ về nhân vật và ánh sáng."
+  expected_output: "Bản Visual Prompts chuẩn Markdown gồm: 1 Master Character Reference Sheet Prompt, 1 Master Environment Prompt và Bảng Dynamic Prompts cho Veo3."
 
 image_task:
   description: |
-    Dựa trên bảng Visual Prompts từ bước trước: "{previous_result}".
-    Tool sinh ảnh của bạn sẽ tạo ra ảnh để đưa vào App AI Video (chế độ Start-End).
+    Dựa trên bảng Visual Prompts: "{previous_result}".
+    Nhiệm vụ: Tạo các ảnh Reference mỏ neo (Anchor Images) để làm tài liệu đầu vào cho Tool AI Video (chế độ Image-to-Video / Reference Frame).
 
-    **YÊU CẦU BẮT BUỘC VỀ TÊN FILE (QUAN TRỌNG)**:
-    Vì Tool AI Video của bạn sắp xếp ảnh theo thứ tự Alphabet và yêu cầu số thứ tự 001, 002... (nếu đặt 1,2,3 sẽ bị lỗi), bạn phải đặt tên file theo quy tắc sau:
-    - Định dạng: `chunk_{STT}_start.png` và `chunk_{STT}_end.png` (STT phải là 2 chữ số, ví dụ: 01, 02... 10).
-    - Với video 60s có 8 Chunks, bạn sẽ sinh ra **16 ảnh**.
-    - **Lưu ý dung lượng**: Tổng ảnh không vượt quá 350MB (giới hạn tool), nếu ảnh quá nặng hãy giảm kích thước xuống 1024x1024 hoặc 1080x1920.
+    **QUY TẮC ĐẶT TÊN & TỐI ƯU**:
+    Chỉ cần sinh **1 đến 2 ảnh Master chuẩn**, đặt tên:
+    - `01_master_character_ref.png`: Ảnh nhân vật tham chiếu mỏ neo.
+    - `02_master_environment_ref.png`: Ảnh bối cảnh không gian chính.
 
     **TIẾN TRÌNH THỰC HIỆN**:
-    1. Lặp qua từng hàng trong bảng Visual Prompts.
-    2. Gọi công cụ `generate_gpt_image` với START Prompt để tạo ảnh đầu.
-    3. Gọi công cụ `generate_gpt_image` với END Prompt để tạo ảnh cuối.
-    4. Lưu ảnh với đúng tên quy định.
+    1. Tạo ảnh Master Character Reference bằng `generate_gpt_image`.
+    2. Tạo ảnh Master Environment Reference bằng `generate_gpt_image`.
+    3. Lưu và trả về danh sách đường dẫn ảnh.
 
     **Định dạng đầu ra BẮT BUỘC (Markdown)**:
-    ### DANH SÁCH ẢNH ĐÃ TẠO (ĐỂ UPLOAD LÊN TOOL)
+    ### DANH SÁCH ẢNH MASTER REFERENCE ĐÃ TẠO
     | STT | Tên File | Loại | Đường dẫn tuyệt đối |
     |---|---|---|---|
-    | 01 | chunk_01_start.png | START | /path/to/... |
-    | 02 | chunk_01_end.png | END | /path/to/... |
-    | ... | ... | ... | ... |
+    | 01 | 01_master_character_ref.png | Master Character Reference | /path/to/01_master_character_ref.png |
+    | 02 | 02_master_environment_ref.png | Master Environment Reference | /path/to/02_master_environment_ref.png |
 
-    **HƯỚNG DẪN UPLOAD LÊN TOOL**:
-    - Vào chế độ **"Tạo video từ ảnh đầu-cuối (Start-End)"**.
-    - Upload toàn bộ ảnh START vào danh sách ảnh bắt đầu.
-    - Upload toàn bộ ảnh END vào danh sách ảnh kết thúc.
-    - Dán prompt tương ứng cho từng cặp (lấy từ Phần 3 của kịch bản).
-    - Tool sẽ tự động sinh ra số lượng video bằng số CHUNK.
+    **HƯỚNG DẪN SỬ DỤNG VỚI VEO3 / AI VIDEO**:
+    - Sử dụng `01_master_character_ref.png` làm ảnh tham chiếu (Image Prompt / First Frame) cho các cảnh có nhân vật.
+    - Copy các đoạn `Combined Visual (EN)` từ kịch bản dán vào Veo 3 để sinh video chuyển động trực tiếp.
 
     {markdown_template}
-  expected_output: "Danh sách đường dẫn ảnh cục bộ với tên file đã được chuẩn hóa (start/end + STT 2 chữ số) để sẵn sàng đưa vào tool."
+  expected_output: "Danh sách đường dẫn ảnh Master Reference và hướng dẫn nạp vào công cụ sinh video Veo3."
 
 voice_task:
   description: |
-    Dựa trên kịch bản gốc ở bước 1: "{script}".
-    Hãy lọc, phân loại và kết hợp toàn bộ phần Lời thoại/Thuyết minh (Voiceover) của các phân cảnh để chuẩn bị cho việc lồng tiếng.
-    
-    Yêu cầu kết quả đầu ra:
-    1. **PHÂN CHIA VĂN BẢN ĐỌC CHI TIẾT**: Tách biệt rõ ràng phần văn bản đọc theo vai:
-       - [NARRATOR]: Lời dẫn chuyện đóng vai trò dẫn dắt và kết nối câu chuyện.
-       - [DIALOGUE - Tên nhân vật]: Lời thoại riêng của nhân vật (để trong ngoặc kép).
-    2. **ĐỀ XUẤT GIỌNG ĐỌC RIÊNG BIỆT**: Gợi ý chi tiết cấu hình ElevenLabs khác nhau cho từng vai (giọng đọc riêng cho Người dẫn chuyện và giọng đọc riêng cho từng nhân vật phát biểu) để đảm bảo không bị trùng giọng đọc.
+    Dựa trên kịch bản: "{script}".
+    Hãy tổng hợp và biên soạn toàn bộ phần Lời thoại / Thuyết minh thành **1 BẢN VOICE THU ÂM HOÀN CHỈNH (FULL AUDIO TRACK)** liền mạch.
+
+    **YÊU CẦU KẾT QUẢ ĐẦU RA**:
+    1. **VĂN BẢN ĐỌC LIỀN MẠCH THEO TIMELINE**:
+       Trình bày kịch bản đọc liên tục có đánh dấu mốc thời gian để người thu âm hoặc AI TTS (ElevenLabs/OpenAI) đọc 1 lần từ đầu đến cuối:
+       - `[00:00 - 00:03] [NARRATOR]: Câu mở đầu gây sốc...`
+       - `[00:03 - 00:07] [DIALOGUE - Tên]: "Câu thoại của nhân vật..."`
+       - `[00:07 - 00:12] [NARRATOR]: Lời dẫn tiếp nối...`
+
+    2. **CẤU HÌNH GIỌNG ĐỌC ĐỀ XUẤT**:
+       - Gợi ý Voice ID, Stability, Similarity Boost phù hợp cho phong cách kịch tính / truyền cảm hứng.
+       - Tốc độ đọc khuyến nghị: 1.05x - 1.1x để vừa khớp nhịp video ngắn.
+
     {markdown_template}
-  expected_output: "Văn bản lồng tiếng hoàn chỉnh phân chia rõ ràng theo vai (Narrator và Nhân vật) + đề xuất cấu hình giọng đọc ElevenLabs riêng biệt cho từng vai."
+  expected_output: "Văn bản Voiceover liền mạch kèm timestamp mốc thời gian cho toàn bộ video + cấu hình giọng đọc ElevenLabs chuẩn."
 
 editor_task:
   description: |
-    Dựa trên kịch bản: "{script}" và danh sách ảnh đã tạo ở bước `image_task`.
-    Bạn là Chuyên gia Dựng phim AI. Hướng dẫn chi tiết quy trình ghép nối các Clip AI trên CapCut để ra sản phẩm hoàn chỉnh.
+    Dựa trên kịch bản: "{script}" và các tài nguyên đã tạo.
+    Bạn là Chuyên gia Dựng phim AI. Hướng dẫn quy trình dựng video nhanh và chuyên nghiệp trên CapCut với 1 Track Audio và các Clip Veo 3.
 
-    **[BƯỚC 1: CHUẨN BỊ TÀI NGUYÊN]**
-    - Xuất các video con từ Tool AI (mỗi video dài 8s, tương ứng với 1 CHUNK). Đặt tên lần lượt là `chunk_01.mp4`, `chunk_02.mp4`...
-    - Tải file Voiceover tổng (đã được tách giọng Narrator và Dialogue riêng biệt nếu có).
+    **[BƯỚC 1: IMPORT TÀI NGUYÊN]**
+    - Import 1 file Voiceover tổng (Full Track) đã thu âm / tạo từ ElevenLabs vào Timeline Audio chính.
+    - Import các đoạn video clip sinh từ Veo 3 (mỗi clip 3-6s).
 
-    **[BƯỚC 2: ĐỒNG BỘ ÂM THANH & HÌNH ẢNH (SYNC)]**
-    - Mở CapCut, import tất cả file `chunk_XX.mp4` và file voiceover.
-    - **Kỹ thuật ghép nối mượt mà (Quan trọng)**: Vì AI sinh mỗi clip 8s không có transition tự nhiên, bạn cần:
-      1. Kéo thả các clip `chunk_01`, `chunk_02`... nối tiếp nhau trên timeline.
-      2. Tại vị trí tiếp giáp giữa 2 clip, thêm hiệu ứng **"Cross Dissolve"** (hoặc "Fade") với thời lượng **0.3s - 0.5s**. Điều này giúp che đi sự khác biệt nhỏ về ánh sáng/hình ảnh giữa các lần sinh AI khác nhau, tạo cảm giác liền mạch.
-      3. Khớp file Voiceover đã được cắt sẵn theo từng CHUNK vào đúng vị trí thời gian tương ứng.
+    **[BƯỚC 2: KHỚP TIMELINE NHANH GỌN (AUDIO-FIRST SYNC)]**
+    - Đặt file Voiceover làm xương sống (Backbone) của toàn bộ video.
+    - Kéo các clip video Veo 3 thả vào Video Track tương ứng với từng mốc câu thoại trên timeline.
+    - Cắt tỉa (Trim) nhẹ nhàng các đoạn thừa của video để khớp chính xác nhịp chuyển giọng nói.
 
-    **[BƯỚC 3: HIỆU ỨNG & CHUYỂN CẢNH (EFFECTS & TRANSITIONS)]**
-    - **Motion Blur**: Bật chế độ "Motion Blur" nhẹ (nếu có) để các chuyển động do AI tạo ra trông mượt hơn, tránh giật hình.
-    - **Auto Captions (Phụ đề)**: Dùng tính năng "Auto Captions" của CapCut. Chọn style phụ đề nổi bật (màu trắng viền đen) và căn giữa. Tăng tốc độ xuất hiện của phụ đề để khớp với giọng đọc nhanh.
-    - **Text Animation**: Thêm hiệuệu ứng "Typewriter" hoặc "Pop up" cho các từ khóa quan trọng để tăng tương tác.
+    **[BƯỚC 3: HIỆU ỨNG CHUYỂN CẢNH & PHỤ ĐỀ TỰ ĐỘNG]**
+    - **Chuyển cảnh**: Giữa các clip Veo 3, thêm hiệu ứng chuyển cảnh nhẹ (Cross Dissolve hoặc Flash nhẹ 0.2s) nếu cần.
+    - **Auto Captions**: Sử dụng tính năng "Auto Captions" của CapCut để sinh phụ đề tự động tiếng Việt theo giọng đọc. Tùy chỉnh màu chữ nổi bật (Vàng viền đen hoặc Trắng viền đen).
 
-    **[BƯỚC 4: MÀU SẮC (COLOR GRADING) & ÂM THANH]**
-    - **LUT/Filter**: Áp dụng 1 filter chung cho toàn bộ video để đồng bộ màu sắc giữa các clip AI (vì màu sắc giữa các lần sinh có thể lệch). Gợi ý dùng filter nhẹ như "Clean" hoặc "Natural" để hài hòa da và bối cảnh.
-    - **Âm thanh (Audio Ducking)**: BGM (nhạc nền) để âm lượng khoảng 15-20%. Voiceover để 100%. Bật chế độ "Ducking" để nhạc tự động hạ xuống khi có giọng nói.
-
-    **[BƯỚC 5: XUẤT FILE]**
-    - Cấu hình xuất: 1080p, 60fps (để video AI không bị giật), H.264.
-    - Thời lượng tổng phải đúng bằng {target_duration}s ± 0.5s.
+    **[BƯỚC 4: ÂM NHẠC & XUẤT BẢN]**
+    - Thêm 1 bài BGM phù hợp với Tone/Mood đã định trong Brief. Bật chế độ **Auto Ducking** (âm lượng BGM giảm xuống 15-20% khi có giọng nói).
+    - Xuất video chuẩn 1080x1920 (9:16), 60fps, Bitrate High.
 
     {markdown_template}
-  expected_output: "Cẩm nang dựng video chi tiết trên CapCut theo đúng quy trình AI (Chia Chunk, Cross Dissolve, Auto Caption, Audio Ducking)."
+  expected_output: "Hướng dẫn dựng video tinh gọn trên CapCut theo quy trình Audio-First và clip Veo3."
