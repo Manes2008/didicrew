@@ -16,113 +16,82 @@ def extract_scenes_from_script(script_text: str) -> list[tuple[int, str]]:
     import re
     scenes_data = {}
     
-    # 1. Parse theo khoi block Canh cua Phan 3 de tim Combined Prompt
-    # Tach cac phan theo Phân cảnh Veo3 hoac Cảnh
-    scene_blocks = re.split(r"-?\s*\*?\*?\s*(?:Phân\s*cảnh\s*Veo3|Cảnh\s*Veo3|Phân\s*cảnh|Cảnh|Scene)\s*(\d+)\s*(?:\([^)]*\))?\s*\*?\*?\s*[:\-–\.\s\n]+", script_text, flags=re.IGNORECASE)
-    
-    if len(scene_blocks) > 1:
-        for i in range(1, len(scene_blocks), 2):
+    # 1. Parse theo bảng Markdown có Scene 1, **Scene 1**, Phân cảnh 1 hoặc số thứ tự
+    table_rows = re.findall(r"\|\s*(?:\*\*)?(?:Scene|Phân cảnh|Cảnh)?\s*(\d+)(?:\*\*)?\s*\|(?:[^|]*\|)?\s*`?([^`|\n]+)`?\s*\|", script_text, re.IGNORECASE)
+    if table_rows:
+        for s_num_str, prompt_str in table_rows:
             try:
-                s_num = int(scene_blocks[i])
-                block_content = scene_blocks[i+1]
-                
-                # Tim cac truong con thong qua regex
-                visual_match = re.search(r"(?:Combined\s+)?Visual(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
-                voice_match = re.search(r"Voiceover(?:\s*/\s*Dialogue)?(?:\s*\(VI\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
-                sfx_match = re.search(r"SFX/BGM\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
-                detail_match = re.search(r"Veo3\s*Detail\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
-                combined_match = re.search(r"Combined\s+(?:Prompt|Visual)(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
-                
-                visual_en = visual_match.group(1).strip() if visual_match else ""
-                voice_vi = voice_match.group(1).strip() if voice_match else ""
-                sfx = sfx_match.group(1).strip() if sfx_match else ""
-                detail = detail_match.group(1).strip() if detail_match else ""
-                combined = combined_match.group(1).strip() if combined_match else ""
-                
-                # Uu tien Combined Prompt hoac Combined Visual tu AI
-                if combined:
-                    prompt = combined
-                elif visual_en:
-                    prompt = visual_en
-                else:
-                    # Neu chua co thi tu gop thong tin
-                    parts = []
-                    if detail: parts.append(detail)
-                    if voice_vi: parts.append(f"Voiceover: {voice_vi}")
-                    if sfx: parts.append(f"Audio: {sfx}")
-                    prompt = ". ".join(parts)
-                    
-                if prompt.strip():
-                    scenes_data[s_num] = prompt
-            except Exception as ex_block:
-                print(f"[WARN] Loi parse block canh {scene_blocks[i]}: {ex_block}")
-                
-    # 2. Fallback 1: Parse bảng phân cảnh ở Phần 2 nếu không parse được khối Phần 3
+                s_num = int(s_num_str)
+                cleaned = prompt_str.strip().strip("`")
+                if cleaned and len(cleaned) > 10 and "thời lượng" not in cleaned.lower() and "ghi chú" not in cleaned.lower():
+                    scenes_data[s_num] = cleaned
+            except Exception:
+                pass
+
+    # 2. Parse theo khối block Cảnh của Phần 3 để tìm Combined / Visual Prompt
     if not scenes_data:
-        lines = script_text.split("\n")
-        for line in lines:
-            line_strip = line.strip()
-            if not line_strip.startswith("|") or not line_strip.endswith("|"):
-                continue
-            parts = [p.strip() for p in line_strip.split("|")[1:-1]]
-            if len(parts) >= 3:
-                s_num_str = parts[0]
-                if s_num_str.isdigit():
-                    s_num = int(s_num_str)
-                    scenes_data[s_num] = parts[2]
+        scene_blocks = re.split(r"-?\s*\*?\*?\s*(?:Phân\s*cảnh\s*Veo3|Cảnh\s*Veo3|Phân\s*cảnh|Cảnh|Scene)\s*(\d+)\s*(?:\([^)]*\))?\s*\*?\*?\s*[:\-–\.\s\n]+", script_text, flags=re.IGNORECASE)
+        if len(scene_blocks) > 1:
+            for i in range(1, len(scene_blocks), 2):
+                try:
+                    s_num = int(scene_blocks[i])
+                    block_content = scene_blocks[i+1]
                     
-    # 3. Fallback 2: Regex co ban cho toan kịch bản
-    final_scenes = []
-    if scenes_data:
-        for s_num in sorted(scenes_data.keys()):
-            final_scenes.append((s_num, scenes_data[s_num]))
-    else:
-        scenes = re.findall(r"(?:Scene|Cảnh)\s*(\d+)[\s*:\-–\.]+(.*?)(?=(?:Scene|Cảnh)\s*\d+[\s*:\-–\.]+|\Z)", script_text, re.DOTALL | re.IGNORECASE)
-        if scenes:
-            final_scenes = [(int(s_num), s_desc.strip()) for s_num, s_desc in scenes]
-        else:
-            final_scenes = [(1, script_text)]
-            
-    return final_scenes
+                    visual_match = re.search(r"(?:Combined\s+)?Visual(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                    voice_match = re.search(r"Voiceover(?:\s*/\s*Dialogue)?(?:\s*\(VI\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                    detail_match = re.search(r"Veo3\s*Detail\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                    combined_match = re.search(r"Combined\s+(?:Prompt|Visual)(?:\s*\(EN\))?\s*[:\-–\.]+\s*(.*?)(?=\n\s*\*|\Z)", block_content, re.IGNORECASE | re.DOTALL)
+                    
+                    visual_en = visual_match.group(1).strip() if visual_match else ""
+                    voice_vi = voice_match.group(1).strip() if voice_match else ""
+                    detail = detail_match.group(1).strip() if detail_match else ""
+                    combined = combined_match.group(1).strip() if combined_match else ""
+                    
+                    prompt = combined or visual_en or detail or voice_vi
+                    if prompt.strip():
+                        scenes_data[s_num] = prompt.strip()
+                except Exception as ex_block:
+                    print(f"[WARN] Loi parse block canh {scene_blocks[i]}: {ex_block}")
+                    
+    # 3. Fallback 2: Parse các gạch đầu dòng hoặc định dạng danh sách
+    if not scenes_data:
+        list_matches = re.findall(r"(?:^|\n)\s*(?:[-*]|\d+\.)?\s*(?:Cảnh|Phân cảnh|Scene)\s*(\d+)[\s*:\-\u2013\.]+(.*?)(?=(?:\n\s*(?:[-*]|\d+\.)?\s*(?:Cảnh|Phân cảnh|Scene)\s*\d+)|\Z)", script_text, re.DOTALL | re.IGNORECASE)
+        for s_num_str, prompt_str in list_matches:
+            try:
+                s_num = int(s_num_str)
+                cleaned = re.sub(r"\n+", " ", prompt_str).strip()
+                if cleaned and len(cleaned) > 10:
+                    scenes_data[s_num] = cleaned
+            except Exception:
+                pass
 
-def generate_gpt_image_func(prompt: str) -> str:
-    """Hàm Python thuần túy để tạo hình ảnh bằng gpt-image-2 và tải về máy local cho tất cả các cảnh, có cơ chế retry khi cạn quota."""
-    try:
-        # Sử dụng API Key của OpenAI được thiết lập trong môi trường
-        api_key = os.environ.get("OPENAI_API_KEY")
-        if not api_key:
-            return "ERROR: Thiếu OPENAI_API_KEY trong môi trường. Vui lòng cấu hình API Key để tạo ảnh."
+    # 4. Fallback 3: Tìm các code blocks (Master Character Reference Sheet, Prompt (EN))
+    if not scenes_data:
+        code_blocks = re.findall(r"```(?:text|prompt)?\s*\n(.*?)```", script_text, re.DOTALL)
+        for idx, block in enumerate(code_blocks, start=1):
+            cleaned = block.strip()
+            if cleaned and len(cleaned) > 20:
+                scenes_data[idx] = cleaned
+                
+    return sorted(scenes_data.items(), key=lambda x: x[0])
 
-        # Thêm chỉ thị loại bỏ chữ/text
-        no_text_suffix = ", absolutely NO text, NO words, NO letters, NO signs, NO watermark, NO logo, NO labels, pure visual scene"
-
-        # Trích xuất profile, style và các scene từ prompt
-        import re
-        profile_match = re.search(r"(?:Character Profile|Hồ sơ nhân vật|Profile|Nhân vật)[\s*:\-–\.]+(.*?)(?=(?:Art Style|Phong cách|Scene|Cảnh)\s*|\Z)", prompt, re.DOTALL | re.IGNORECASE)
-        style_match = re.search(r"(?:Art Style|Phong cách nghệ thuật|Style|Phong cách)[\s*:\-–\.]+(.*?)(?=(?:Scene|Cảnh|Nhân vật|Profile)\s*|\Z)", prompt, re.DOTALL | re.IGNORECASE)
-        
-        profile_text = profile_match.group(1).strip() if profile_match else ""
-        style_text = style_match.group(1).strip() if style_match else ""
-        
-        # Su dung bo parse thong minh de trich xuat cac canh
-        scenes = extract_scenes_from_script(prompt)
-
-        scene_prompts = []
-        for s_num, s_desc in scenes:
-            scene_prompt = f"{style_text} {profile_text} {s_desc.strip()}".strip()
-            scene_prompt = scene_prompt.replace("\n", " ").strip()
-            scene_prompts.append((int(s_num), scene_prompt))
-
-        # Chỉ định cứng base_url của OpenAI để tránh bị ghi đè bởi biến môi trường proxy
-        client = OpenAI(api_key=api_key, base_url="https://api.openai.com/v1")
-        
-        scene_results = {}
+def generate_gpt_image_func(script_text: str) -> str:
+    """Ham sinh anh gpt-image-2 cho tung phan canh (Co fallback va retry)."""
+    import config
+    client = OpenAI(api_key=config.OPENAI_API_KEY)
+    
+    scene_prompts = extract_scenes_from_script(script_text)
+    
+    no_text_suffix = ", cinematic composition, highly detailed, realistic textures, no text, no watermark, no typography, clean image"
+    
+    scene_results = {}
+    
+    if scene_prompts:
         max_attempts = 3
         
         def generate_single_scene_image(scene_info, gen_id_ref=None) -> tuple[int, str, str | None]:
             s_num, s_prompt = scene_info
             
-            # Nếu có gen_id_ref từ Scene đầu tiên, thêm chỉ dẫn tham chiếu vào prompt
             if gen_id_ref and s_num > 1:
                 refined_prompt = f"Using gen_id {gen_id_ref} as reference to maintain identical character, clothing, face features, and art style. {s_prompt[:25000]}{no_text_suffix}"
             else:
@@ -130,7 +99,6 @@ def generate_gpt_image_func(prompt: str) -> str:
                 
             try:
                 try:
-                    # Thử tạo ảnh bằng gpt-image-2
                     response = client.images.generate(
                         model="gpt-image-2",
                         prompt=refined_prompt,
@@ -139,7 +107,6 @@ def generate_gpt_image_func(prompt: str) -> str:
                         n=1
                     )
                 except Exception as e2:
-                    # Nếu gpt-image-2 lỗi, tự động hạ cấp xuống gpt-image-1-mini
                     try:
                         response = client.images.generate(
                             model="gpt-image-1-mini",
@@ -161,7 +128,6 @@ def generate_gpt_image_func(prompt: str) -> str:
                 img = Image.open(BytesIO(img_bytes))
                 
                 os.makedirs("generated_images", exist_ok=True)
-                # Lưu tên file chứa scene_{s_num} để UI dễ đối chiếu
                 file_path = f"generated_images/scene_{s_num}_image_{int(time.time())}.png"
                 img.save(file_path)
                 
@@ -169,7 +135,6 @@ def generate_gpt_image_func(prompt: str) -> str:
             except Exception as e:
                 return s_num, f"ERROR_IDX_{s_num}: {str(e)}", None
 
-        # Sắp xếp để vẽ scene đầu tiên trước (thường là Scene 1)
         sorted_scenes = sorted(scene_prompts, key=lambda x: x[0])
         gen_id_ref = None
         
@@ -178,7 +143,6 @@ def generate_gpt_image_func(prompt: str) -> str:
             first_scene_success = False
             first_attempt = 0
             
-            # Thử sinh Scene đầu tiên (có retry rate-limit)
             while first_attempt < max_attempts and not first_scene_success:
                 first_attempt += 1
                 s_num, res_path, gen_id = generate_single_scene_image(first_scene, None)
@@ -195,7 +159,6 @@ def generate_gpt_image_func(prompt: str) -> str:
                     gen_id_ref = gen_id
                     first_scene_success = True
             
-            # Sinh song song các Scene còn lại
             other_scenes = sorted_scenes[1:]
             if other_scenes:
                 pending_scenes = list(other_scenes)
@@ -221,75 +184,159 @@ def generate_gpt_image_func(prompt: str) -> str:
                                 next_pending.append((s_num, s_prompt))
                         else:
                             scene_results[s_num] = res_path
-                    
+                            
                     pending_scenes = next_pending
-                    if pending_scenes:
+                    if pending_scenes and attempt < max_attempts:
                         time.sleep(2)
-
-        # Định dạng dòng trả về để tương thích ngược
-        output_lines = []
-        errors = []
-        for s_num in sorted(scene_results.keys()):
-            res = scene_results[s_num]
-            if "ERROR_IDX_" in res:
-                errors.append(res)
-            else:
-                output_lines.append(f"[ANH] Duong dan anh: {res}")
-        
-        if not output_lines:
-            return "ERROR: Khong the tao bat ky anh nao. Chi tiet:\n" + "\n".join(errors)
-            
-        if errors:
-            output_lines.append("[WARN] Mot so anh bi loi khi tao:\n" + "\n".join(errors))
-            
+                        
+        output_lines = [f"[ANH CẢNH {s}]: {p}" for s, p in sorted(scene_results.items())]
         return "\n".join(output_lines)
+    else:
+        try:
+            clean_prompt = f"{script_text[:30000]}{no_text_suffix}"
+            response = client.images.generate(
+                model="gpt-image-2",
+                prompt=clean_prompt,
+                size="1024x1024",
+                quality="medium",
+                n=1
+            )
+            b64_data = response.data[0].b64_json
+            if not b64_data:
+                return "ERROR: OpenAI khong tra ve du lieu anh."
+            
+            img_bytes = base64.b64decode(b64_data)
+            img = Image.open(BytesIO(img_bytes))
+            
+            os.makedirs("generated_images", exist_ok=True)
+            file_path = f"generated_images/single_image_{int(time.time())}.png"
+            img.save(file_path)
+            
+            return f"[ANH]: {file_path}"
+        except Exception as e:
+            return f"ERROR: Loi khi sinh anh tong the bang gpt-image: {str(e)}"
 
-    except Exception as e:
-        return f"ERROR: {str(e)}"
+@tool("generate_gpt_image")
+def generate_gpt_image(script_text: str) -> str:
+    """Cong cu CrewAI sinh anh cho tung phan canh kich ban."""
+    return generate_gpt_image_func(script_text)
 
-@tool("genimage")
-def generate_gpt_image(prompt: str) -> str:
-    """Tạo hình ảnh bằng dall-e-3, tự động tải về máy local và trả về đường dẫn file."""
-    return generate_gpt_image_func(prompt)
+def generate_gemini_imagen_func(script_text: str, aspect_ratio: str = "9:16", model_name: str = "gemini-2.5-flash-image") -> str:
+    """Sinh anh bang Google Gemini Image Native (gemini-2.5-flash-image, gemini-3-pro-image, gemini-3.1-flash-image) hoac Flux Realism Ultra HD."""
+    import config
+    import urllib.parse
+    import re
+    api_key = config.GEMINI_API_KEY or os.getenv("GEMINI_API_KEY")
 
+    scene_prompts = extract_scenes_from_script(script_text)
+    if not scene_prompts:
+        scene_prompts = [(1, script_text[:1000])]
 
-def generate_local_image_sd_func(prompt: str, use_gpu: bool = None) -> str:
-    """
-    Sinh anh local su dung Stable Diffusion v1.5 qua diffusers.
-    Neu use_gpu la None, tu dong phat hien GPU qua torch.cuda.is_available().
-    """
-    try:
-        import os
-        import time
-        import torch
-        from diffusers import StableDiffusionPipeline
-        import gc
+    scene_results = {}
+    os.makedirs("generated_images", exist_ok=True)
+
+    # Tinh toan do phan giai cao (Ultra HD) theo ti le
+    if aspect_ratio == "16:9":
+        w, h = 1536, 896
+    elif aspect_ratio == "1:1":
+        w, h = 1024, 1024
+    else: # 9:16 Shorts
+        w, h = 896, 1536
+
+    def generate_single_scene(s_num: int, prompt: str) -> tuple[int, str]:
+        clean_p = prompt.replace("\n", " ").strip()
+        clean_p = re.sub(r"(?:Phân cảnh|Cảnh|Lời thoại|Voiceover|SFX|BGM|Veo3 Detail)\s*[:\-–\.]+", "", clean_p, flags=re.IGNORECASE)
+        clean_p = re.sub(r"[^\x00-\x7F]+", " ", clean_p)
+        clean_p = re.sub(r"\s+", " ", clean_p).strip()
+
+        if len(clean_p) < 15:
+            clean_p = "cinematic photorealistic scene, highly detailed, beautiful lighting, masterpiece 8k"
+
+        file_path = f"generated_images/scene_{s_num}_{int(time.time())}.png"
+
+        # 1. Thu goi Google Gemini GenAI SDK voi model da chon neu khong phai Flux truc tiep
+        if api_key and not model_name.startswith("flux"):
+            try:
+                from google import genai
+                from google.genai import types
+                client = genai.Client(api_key=api_key)
+                response = client.models.generate_content(
+                    model=target_gemini_model,
+                    contents=f"Generate a high quality, photorealistic, cinematic image of: {clean_p}",
+                    config=types.GenerateContentConfig(response_modalities=["IMAGE"])
+                )
+                if response.candidates and response.candidates[0].content.parts:
+                    for part in response.candidates[0].content.parts:
+                        if hasattr(part, "inline_data") and part.inline_data:
+                            img_bytes = part.inline_data.data
+                            with open(file_path, "wb") as f:
+                                f.write(img_bytes)
+                            return s_num, file_path
+            except Exception:
+                pass
+
+        # 2. Fallback sang Flux Realism / Flux / Turbo voi co che Retry 3 lan chong Timeout
+        enhanced_prompt = f"{clean_p[:450]}, masterpiece, 8k resolution, highly detailed realistic textures, cinematic soft rim lighting, photorealistic portrait, sharp focus, 35mm photography"
+        encoded_p = urllib.parse.quote(enhanced_prompt)
         
-        # Phat hien GPU neu khong chi dinh
-        if use_gpu is None:
+        fallback_models = ["flux-realism", "flux", "turbo"]
+        for attempt, f_model in enumerate(fallback_models):
+            try:
+                seed_val = int(time.time() + s_num * 100 + attempt * 17) % 99999
+                flux_url = f"https://image.pollinations.ai/prompt/{encoded_p}?width={w}&height={h}&model={f_model}&nologo=true&seed={seed_val}&enhance=true"
+                
+                r = requests.get(flux_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}, timeout=60)
+                if r.status_code == 200 and len(r.content) > 5000:
+                    with open(file_path, "wb") as f:
+                        f.write(r.content)
+                    return s_num, file_path
+            except Exception as ex_attempt:
+                time.sleep(1.5)
+                
+        return s_num, f"ERROR_IDX_{s_num}: Khong the sinh anh cho canh {s_num}"
+
+    # Chay song song toi da 3 luong de toi uu toc do va khong bi nghen mang
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [executor.submit(generate_single_scene, s_num, prompt) for s_num, prompt in scene_prompts]
+        for f in futures:
+            try:
+                s_idx, res_path = f.result()
+                scene_results[s_idx] = res_path
+            except Exception as ex_f:
+                pass
+
+    output_lines = [f"[ANH CẢNH {s}]: {p}" for s, p in sorted(scene_results.items())]
+    return "\n".join(output_lines)
+
+def generate_local_image_sd_func(prompt: str, use_gpu: bool = False) -> str:
+    """Sinh anh cuc bo bang model Stable Diffusion v1.5 (CPU hoac GPU)."""
+    try:
+        import torch
+        import gc
+        from diffusers import StableDiffusionPipeline
+        
+        if use_gpu and not torch.cuda.is_available():
+            print("[WARN] Yeu cau chay GPU nhung he thong khong co CUDA! Tu dong chuyen sang CPU.")
+            use_gpu = False
+        elif not use_gpu:
             use_gpu = torch.cuda.is_available()
             
         device = "cuda" if use_gpu else "cpu"
-        # GPU thi dung float16 de tiet kiem VRAM, CPU thi bat buoc dung float32
         dtype = torch.float16 if use_gpu else torch.float32
         
-        print(f"[LOG] Khoi tao Stable Diffusion v1.5 tren thiet bi: {device} | dtype: {dtype}")
+        print(f"[LOG] Khoi tao Stable Diffusion tren: {device}")
         
-        # Giai phong cache CUDA truoc khi chay
         if use_gpu:
             gc.collect()
             torch.cuda.empty_cache()
             
         model_id = "runwayml/stable-diffusion-v1-5"
-        
-        # Tải pipeline SD v1.5
         pipe = StableDiffusionPipeline.from_pretrained(
             model_id, 
             torch_dtype=dtype,
             low_cpu_mem_usage=True
         )
         
-        # Cau hinh thiet bi va cac buoc toi uu hoa
         if use_gpu:
             pipe.to("cuda")
             if hasattr(pipe, "enable_attention_slicing"):
@@ -297,28 +344,20 @@ def generate_local_image_sd_func(prompt: str, use_gpu: bool = None) -> str:
         else:
             pipe.to("cpu")
             
-        # Tao thu muc luu tru
         os.makedirs("generated_images", exist_ok=True)
-        
-        # So buoc lay mau (steps): CPU chay 15 steps cho nhanh, GPU chay 30 steps chat luong tot hon
         num_inference_steps = 30 if use_gpu else 15
-        
-        # Sinh 1 anh chat luong cao de tranh tran bo nho
         image = pipe(prompt=prompt[:1024], num_inference_steps=num_inference_steps).images[0]
-        
         file_path = f"generated_images/sd_image_{int(time.time())}.png"
         image.save(file_path)
         
-        # Giai phong bo nho
         del pipe
         if use_gpu:
             gc.collect()
             torch.cuda.empty_cache()
             
-        return f"[ANH] Duong dan anh: {file_path}"
+        return f"[ANH]: {file_path}"
         
     except ImportError:
-        return "ERROR: Chưa cài đặt thư viện diffusers / transformers / torch. Vui lòng chạy: pip install diffusers transformers torch"
+        return "ERROR: Chua cai dat thu vien diffusers / torch."
     except Exception as e:
-        return f"ERROR: Lỗi khi sinh ảnh bằng Stable Diffusion local: {str(e)}"
-
+        return f"ERROR: Loi khi sinh anh SD local: {str(e)}"

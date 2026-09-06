@@ -308,7 +308,16 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                             model_name=model_name,
                             provider=provider,
                         )
-                        data = json.loads(self._clean_json_response(resp))
+                        cleaned_json = self._clean_json_response(resp)
+                        try:
+                            data = json.loads(cleaned_json, strict=False)
+                        except Exception:
+                            # Fallback regex trich xuat adjusted_prompt neu JSON co control character
+                            import re as _re_fb
+                            adj_match = _re_fb.search(r'"adjusted_prompt"\s*:\s*"([\s\S]*?)"\s*,\s*"is_standardized"', cleaned_json)
+                            adj_val = adj_match.group(1).replace("\\n", "\n").replace('\\"', '"').strip() if adj_match else idea
+                            data = {"adjusted_prompt": adj_val, "is_standardized": True, "metrics": {}}
+                        
                         adjusted_prompt = data.get("adjusted_prompt", idea)
                         is_standardized = data.get("is_standardized", False)
                         metrics_step1 = data.get("metrics", {})
@@ -406,6 +415,12 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                         local_prompt = full_prompt
                     from src.tools.image_tool import generate_local_image_sd_func
                     return generate_local_image_sd_func(local_prompt, use_gpu=(image_engine == "markl_local"))
+                elif image_engine in ("gemini", "imagen", "imagen3") or "gemini" in str(image_engine) or "flux" in str(image_engine):
+                    if custom_template and custom_template.strip():
+                        full_prompt = f"{custom_template.strip()}\n\n{full_prompt}"
+                    from src.tools.image_tool import generate_gemini_imagen_func
+                    cur_ratio = context.get("aspect_ratio", "9:16") if context else "9:16"
+                    return generate_gemini_imagen_func(full_prompt, aspect_ratio=cur_ratio, model_name=str(image_engine))
                 else:
                     # OpenAI: truyen toan bo visual prompt; generate_gpt_image_func tu tach scene va sinh anh song song
                     if custom_template and custom_template.strip():
@@ -427,6 +442,13 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                         elapsed_seconds=t_img_elapsed,
                     )
                     return img_result
+
+            # Chạy trực tiếp sinh giọng đọc Voiceover (Microsoft Neural Edge-TTS)
+            if stage_name == "voice":
+                from src.tools.voice_tool import generate_voiceover_func
+                script_content = all_results.get("script", "") if all_results else (previous_result if previous_result else idea_for_script)
+                voice_name = context.get("voice_name", "vi-VN-NamMinhNeural") if context else "vi-VN-NamMinhNeural"
+                return generate_voiceover_func(script_content, voice_name=voice_name)
             
             # Chạy trực tiếp sinh video
             if stage_name == "video":
