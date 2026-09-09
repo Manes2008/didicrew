@@ -53,7 +53,7 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
   const handleLogout = () => {
     logout();
     if (onCloseMobile) onCloseMobile();
-    router.push("/login");
+    window.location.href = "/login";
   };
 
   const handleNavClick = () => {
