@@ -136,9 +136,25 @@ async def login(req: LoginRequest, request: Request, db: AsyncSession = Depends(
 
 @router.post("/register", response_model=AuthResponse, summary="Dang ky tai khoan moi")
 async def register(req: RegisterRequest, request: Request, db: AsyncSession = Depends(get_async_db)):
-    client_ip = request.client.host if request.client else "127.0.0.1"
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        client_ip = forwarded.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else "127.0.0.1"
+
+    username = req.username.strip().lower()
+    if len(username) < 3:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ten dang nhap phai co it nhat 3 ky tu"
+        )
+    if len(req.password.strip()) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mat khau phai co it nhat 6 ky tu"
+        )
     
-    stmt = select(User).where(User.username == req.username.strip().lower())
+    stmt = select(User).where(User.username == username)
     result = await db.execute(stmt)
     if result.scalars().first():
         raise HTTPException(
@@ -146,30 +162,54 @@ async def register(req: RegisterRequest, request: Request, db: AsyncSession = De
             detail="Ten dang nhap da ton tai"
         )
 
-    new_user = User(
-        username=req.username.strip().lower(),
-        password_hash=hash_password(req.password),
-        role="user",
-        is_active=True
-    )
-    db.add(new_user)
-    await db.flush()
+    try:
+        new_user = User(
+            username=username,
+            password_hash=hash_password(req.password),
+            role="user",
+            is_active=True
+        )
+        db.add(new_user)
+        await db.flush()
 
-    new_ip = AllowedIP(
-        ip_address=client_ip,
-        label=req.device_label or f"{new_user.username}: User Device",
-        status="approved",
-        is_admin_ip=False,
-        user_id=new_user.id
-    )
-    db.add(new_ip)
-    await db.commit()
+        stmt_ip = select(AllowedIP).where(AllowedIP.ip_address == client_ip)
+        res_ip = await db.execute(stmt_ip)
+        existing_ip = res_ip.scalars().first()
 
-    return AuthResponse(
-        status="success",
-        username=new_user.username,
-        role=new_user.role,
-        is_admin_ip=False,
-        client_ip=client_ip,
-        message="Dang ky tai khoan thanh cong"
-    )
+        if existing_ip:
+            existing_ip.user_id = new_user.id
+            existing_ip.status = "approved"
+            if req.device_label:
+                existing_ip.label = req.device_label
+            existing_ip.approved_at = datetime.datetime.utcnow()
+        else:
+            new_ip = AllowedIP(
+                ip_address=client_ip,
+                label=req.device_label or f"{new_user.username}: User Device",
+                status="approved",
+                is_admin_ip=False,
+                user_id=new_user.id,
+                approved_at=datetime.datetime.utcnow()
+            )
+            db.add(new_ip)
+
+        await db.commit()
+
+        return AuthResponse(
+            status="success",
+            username=new_user.username,
+            role=new_user.role,
+            is_admin_ip=False,
+            client_ip=client_ip,
+            message="Dang ky tai khoan thanh cong"
+        )
+    except HTTPException:
+        await db.rollback()
+        raise
+    except Exception as ex:
+        await db.rollback()
+        print(f"[ERROR] Dang ky that bai: {ex}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Loi he thong khi dang ky: {str(ex)}"
+        )
