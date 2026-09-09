@@ -9,7 +9,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, checkSessionValidity } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isLoginPage = pathname
@@ -17,16 +17,21 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     : false;
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      if (!isLoginPage) {
+    if (isAuthenticated) {
+      const isValid = checkSessionValidity();
+      if (!isValid) {
         router.replace("/login");
+        return;
       }
-    } else {
       if (isLoginPage) {
         router.replace("/");
       }
+    } else {
+      if (!isLoginPage) {
+        router.replace("/login");
+      }
     }
-  }, [isAuthenticated, isLoginPage, router]);
+  }, [isAuthenticated, isLoginPage, router, checkSessionValidity]);
 
   // Tu dong dong mobile menu khi doi route
   useEffect(() => {
