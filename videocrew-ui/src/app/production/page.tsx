@@ -34,7 +34,9 @@ import {
   Volume2,
   FolderKanban,
   ExternalLink,
-  Plus
+  Plus,
+  List,
+  Eye,
 } from "lucide-react";
 
 export default function ProductionPage() {
@@ -90,6 +92,7 @@ export default function ProductionPage() {
   const [showProjectHistory, setShowProjectHistory] = useState(false);
   const [selectedImageModal, setSelectedImageModal] = useState<string | null>(null);
   const [savedFeedback, setSavedFeedback] = useState(false);
+  const [contentViewMode, setContentViewMode] = useState<"raw" | "preview">("preview");
 
   const handleSaveDefaultConfig = async () => {
     await saveEngineConfigToDatabase();
@@ -677,17 +680,115 @@ export default function ProductionPage() {
                 </div>
               ) : currentContent ? (
                 <div className="space-y-4">
+                  {/* Content View Toggle + Header */}
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-zinc-400 flex items-center gap-1.5">
                       <Edit3 className="w-3.5 h-3.5 text-amber-400" />
-                      Nội dung chi tiết (Bạn có thể chỉnh sửa trực tiếp trước khi duyệt):
+                      {contentViewMode === "raw"
+                        ? "Noi dung thu (chinh sua truc tiep truoc khi duyet):"
+                        : "Xem truoc noi dung (Preview):"}
                     </span>
-                    <span className="text-[11px] text-zinc-500 font-mono">
-                      {currentContent.length} ký tự
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-zinc-500 font-mono">
+                        {currentContent.length} ky tu
+                      </span>
+                      {/* Toggle Raw / Preview */}
+                      <div className="flex items-center rounded-lg overflow-hidden border border-[var(--vc-border)] text-[11px] font-semibold">
+                        <button
+                          onClick={() => setContentViewMode("preview")}
+                          className={`flex items-center gap-1 px-2.5 py-1 transition ${
+                            contentViewMode === "preview"
+                              ? "bg-amber-500/20 text-amber-400"
+                              : "bg-transparent text-zinc-500 hover:text-zinc-300"
+                          }`}
+                        >
+                          <Eye className="w-3 h-3" />
+                          Preview
+                        </button>
+                        <button
+                          onClick={() => setContentViewMode("raw")}
+                          className={`flex items-center gap-1 px-2.5 py-1 transition ${
+                            contentViewMode === "raw"
+                              ? "bg-amber-500/20 text-amber-400"
+                              : "bg-transparent text-zinc-500 hover:text-zinc-300"
+                          }`}
+                        >
+                          <List className="w-3 h-3" />
+                          Raw
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Stage-specific Media Previews */}
+                  {/* RAW: Editable Textarea */}
+                  {contentViewMode === "raw" ? (
+                    <textarea
+                      value={currentContent}
+                      onChange={(e) => updateStageContent(currentStageMeta.key, e.target.value)}
+                      rows={16}
+                      className="w-full p-4 rounded-xl bg-black/60 border border-[var(--vc-border)] focus:border-amber-500/70 focus:ring-1 focus:ring-amber-500/50 text-xs font-mono leading-relaxed outline-none transition resize-y text-zinc-200"
+                    />
+                  ) : (
+                    /* PREVIEW: Render formatted markdown-like content */
+                    <div
+                      className="w-full min-h-[200px] p-4 rounded-xl bg-black/40 border border-[var(--vc-border)] text-xs leading-relaxed text-zinc-200 overflow-x-auto"
+                    >
+                      <div className="prose prose-invert prose-xs max-w-none">
+                        {currentContent.split("\n").map((line, i) => {
+                          const trimmed = line.trim();
+                          if (!trimmed) return <div key={i} className="h-3" />;
+                          // Table row: starts with |
+                          if (trimmed.startsWith("|")) {
+                            const isSeparator = trimmed.replace(/[|\s-]/g, "") === "";
+                            if (isSeparator) return null;
+                            const cells = trimmed.split("|").filter((c) => c.trim() !== "");
+                            const isHeader = i === 0 || (currentContent.split("\n")[i + 1] || "").includes("---");
+                            return (
+                              <div key={i} className={`flex gap-0 text-[11px] ${
+                                isHeader ? "border-b border-amber-500/30 mb-1" : "border-b border-zinc-800/60 hover:bg-white/[0.02]"
+                              }`}>
+                                {cells.map((cell, ci) => {
+                                  const clean = cell.trim().replace(/\*\*(.*?)\*\*/g, "$1");
+                                  return (
+                                    <div
+                                      key={ci}
+                                      className={`px-2 py-1.5 align-top ${
+                                        ci === 0 ? "w-24 shrink-0 font-bold text-amber-400" :
+                                        ci === 1 ? "w-16 shrink-0 text-zinc-400" :
+                                        "flex-1"
+                                      } ${ isHeader ? "font-bold text-zinc-300 text-[10px] uppercase tracking-wide" : "" }`}
+                                    >
+                                      {clean}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          }
+                          // Heading ##
+                          if (trimmed.startsWith("## ")) {
+                            return (
+                              <h3 key={i} className="text-sm font-bold text-amber-400 mt-4 mb-1.5 border-b border-amber-500/20 pb-1">
+                                {trimmed.replace(/^#+\s/, "")}
+                              </h3>
+                            );
+                          }
+                          if (trimmed.startsWith("# ")) {
+                            return (
+                              <h2 key={i} className="text-base font-extrabold text-white mt-3 mb-2">
+                                {trimmed.replace(/^#+\s/, "")}
+                              </h2>
+                            );
+                          }
+                          // Bold **text**
+                          const rendered = trimmed.replace(/\*\*(.*?)\*\*/g, "<strong class='text-zinc-100'>$1</strong>");
+                          return (
+                            <p key={i} className="my-0.5 text-zinc-300" dangerouslySetInnerHTML={{ __html: rendered }} />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                   {currentStageMeta.key === "image" && mediaOutputs.image && mediaOutputs.image.length > 0 && (
                     <div className="p-4 rounded-xl bg-zinc-900/60 border border-[var(--vc-border)] space-y-3">
                       <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
@@ -753,14 +854,6 @@ export default function ProductionPage() {
                       </video>
                     </div>
                   )}
-
-                  {/* Editable Raw Textarea */}
-                  <textarea
-                    value={currentContent}
-                    onChange={(e) => updateStageContent(currentStageMeta.key, e.target.value)}
-                    rows={12}
-                    className="w-full p-4 rounded-xl bg-black/60 border border-[var(--vc-border)] focus:border-amber-500/70 focus:ring-1 focus:ring-amber-500/50 text-xs font-mono leading-relaxed outline-none transition resize-y text-zinc-200"
-                  />
                 </div>
               ) : (
                 <div className="py-12 text-center space-y-3 text-zinc-500">
