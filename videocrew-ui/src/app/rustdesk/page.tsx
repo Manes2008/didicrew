@@ -42,10 +42,10 @@ export default function RustDeskPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300 max-w-4xl">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-extrabold flex items-center gap-2.5">
-          <Monitor className="w-7 h-7 text-[#C2542D]" />
+        <h1 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2.5">
+          <Monitor className="w-6 h-6 sm:w-7 sm:h-7 text-[#C2542D] shrink-0" />
           Cấu Hình Điều Khiển Từ Xa (RustDesk)
         </h1>
         <p className="text-sm text-[var(--vc-muted)] mt-1">
@@ -55,12 +55,12 @@ export default function RustDeskPage() {
 
       <form onSubmit={handleSave} className="space-y-6">
         <div className="glass-panel p-6 space-y-5">
-          <div className="flex items-center justify-between border-b border-[var(--vc-border)] pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--vc-border)] pb-3">
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-2">
-              <Radio className="w-4 h-4 text-[#C99A45]" />
+              <Radio className="w-4 h-4 text-[#C99A45] shrink-0" />
               Máy Chủ RustDesk Tùy Chỉnh (Self-Hosted)
             </h2>
-            <span className="vc-badge text-[10px]">Đã kết nối</span>
+            <span className="vc-badge text-[10px] shrink-0">Đã kết nối</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -112,7 +112,7 @@ export default function RustDeskPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
           {isSaved ? (
             <div className="flex items-center gap-2 text-emerald-400 text-sm font-semibold animate-in fade-in">
               <Check className="w-4 h-4" />
@@ -124,7 +124,7 @@ export default function RustDeskPage() {
           <button
             type="submit"
             disabled={loading}
-            className="gradient-btn px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer"
+            className="gradient-btn w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 cursor-pointer"
           >
             <Save className="w-4 h-4" />
             {loading ? "Đang lưu..." : "Lưu Cấu Hình RustDesk"}

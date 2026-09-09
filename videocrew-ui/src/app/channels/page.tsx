@@ -215,7 +215,7 @@ export default function ChannelsPage() {
       {/* Modal Add Channel */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel p-6 max-w-md w-full border border-zinc-700 bg-zinc-950 rounded-2xl space-y-5 shadow-2xl animate-in zoom-in-95">
+          <div className="glass-panel p-6 max-w-md w-full max-h-[90vh] overflow-y-auto border border-zinc-700 bg-zinc-950 rounded-2xl space-y-5 shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <Plus className="w-5 h-5 text-amber-400" />
@@ -289,7 +289,7 @@ export default function ChannelsPage() {
       {/* Modal Edit Channel */}
       {editingChannel && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel p-6 max-w-md w-full border border-zinc-700 bg-zinc-950 rounded-2xl space-y-5 shadow-2xl animate-in zoom-in-95">
+          <div className="glass-panel p-6 max-w-md w-full max-h-[90vh] overflow-y-auto border border-zinc-700 bg-zinc-950 rounded-2xl space-y-5 shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <Edit3 className="w-5 h-5 text-amber-400" />

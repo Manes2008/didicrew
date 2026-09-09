@@ -142,40 +142,40 @@ export default function AnalyticsPage() {
 
           <div className="flex flex-wrap items-center gap-3">
             {/* Stage Filter */}
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-zinc-800 text-xs">
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-zinc-800 text-xs overflow-x-auto max-w-full">
               <button
                 onClick={() => setSelectedStageFilter("all")}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition ${selectedStageFilter === "all" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
+                className={`px-3 py-1.5 rounded-lg font-semibold transition whitespace-nowrap ${selectedStageFilter === "all" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
               >
                 Tất cả
               </button>
               <button
                 onClick={() => setSelectedStageFilter("brief")}
-                className={`px-2.5 py-1.5 rounded-lg font-semibold transition ${selectedStageFilter === "brief" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
+                className={`px-2.5 py-1.5 rounded-lg font-semibold transition whitespace-nowrap ${selectedStageFilter === "brief" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
               >
                 Brief
               </button>
               <button
                 onClick={() => setSelectedStageFilter("script")}
-                className={`px-2.5 py-1.5 rounded-lg font-semibold transition ${selectedStageFilter === "script" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
+                className={`px-2.5 py-1.5 rounded-lg font-semibold transition whitespace-nowrap ${selectedStageFilter === "script" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
               >
                 Kịch bản
               </button>
               <button
                 onClick={() => setSelectedStageFilter("image")}
-                className={`px-2.5 py-1.5 rounded-lg font-semibold transition ${selectedStageFilter === "image" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
+                className={`px-2.5 py-1.5 rounded-lg font-semibold transition whitespace-nowrap ${selectedStageFilter === "image" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
               >
                 Ảnh AI
               </button>
               <button
                 onClick={() => setSelectedStageFilter("voice")}
-                className={`px-2.5 py-1.5 rounded-lg font-semibold transition ${selectedStageFilter === "voice" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
+                className={`px-2.5 py-1.5 rounded-lg font-semibold transition whitespace-nowrap ${selectedStageFilter === "voice" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
               >
                 Giọng đọc
               </button>
               <button
                 onClick={() => setSelectedStageFilter("video")}
-                className={`px-2.5 py-1.5 rounded-lg font-semibold transition ${selectedStageFilter === "video" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
+                className={`px-2.5 py-1.5 rounded-lg font-semibold transition whitespace-nowrap ${selectedStageFilter === "video" ? "bg-amber-500 text-black" : "text-zinc-400 hover:text-white"}`}
               >
                 Render
               </button>
@@ -197,7 +197,7 @@ export default function AnalyticsPage() {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs min-w-[680px]">
             <thead>
               <tr className="border-b border-zinc-800 text-zinc-400 font-semibold">
                 <th className="py-3 px-3">Giai đoạn</th>

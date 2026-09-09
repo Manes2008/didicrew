@@ -54,8 +54,8 @@ export default function LoginPage() {
       {/* Main Studio Container */}
       <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         
-        {/* Left Column: AI Studio Showcase */}
-        <div className="lg:col-span-7 space-y-6 text-left">
+        {/* Left Column: AI Studio Showcase - hidden on mobile */}
+        <div className="hidden lg:block lg:col-span-7 space-y-6 text-left">
           <div className="space-y-4">
             <div className="vc-badge">
               <Sparkles className="w-3.5 h-3.5 text-[#FF5E1E]" />
