@@ -47,45 +47,66 @@ script_task:
     Hãy viết kịch bản video ngắn hoàn chỉnh tối ưu cho công cụ sinh video AI thế hệ mới (Google Veo 3 / Runway Gen-3 / Kling).
     Tổng thời lượng mục tiêu: {target_duration} giây.
 
-    **[CẤU TRÚC PHÂN BỔ THỜI LƯỢNG & NHỊP ĐIỆU]**
+    **[CẤU TRÚC PHÂN BỔ THỜI LƯỢNG & ĐỘ DÀY LỜI THOẠI]**
     - Tổng thời lượng: {target_duration} giây.
-    - Chia video thành các cảnh nhỏ linh hoạt từ 2-4 giây để giữ nhịp nhanh, cuốn hút.
-    - Tốc độ đọc tiếng Việt: **3.5 - 4 từ/giây**. Tổng số từ voiceover xấp xỉ ({target_duration} * 4) từ.
+    - Chia video thành các cảnh linh hoạt từ 3-5 giây để giữ trọn nhịp điệu cảm xúc và hình ảnh chuyển động điện ảnh.
+    - ĐỘ DÀY LỜI THOẠI (BẮT BUỘC): Mỗi cảnh phải có từ 14 đến 22 từ, tuyệt đối cấm câu cụt ngủn dưới 10 từ. Lời thoại phải đạt chuẩn văn học điện ảnh, sử dụng câu phức, hình ảnh ẩn dụ giàu sức nặng tâm lý (Subtext & Psychological Weight).
+    - Tốc độ đọc tiếng Việt chuẩn: 3.5 - 4 từ/giây. Tổng số từ toàn kịch bản xấp xỉ ({target_duration} * 4) từ.
 
-    **[PHÂN ĐỊNH LỜI DẪN CHUYỆN VÀ THOẠI NHÂN VẬT]**
-    - [NARRATOR]: Lời dẫn chuyện lôi cuốn, đóng vai trò dẫn dắt mạch cảm xúc xuyên suốt.
-    - [DIALOGUE - Tên]: Lời thoại nhân vật ngắn gọn, giàu cảm xúc, đặt trong dấu ngoặc kép.
+    **[PHÂN ĐỊNH LỜI DẪN CHUYỆN VÀ THOẠI NHÂN VẬT ĐA TẦNG]**
+    - [NARRATOR]: Lời dẫn chuyện đẫm tính văn học, mở ra không gian bối cảnh và dẫn dắt mạch cảm xúc sâu lắng.
+    - [DIALOGUE - Tên]: Lời thoại trực tiếp của nhân vật, bật ra từ nội tâm giằng xé, nỗi đau hoặc niềm tự hào kiêu hãnh, đặt trong dấu ngoặc kép.
+    - Trong các phân cảnh cao trào, có thể đan xen cả [NARRATOR] gợi mở và [DIALOGUE] tiếp nối liền mạch để tạo độ dày cảm xúc.
 
-    **[PHẦN 1 - TÊN DỰ ÁN & HOOK]**
-    - Tên video, định dạng, thời lượng.
-    - CHIẾN LƯỢC HOOK 3 GIÂY ĐẦU: Hình ảnh hành động mạnh mẽ + câu thoại/lời dẫn gây sốc ngay giây 0-3.
+    **[PHẦN 1 - TÊN DỰ ÁN & CHIẾN LƯỢC HOOK 3 GIÂY ĐẦU]**
+    - Tên video, định dạng (9:16), thời lượng ({target_duration}s).
+    - CHIẾN LƯỢC HOOK 3S ĐẦU (BẮT BUỘC CHỌN 1 TRONG 2 MÔ THỨC):
+      * Mô thức A (Số liệu tương phản): Cấu trúc [Tuổi tác/Thời gian] - [Chiến tích/Nghịch cảnh khốc liệt] (Ví dụ: "24 tuổi - đã sống sót qua 27 trận bom đạn ác liệt nhất").
+      * Mô thức B (Nghịch lý cảm xúc cực độ): Lời khẳng định đanh thép, gây chấn động tâm lý ngay lập tức (Ví dụ: "Có những người lính ra đi mà thân thể vĩnh viễn không bao giờ lành lặn").
+      * TUYỆT ĐỐI CẤM: Mở đầu bằng lối kể chuyện chậm rãi, mô tả hoàn cảnh chung chung.
 
-    **[PHẦN 2 - BẢNG PHÂN CẢNH CHI TIẾT]**
-    Trình bày bảng Markdown chuẩn 5 cột (bắt buộc để hệ thống đo đạc thời lượng chính xác):
-    | Scene | Thời lượng | Visual Description (EN) | Voiceover (VI) | SFX/BGM |
-    |---|---|---|---|---|
-    | Cảnh 1 | 3s | [Prompt mô tả hành động, camera, ánh sáng] | [NARRATOR]: Lời dẫn mở đầu... | Âm thanh mở màn kịch tính |
-    | Cảnh 2 | 3s | ... | ... | ... |
+    **[PHẦN 2 - BẢNG PHÂN CẢNH CHI TIẾT (CHUẨN 6 CỘT)]**
+    Trình bày bảng Markdown chuẩn 6 cột (bắt buộc để hệ thống đo đạc thời lượng và render trực quan):
+    | Scene | Thời lượng | Visual Description (EN) | Voiceover / Dialogue (VI) | On-Screen Flash Text (VI) | SFX/BGM |
+    |---|---|---|---|---|---|
+    | Cảnh 1 | 3s | [Prompt mô tả hành động, camera, ánh sáng] | [NARRATOR]: Lời thoại dày dặn 14-22 từ... | [TỪ KHÓA ĐẬP MẮT 2-5 TỪ] | Âm thanh mở màn kịch tính |
+    | Cảnh 2 | 4s | ... | ... | ... | ... |
 
     **[PHẦN 3 - TRÍCH XUẤT PROMPT VEO3 CHI TIẾT TỪNG CẢNH (QUAN TRỌNG)]**
     Với mỗi cảnh, trích xuất đoạn Prompt tiếng Anh chuẩn cho Veo 3 (Text-to-Video hoặc Image-to-Video với Reference Frame) theo định dạng:
 
     - **Phân cảnh Veo3 1 (0s - 3s)**:
       * **Combined Visual (EN)**: [Prompt tiếng Anh hoàn chỉnh 4-6 câu kết hợp: Master Art Style + Character Profile + Dynamic Camera Movement (ví dụ: cinematic slow dolly in, steadycam tracking, eye-level shot) + Action & Micro-expressions + Lighting Transition + Environment details].
-      * **Voiceover / Dialogue (VI)**: [Đoạn thoại/lời dẫn của cảnh này].
-      * **SFX/BGM**: [Hiệu ứng âm thanh].
+      * **Voiceover / Dialogue (VI)**: [Đoạn thoại dày dặn của cảnh này, 14-22 từ].
+      * **On-Screen Flash Text (VI)**: [Từ khóa in hoa giật màn hình 0.5s - 1s, ví dụ: 27 TRẬN TỬ CHIẾN].
+      * **SFX/BGM**: [Hiệu ứng âm thanh và sắc thái nhạc nền].
 
-    - **Phân cảnh Veo3 2 (3s - 6s)**:
+    - **Phân cảnh Veo3 2 (3s - 7s)**:
       * **Combined Visual (EN)**: [Prompt tiếng Anh chi tiết cho cảnh 2, nối tiếp chuyển động từ cảnh 1].
       * **Voiceover / Dialogue (VI)**: [...]
+      * **On-Screen Flash Text (VI)**: [...]
       * **SFX/BGM**: [...]
 
-    (Lặp lại đầy đủ cho tất cả các cảnh đến hết thời lượng {target_duration}s).
+    (Lặp lại đầy đủ cho tất cả các cảnh đến hết thời lượng {target_duration}s. Cảnh chứa CÂU THOẠI VÀNG - GOLDEN QUOTE phải được đánh dấu rõ bằng chỉ dẫn [CÂU THOẠI VÀNG]).
 
-    **[PHẦN 4 - CTA (KẾT THÚC)]**
-    - Lời kêu gọi hành động (Call To Action) ấn tượng ở cảnh cuối cùng.
+    **[PHẦN 4 - LỜI KÊU GỌI HÀNH ĐỘNG TƯƠNG TÁC (INTERACTIVE EMOTIONAL CTA)]**
+    - Lời kêu gọi hành động ở cảnh cuối cùng chạm vào lòng tự hào hoặc tình cảm cá nhân của khán giả, kích hoạt bình luận.
+    - BẮT BUỘC: Đặt câu hỏi kết nối trực tiếp hoặc kêu gọi comment từ khóa tri ân (Ví dụ: "Nếu trong gia đình bạn có một người lính cựu chiến binh, hãy để lại lời cảm ơn dưới phần bình luận").
+    - TUYỆT ĐỐI CẤM: Các câu sáo rỗng như "Hãy like, share, bấm tim và đăng ký kênh".
+
+    **[PHẦN 5 - ĐÓNG GÓI CAPTION & BỘ HASHTAG VIRAL (SOCIAL PACKAGING)]**
+    Tạo sẵn nội dung để đăng tải trực tiếp lên TikTok / Reels / Shorts:
+    - **Caption mẫu**: Gồm 3 phần: (1) Câu mở đầu gây sốc/tò mò, (2) Đúc kết cảm xúc 2 dòng, (3) Lời kêu gọi thảo luận kèm icon tối giản.
+    - **Bảng Hashtag chiến lược**:
+      | Nhóm | Danh sách Hashtags | Mục đích tiếp cận |
+      |---|---|---|
+      | Core / Brand | #TenKenh #TenChuDeChinh | Nhận diện thương hiệu kênh |
+      | Trending | #TriAn #LichSuVietNam ... | Đẩy xu hướng thịnh hành |
+      | Seasonal / Timely | #NgayLe #Tet2026 ... | Bắt nhịp thời điểm vàng |
+      | Broad Reach | #Storytelling #ViralVideo ... | Tiếp cận khán giả đại chúng |
+
     {markdown_template}
-  expected_output: "Kịch bản hoàn chỉnh dạng Markdown gồm: Hook, Bảng phân cảnh chi tiết chuẩn 5 cột, và Danh sách Prompt Veo3 từng cảnh sẵn sàng đưa vào công cụ sinh video."
+  expected_output: "Kịch bản hoàn chỉnh dạng Markdown gồm: Hook 3s số liệu, Bảng phân cảnh 6 cột có On-Screen Text, Danh sách Prompt Veo3 từng cảnh, Interactive CTA và Bộ đóng gói Caption/Hashtag."
 
 visual_task:
   description: |
@@ -176,9 +197,11 @@ editor_task:
     - Kéo các clip video Veo 3 thả vào Video Track tương ứng với từng mốc câu thoại trên timeline.
     - Cắt tỉa (Trim) nhẹ nhàng các đoạn thừa của video để khớp chính xác nhịp chuyển giọng nói.
 
-    **[BƯỚC 3: HIỆU ỨNG CHUYỂN CẢNH & PHỤ ĐỀ TỰ ĐỘNG]**
+    **[BƯỚC 3: HIỆU ỨNG CHUYỂN CẢNH, PHỤ ĐỀ & ON-SCREEN FLASH TEXT]**
     - **Chuyển cảnh**: Giữa các clip Veo 3, thêm hiệu ứng chuyển cảnh nhẹ (Cross Dissolve hoặc Flash nhẹ 0.2s) nếu cần.
     - **Auto Captions**: Sử dụng tính năng "Auto Captions" của CapCut để sinh phụ đề tự động tiếng Việt theo giọng đọc. Tùy chỉnh màu chữ nổi bật (Vàng viền đen hoặc Trắng viền đen).
+    - **On-Screen Flash Text (Keyphrase)**: Với các từ khóa đập mắt trong cột 5 của kịch bản, tạo Text Overlay kích thước lớn (Bold Sans-serif), màu vàng hổ phách, căn giữa màn hình hoặc góc dưới an toàn (tránh che thanh công cụ TikTok), xuất hiện 0.5s - 1s đồng bộ với điểm nổ âm thanh.
+    - **Highlight [CÂU THOẠI VÀNG]**: Đặt subtitle cỡ chữ cực đại, viền phát sáng nhẹ, căn giữa màn hình cho câu thoại đắt giá nhất để tạo điểm neo cảm xúc.
 
     **[BƯỚC 4: ÂM NHẠC & XUẤT BẢN]**
     - Thêm 1 bài BGM phù hợp với Tone/Mood đã định trong Brief. Bật chế độ **Auto Ducking** (âm lượng BGM giảm xuống 15-20% khi có giọng nói).
