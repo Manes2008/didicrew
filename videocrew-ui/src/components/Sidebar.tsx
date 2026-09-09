@@ -185,9 +185,9 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
             {(!collapsed || isMobile) && "Đăng Xuất"}
           </button>
         ) : (
-          <Link
-            href="/login"
-            onClick={handleNavClick}
+          <button
+            type="button"
+            onClick={handleLogout}
             title={collapsed && !isMobile ? "Đăng Nhập" : undefined}
             className={`w-full flex items-center ${
               collapsed && !isMobile ? "justify-center p-2" : "justify-center gap-2 py-2"
@@ -195,7 +195,7 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
           >
             <LogIn className="w-3.5 h-3.5 text-[#C2542D]" />
             {(!collapsed || isMobile) && "Đăng Nhập"}
-          </Link>
+          </button>
         )}
       </div>
     </>
