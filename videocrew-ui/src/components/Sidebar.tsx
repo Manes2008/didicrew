@@ -20,6 +20,7 @@ import {
   X
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 interface SidebarProps {
   mobileOpen?: boolean;
@@ -29,13 +30,11 @@ interface SidebarProps {
 export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const { user: currentUser, isAuthenticated, logout } = useAuthStore();
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("user");
-      if (stored) setCurrentUser(JSON.parse(stored));
       const storedCollapsed = localStorage.getItem("sidebar_collapsed");
       if (storedCollapsed !== null) {
         setIsCollapsed(storedCollapsed === "true");
@@ -52,8 +51,7 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    setCurrentUser(null);
+    logout();
     if (onCloseMobile) onCloseMobile();
     router.push("/login");
   };
@@ -169,13 +167,13 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
               </div>
               <div className="flex justify-between">
                 <span>Client IP:</span>
-                <span className="font-mono text-zinc-300">127.0.0.1</span>
+                <span className="font-mono text-zinc-300">{currentUser?.client_ip || "127.0.0.1"}</span>
               </div>
             </div>
           )}
         </div>
 
-        {currentUser ? (
+        {isAuthenticated ? (
           <button
             onClick={handleLogout}
             title={collapsed && !isMobile ? "Đăng Xuất" : undefined}
