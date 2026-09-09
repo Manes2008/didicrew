@@ -36,7 +36,7 @@ if %errorlevel% == 0 (
     echo.
     echo [OK] Redeploy thanh cong!
     echo [OK] Code moi da duoc ap dung - Database giu nguyen an toan.
-    echo [OK] Ung dung chay tai: http://localhost:8501
+    echo [OK] Ung dung chay tai: http://localhost:8000 (Docs: http://localhost:8000/docs)
     echo [OK] Xem log: docker compose logs -f videocrew
 ) else (
     echo [ERROR] Co loi trong qua trinh redeploy. Xem chi tiet: docker compose logs videocrew
