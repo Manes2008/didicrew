@@ -1,0 +1,22 @@
+# Backend FastAPI dependencies (subset nhanh cho scripts)
+# Danh sach day du xem file requirements.txt chinh o thu muc goc
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+crewai>=1.15.0
+langchain-openai
+langchain-google-genai>=2.0.0
+python-dotenv>=1.0.0
+pyyaml>=6.0.2
+sqlalchemy>=2.0.30
+alembic>=1.13.0
+psycopg2-binary>=2.9.9
+Pillow>=10.4.0
+requests>=2.32.0
+torch>=2.4.0
+torchvision>=0.19.0
+diffusers>=0.31.0
+transformers
+accelerate
+ffmpeg-python
+yt-dlp
+cryptography>=43.0.0

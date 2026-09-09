@@ -25,6 +25,10 @@ PRICING_TABLE = {
     "gemini-2.0-flash-lite": {"input": 0.000075, "output": 0.000300},
     "gemini-2.5-flash":      {"input": 0.000150, "output": 0.000600},
     "gemini-2.5-pro":        {"input": 0.001250, "output": 0.010000},
+    "gemini-3.6-flash":      {"input": 0.000150, "output": 0.000600},
+    "gemini-3.7-flash":      {"input": 0.000150, "output": 0.000600},
+    "gemini-flash-latest":   {"input": 0.000150, "output": 0.000600},
+    "gemini-3.1-pro-preview":{"input": 0.001250, "output": 0.010000},
 }
 
 # Chi phi DALL-E theo so luong anh (USD/image) - khong tinh theo token
@@ -142,7 +146,28 @@ def track_llm_call(
     input_tokens = estimate_tokens(input_text, model_name)
 
     t_start = time.monotonic()
-    response_text = llm.call(messages=messages)
+    max_retries = 4
+    response_text = ""
+    for attempt in range(max_retries):
+        try:
+            response_text = llm.call(messages=messages)
+            break
+        except Exception as ex:
+            ex_str = str(ex).lower()
+            if ("429" in ex_str or "quota" in ex_str or "resource_exhausted" in ex_str) and attempt < max_retries - 1:
+                delay = 15.0 * (attempt + 1)
+                import re
+                retry_match = re.search(r"retry in ([\d\.]+)s", str(ex))
+                if retry_match:
+                    try:
+                        delay = max(float(retry_match.group(1)) + 2.0, 10.0)
+                    except Exception:
+                        pass
+                print(f"[RETRY] Cham gioi han Google Gemini 429. Dang tu dong cho {delay:.1f}s truoc khi thu lai lan {attempt + 2}/{max_retries}...")
+                time.sleep(delay)
+            else:
+                raise ex
+
     elapsed = round(time.monotonic() - t_start, 3)
 
     output_tokens = estimate_tokens(str(response_text), model_name)
@@ -194,7 +219,28 @@ def track_crew_kickoff(
         (crew_output, stats: dict)
     """
     t_start = time.monotonic()
-    crew_output = crew.kickoff()
+    max_retries = 4
+    crew_output = None
+    for attempt in range(max_retries):
+        try:
+            crew_output = crew.kickoff()
+            break
+        except Exception as ex:
+            ex_str = str(ex).lower()
+            if ("429" in ex_str or "quota" in ex_str or "resource_exhausted" in ex_str) and attempt < max_retries - 1:
+                delay = 20.0 * (attempt + 1)
+                import re
+                retry_match = re.search(r"retry in ([\d\.]+)s", str(ex))
+                if retry_match:
+                    try:
+                        delay = max(float(retry_match.group(1)) + 2.0, 15.0)
+                    except Exception:
+                        pass
+                print(f"[RETRY] Cham gioi han Google Gemini 429 trong Crew. Dang tu dong cho {delay:.1f}s truoc khi thu lai lan {attempt + 2}/{max_retries}...")
+                time.sleep(delay)
+            else:
+                raise ex
+
     elapsed = round(time.monotonic() - t_start, 3)
 
     # Doc token_usage tu CrewAI CrewOutput

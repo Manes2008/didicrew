@@ -26,7 +26,7 @@ services:
     build: .
     container_name: videocrew-app
     ports:
-      - "8501:8501"
+      - "8000:8000"
     volumes:
       - ./generated_images:/app/generated_images
       - ./generated_videos:/app/generated_videos

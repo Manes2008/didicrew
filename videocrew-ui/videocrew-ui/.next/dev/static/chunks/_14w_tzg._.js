@@ -1,0 +1,2137 @@
+(globalThis["TURBOPACK"] || (globalThis["TURBOPACK"] = [])).push([typeof document === "object" ? document.currentScript : undefined,
+"[project]/node_modules/lucide-react/dist/esm/icons/arrow-right.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>ArrowRight
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M5 12h14",
+            key: "1ays0h"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "m12 5 7 7-7 7",
+            key: "xquz4c"
+        }
+    ]
+];
+const ArrowRight = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("arrow-right", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/arrow-right.mjs [app-client] (ecmascript) <export default as ArrowRight>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "ArrowRight",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$arrow$2d$right$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$arrow$2d$right$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/arrow-right.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/check.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Check
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M20 6 9 17l-5-5",
+            key: "1gmf2c"
+        }
+    ]
+];
+const Check = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("check", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/check.mjs [app-client] (ecmascript) <export default as Check>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Check",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$check$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$check$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/check.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/circle-check.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>CircleCheck
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "circle",
+        {
+            cx: "12",
+            cy: "12",
+            r: "10",
+            key: "1mglay"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "m9 12 2 2 4-4",
+            key: "dzmm74"
+        }
+    ]
+];
+const CircleCheck = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("circle-check", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/circle-check.mjs [app-client] (ecmascript) <export default as CheckCircle2>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "CheckCircle2",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$check$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$check$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/circle-check.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/circle-plus.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>CirclePlus
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "circle",
+        {
+            cx: "12",
+            cy: "12",
+            r: "10",
+            key: "1mglay"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M8 12h8",
+            key: "1wcyev"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M12 8v8",
+            key: "napkw2"
+        }
+    ]
+];
+const CirclePlus = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("circle-plus", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/circle-plus.mjs [app-client] (ecmascript) <export default as PlusCircle>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "PlusCircle",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$plus$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$plus$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/circle-plus.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/copy.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Copy
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "rect",
+        {
+            width: "14",
+            height: "14",
+            x: "8",
+            y: "8",
+            rx: "2",
+            ry: "2",
+            key: "17jyea"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2",
+            key: "zix9uf"
+        }
+    ]
+];
+const Copy = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("copy", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/copy.mjs [app-client] (ecmascript) <export default as Copy>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Copy",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$copy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$copy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/copy.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/download.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Download
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M12 15V3",
+            key: "m9g1x1"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
+            key: "ih7n3h"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "m7 10 5 5 5-5",
+            key: "brsn70"
+        }
+    ]
+];
+const Download = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("download", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/download.mjs [app-client] (ecmascript) <export default as Download>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Download",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$download$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$download$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/download.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/external-link.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>ExternalLink
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M15 3h6v6",
+            key: "1q9fwt"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M10 14 21 3",
+            key: "gplh6r"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",
+            key: "a6xqqp"
+        }
+    ]
+];
+const ExternalLink = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("external-link", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/external-link.mjs [app-client] (ecmascript) <export default as ExternalLink>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "ExternalLink",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$external$2d$link$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$external$2d$link$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/external-link.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/file-text.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>FileText
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",
+            key: "1oefj6"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M14 2v5a1 1 0 0 0 1 1h5",
+            key: "wfsgrz"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M10 9H8",
+            key: "b1mrlr"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M16 13H8",
+            key: "t4e002"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M16 17H8",
+            key: "z1uh3a"
+        }
+    ]
+];
+const FileText = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("file-text", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/file-text.mjs [app-client] (ecmascript) <export default as FileText>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "FileText",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$file$2d$text$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$file$2d$text$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/file-text.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/folder-kanban.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>FolderKanban
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z",
+            key: "1fr9dc"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M8 10v4",
+            key: "tgpxqk"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M12 10v2",
+            key: "hh53o1"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M16 10v6",
+            key: "1d6xys"
+        }
+    ]
+];
+const FolderKanban = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("folder-kanban", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/folder-kanban.mjs [app-client] (ecmascript) <export default as FolderKanban>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "FolderKanban",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$folder$2d$kanban$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$folder$2d$kanban$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/folder-kanban.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/image.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Image
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "rect",
+        {
+            width: "18",
+            height: "18",
+            x: "3",
+            y: "3",
+            rx: "2",
+            ry: "2",
+            key: "1m3agn"
+        }
+    ],
+    [
+        "circle",
+        {
+            cx: "9",
+            cy: "9",
+            r: "2",
+            key: "af1f0g"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21",
+            key: "1xmnt7"
+        }
+    ]
+];
+const Image = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("image", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/image.mjs [app-client] (ecmascript) <export default as Image>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Image",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$image$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$image$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/image.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/maximize-2.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Maximize2
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M15 3h6v6",
+            key: "1q9fwt"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "m21 3-7 7",
+            key: "1l2asr"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "m3 21 7-7",
+            key: "tjx5ai"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M9 21H3v-6",
+            key: "wtvkvv"
+        }
+    ]
+];
+const Maximize2 = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("maximize-2", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/maximize-2.mjs [app-client] (ecmascript) <export default as Maximize2>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Maximize2",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$maximize$2d$2$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$maximize$2d$2$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/maximize-2.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/mic.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Mic
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M12 19v3",
+            key: "npa21l"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M19 10v2a7 7 0 0 1-14 0v-2",
+            key: "1vc78b"
+        }
+    ],
+    [
+        "rect",
+        {
+            x: "9",
+            y: "2",
+            width: "6",
+            height: "13",
+            rx: "3",
+            key: "s6n7sd"
+        }
+    ]
+];
+const Mic = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("mic", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/mic.mjs [app-client] (ecmascript) <export default as Mic>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Mic",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mic$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mic$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/mic.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/pen-line.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>PenLine
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M13 21h8",
+            key: "1jsn5i"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z",
+            key: "1a8usu"
+        }
+    ]
+];
+const PenLine = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("pen-line", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/pen-line.mjs [app-client] (ecmascript) <export default as Edit3>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Edit3",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$pen$2d$line$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$pen$2d$line$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/pen-line.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/play.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Play
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z",
+            key: "10ikf1"
+        }
+    ]
+];
+const Play = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("play", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/play.mjs [app-client] (ecmascript) <export default as Play>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Play",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$play$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$play$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/play.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/plus.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Plus
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M5 12h14",
+            key: "1ays0h"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M12 5v14",
+            key: "s699le"
+        }
+    ]
+];
+const Plus = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("plus", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/plus.mjs [app-client] (ecmascript) <export default as Plus>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Plus",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/plus.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/rotate-ccw.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>RotateCcw
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",
+            key: "1357e3"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M3 3v5h5",
+            key: "1xhq8a"
+        }
+    ]
+];
+const RotateCcw = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("rotate-ccw", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/rotate-ccw.mjs [app-client] (ecmascript) <export default as RotateCcw>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "RotateCcw",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$rotate$2d$ccw$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$rotate$2d$ccw$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/rotate-ccw.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/smartphone.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Smartphone
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "rect",
+        {
+            width: "14",
+            height: "20",
+            x: "5",
+            y: "2",
+            rx: "2",
+            ry: "2",
+            key: "1yt0o3"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M12 18h.01",
+            key: "mhygvu"
+        }
+    ]
+];
+const Smartphone = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("smartphone", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/smartphone.mjs [app-client] (ecmascript) <export default as Smartphone>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Smartphone",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$smartphone$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$smartphone$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/smartphone.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/sparkles.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Sparkles
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z",
+            key: "1s2grr"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M20 2v4",
+            key: "1rf3ol"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M22 4h-4",
+            key: "gwowj6"
+        }
+    ],
+    [
+        "circle",
+        {
+            cx: "4",
+            cy: "20",
+            r: "2",
+            key: "6kqj1y"
+        }
+    ]
+];
+const Sparkles = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("sparkles", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/sparkles.mjs [app-client] (ecmascript) <export default as Sparkles>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Sparkles",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$sparkles$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$sparkles$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/sparkles.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/terminal.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Terminal
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M12 19h8",
+            key: "baeox8"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "m4 17 6-6-6-6",
+            key: "1yngyt"
+        }
+    ]
+];
+const Terminal = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("terminal", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/terminal.mjs [app-client] (ecmascript) <export default as Terminal>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Terminal",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$terminal$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$terminal$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/terminal.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/video.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Video
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5",
+            key: "ftymec"
+        }
+    ],
+    [
+        "rect",
+        {
+            x: "2",
+            y: "6",
+            width: "14",
+            height: "12",
+            rx: "2",
+            key: "158x01"
+        }
+    ]
+];
+const Video = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("video", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/video.mjs [app-client] (ecmascript) <export default as Video>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Video",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$video$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$video$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/video.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/volume-2.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>Volume2
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z",
+            key: "uqj9uw"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M16 9a5 5 0 0 1 0 6",
+            key: "1q6k2b"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M19.364 18.364a9 9 0 0 0 0-12.728",
+            key: "ijwkga"
+        }
+    ]
+];
+const Volume2 = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("volume-2", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/volume-2.mjs [app-client] (ecmascript) <export default as Volume2>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Volume2",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$volume$2d$2$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$volume$2d$2$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/volume-2.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/wand-sparkles.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "__iconNode",
+    ()=>__iconNode,
+    "default",
+    ()=>WandSparkles
+]);
+/**
+ * @license lucide-react v1.33.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/createLucideIcon.mjs [app-client] (ecmascript)");
+;
+const __iconNode = [
+    [
+        "path",
+        {
+            d: "m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72",
+            key: "ul74o6"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "m14 7 3 3",
+            key: "1r5n42"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M5 6v4",
+            key: "ilb8ba"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M19 14v4",
+            key: "blhpug"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M10 2v2",
+            key: "7u0qdc"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M7 8H3",
+            key: "zfb6yr"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M21 16h-4",
+            key: "1cnmox"
+        }
+    ],
+    [
+        "path",
+        {
+            d: "M11 3H9",
+            key: "1obp7u"
+        }
+    ]
+];
+const WandSparkles = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$createLucideIcon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("wand-sparkles", __iconNode);
+;
+}),
+"[project]/node_modules/lucide-react/dist/esm/icons/wand-sparkles.mjs [app-client] (ecmascript) <export default as Wand2>", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "Wand2",
+    ()=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$wand$2d$sparkles$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$wand$2d$sparkles$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/wand-sparkles.mjs [app-client] (ecmascript)");
+}),
+"[project]/node_modules/zustand/esm/middleware.mjs [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "combine",
+    ()=>combine,
+    "createJSONStorage",
+    ()=>createJSONStorage,
+    "devtools",
+    ()=>devtools,
+    "persist",
+    ()=>persist,
+    "redux",
+    ()=>redux,
+    "subscribeWithSelector",
+    ()=>subscribeWithSelector,
+    "unstable_ssrSafe",
+    ()=>ssrSafe
+]);
+var __TURBOPACK__import$2e$meta__ = {
+    get url () {
+        return __turbopack_context__.F("node_modules/zustand/esm/middleware.mjs");
+    },
+    env: {
+        DEV: true,
+        PROD: false,
+        MODE: "development",
+        BASE_URL: "/",
+        SSR: false
+    },
+    get turbopackHot () {
+        return __turbopack_context__.m.hot;
+    }
+};
+const reduxImpl = (reducer, initial)=>(set, _get, api)=>{
+        api.dispatch = (action)=>{
+            set((state)=>reducer(state, action), false, action);
+            return action;
+        };
+        api.dispatchFromDevtools = true;
+        return {
+            dispatch: (...args)=>api.dispatch(...args),
+            ...initial
+        };
+    };
+const redux = reduxImpl;
+const shouldDispatchFromDevtools = (api)=>!!api.dispatchFromDevtools && typeof api.dispatch === "function";
+const trackedConnections = /* @__PURE__ */ new Map();
+const getTrackedConnectionState = (name)=>{
+    const api = trackedConnections.get(name);
+    if (!api) return {};
+    return Object.fromEntries(Object.entries(api.stores).map(([key, api2])=>[
+            key,
+            api2.getState()
+        ]));
+};
+const extractConnectionInformation = (store, extensionConnector, options)=>{
+    if (store === void 0) {
+        return {
+            type: "untracked",
+            connection: extensionConnector.connect(options)
+        };
+    }
+    const existingConnection = trackedConnections.get(options.name);
+    if (existingConnection) {
+        return {
+            type: "tracked",
+            store,
+            ...existingConnection
+        };
+    }
+    const newConnection = {
+        connection: extensionConnector.connect(options),
+        stores: {}
+    };
+    trackedConnections.set(options.name, newConnection);
+    return {
+        type: "tracked",
+        store,
+        ...newConnection
+    };
+};
+const removeStoreFromTrackedConnections = (name, store)=>{
+    if (store === void 0) return;
+    const connectionInfo = trackedConnections.get(name);
+    if (!connectionInfo) return;
+    delete connectionInfo.stores[store];
+    if (Object.keys(connectionInfo.stores).length === 0) {
+        trackedConnections.delete(name);
+    }
+};
+const v8StackLineRe = /^at (?:new |async )?(.+?) \(/;
+const geckoStackLineRe = /^([^@]+)@/;
+function findCallerName(stack) {
+    var _a, _b, _c;
+    if (!stack) return void 0;
+    const traceLines = stack.split("\n");
+    const apiSetStateLineIndex = traceLines.findIndex((traceLine)=>traceLine.includes("api.setState"));
+    if (apiSetStateLineIndex < 0) return void 0;
+    const callerLine = ((_a = traceLines[apiSetStateLineIndex + 1]) == null ? void 0 : _a.trim()) || "";
+    return ((_b = v8StackLineRe.exec(callerLine)) == null ? void 0 : _b[1]) || ((_c = geckoStackLineRe.exec(callerLine)) == null ? void 0 : _c[1]);
+}
+const devtoolsImpl = (fn, devtoolsOptions = {})=>(set, get, api)=>{
+        const { enabled, anonymousActionType, store, ...options } = devtoolsOptions;
+        let extensionConnector;
+        try {
+            extensionConnector = (enabled != null ? enabled : (("TURBOPACK compile-time truthy", 1) ? __TURBOPACK__import$2e$meta__.env.MODE : "TURBOPACK unreachable") !== "production") && window.__REDUX_DEVTOOLS_EXTENSION__;
+        } catch (e) {}
+        if (!extensionConnector) {
+            return fn(set, get, api);
+        }
+        const { connection, ...connectionInformation } = extractConnectionInformation(store, extensionConnector, options);
+        let isRecording = true;
+        api.setState = (state, replace, nameOrAction)=>{
+            const r = set(state, replace);
+            if (!isRecording) return r;
+            const action = nameOrAction === void 0 ? {
+                type: anonymousActionType || findCallerName(new Error().stack) || "anonymous"
+            } : typeof nameOrAction === "string" ? {
+                type: nameOrAction
+            } : nameOrAction;
+            if (store === void 0) {
+                connection == null ? void 0 : connection.send(action, get());
+                return r;
+            }
+            connection == null ? void 0 : connection.send({
+                ...action,
+                type: `${store}/${action.type}`
+            }, {
+                ...getTrackedConnectionState(options.name),
+                [store]: api.getState()
+            });
+            return r;
+        };
+        api.devtools = {
+            cleanup: ()=>{
+                if (connection && typeof connection.unsubscribe === "function") {
+                    connection.unsubscribe();
+                }
+                removeStoreFromTrackedConnections(options.name, store);
+            }
+        };
+        const setStateFromDevtools = (...a)=>{
+            const originalIsRecording = isRecording;
+            isRecording = false;
+            set(...a);
+            isRecording = originalIsRecording;
+        };
+        const initialState = fn(api.setState, get, api);
+        if (connectionInformation.type === "untracked") {
+            connection == null ? void 0 : connection.init(initialState);
+        } else {
+            connectionInformation.stores[connectionInformation.store] = api;
+            connection == null ? void 0 : connection.init(Object.fromEntries(Object.entries(connectionInformation.stores).map(([key, store2])=>[
+                    key,
+                    key === connectionInformation.store ? initialState : store2.getState()
+                ])));
+        }
+        if (shouldDispatchFromDevtools(api)) {
+            let didWarnAboutReservedActionType = false;
+            const originalDispatch = api.dispatch;
+            api.dispatch = (...args)=>{
+                if ((("TURBOPACK compile-time truthy", 1) ? __TURBOPACK__import$2e$meta__.env.MODE : "TURBOPACK unreachable") !== "production" && args[0].type === "__setState" && !didWarnAboutReservedActionType) {
+                    console.warn('[zustand devtools middleware] "__setState" action type is reserved to set state from the devtools. Avoid using it.');
+                    didWarnAboutReservedActionType = true;
+                }
+                originalDispatch(...args);
+            };
+        }
+        connection.subscribe((message)=>{
+            var _a;
+            switch(message.type){
+                case "ACTION":
+                    if (typeof message.payload !== "string") {
+                        console.error("[zustand devtools middleware] Unsupported action format");
+                        return;
+                    }
+                    return parseJsonThen(message.payload, (action)=>{
+                        if (action.type === "__setState") {
+                            if (store === void 0) {
+                                setStateFromDevtools(action.state);
+                                return;
+                            }
+                            if (Object.keys(action.state).length !== 1) {
+                                console.error(`
+                    [zustand devtools middleware] Unsupported __setState action format.
+                    When using 'store' option in devtools(), the 'state' should have only one key, which is a value of 'store' that was passed in devtools(),
+                    and value of this only key should be a state object. Example: { "type": "__setState", "state": { "abc123Store": { "foo": "bar" } } }
+                    `);
+                            }
+                            const stateFromDevtools = action.state[store];
+                            if (stateFromDevtools === void 0 || stateFromDevtools === null) {
+                                return;
+                            }
+                            if (JSON.stringify(api.getState()) !== JSON.stringify(stateFromDevtools)) {
+                                setStateFromDevtools(stateFromDevtools);
+                            }
+                            return;
+                        }
+                        if (shouldDispatchFromDevtools(api)) {
+                            api.dispatch(action);
+                        }
+                    });
+                case "DISPATCH":
+                    switch(message.payload.type){
+                        case "RESET":
+                            setStateFromDevtools(initialState);
+                            if (store === void 0) {
+                                return connection == null ? void 0 : connection.init(api.getState());
+                            }
+                            return connection == null ? void 0 : connection.init(getTrackedConnectionState(options.name));
+                        case "COMMIT":
+                            if (store === void 0) {
+                                connection == null ? void 0 : connection.init(api.getState());
+                                return;
+                            }
+                            return connection == null ? void 0 : connection.init(getTrackedConnectionState(options.name));
+                        case "ROLLBACK":
+                            return parseJsonThen(message.state, (state)=>{
+                                if (store === void 0) {
+                                    setStateFromDevtools(state);
+                                    connection == null ? void 0 : connection.init(api.getState());
+                                    return;
+                                }
+                                setStateFromDevtools(state[store]);
+                                connection == null ? void 0 : connection.init(getTrackedConnectionState(options.name));
+                            });
+                        case "JUMP_TO_STATE":
+                        case "JUMP_TO_ACTION":
+                            return parseJsonThen(message.state, (state)=>{
+                                if (store === void 0) {
+                                    setStateFromDevtools(state);
+                                    return;
+                                }
+                                if (JSON.stringify(api.getState()) !== JSON.stringify(state[store])) {
+                                    setStateFromDevtools(state[store]);
+                                }
+                            });
+                        case "IMPORT_STATE":
+                            {
+                                const { nextLiftedState } = message.payload;
+                                const lastComputedState = (_a = nextLiftedState.computedStates.slice(-1)[0]) == null ? void 0 : _a.state;
+                                if (!lastComputedState) return;
+                                if (store === void 0) {
+                                    setStateFromDevtools(lastComputedState);
+                                } else {
+                                    setStateFromDevtools(lastComputedState[store]);
+                                }
+                                connection == null ? void 0 : connection.send(null, // FIXME no-any
+                                nextLiftedState);
+                                return;
+                            }
+                        case "PAUSE_RECORDING":
+                            return isRecording = !isRecording;
+                    }
+                    return;
+            }
+        });
+        return initialState;
+    };
+const devtools = devtoolsImpl;
+const parseJsonThen = (stringified, fn)=>{
+    let parsed;
+    try {
+        parsed = JSON.parse(stringified);
+    } catch (e) {
+        console.error("[zustand devtools middleware] Could not parse the received json", e);
+    }
+    if (parsed !== void 0) fn(parsed);
+};
+const subscribeWithSelectorImpl = (fn)=>(set, get, api)=>{
+        const origSubscribe = api.subscribe;
+        api.subscribe = (selector, optListener, options)=>{
+            let listener = selector;
+            if (optListener) {
+                const equalityFn = (options == null ? void 0 : options.equalityFn) || Object.is;
+                let currentSlice = selector(api.getState());
+                listener = (state)=>{
+                    const nextSlice = selector(state);
+                    if (!equalityFn(currentSlice, nextSlice)) {
+                        const previousSlice = currentSlice;
+                        optListener(currentSlice = nextSlice, previousSlice);
+                    }
+                };
+                if (options == null ? void 0 : options.fireImmediately) {
+                    optListener(currentSlice, currentSlice);
+                }
+            }
+            return origSubscribe(listener);
+        };
+        const initialState = fn(set, get, api);
+        return initialState;
+    };
+const subscribeWithSelector = subscribeWithSelectorImpl;
+function combine(initialState, create) {
+    return (...args)=>Object.assign({}, initialState, create(...args));
+}
+function createJSONStorage(getStorage, options) {
+    let storage;
+    try {
+        storage = getStorage();
+    } catch (e) {
+        return;
+    }
+    const persistStorage = {
+        getItem: (name)=>{
+            var _a;
+            const parse = (str2)=>{
+                if (str2 === null) {
+                    return null;
+                }
+                return JSON.parse(str2, options == null ? void 0 : options.reviver);
+            };
+            const str = (_a = storage.getItem(name)) != null ? _a : null;
+            if (str instanceof Promise) {
+                return str.then(parse);
+            }
+            return parse(str);
+        },
+        setItem: (name, newValue)=>storage.setItem(name, JSON.stringify(newValue, options == null ? void 0 : options.replacer)),
+        removeItem: (name)=>storage.removeItem(name)
+    };
+    return persistStorage;
+}
+const toThenable = (fn)=>(input)=>{
+        try {
+            const result = fn(input);
+            if (result instanceof Promise) {
+                return result;
+            }
+            return {
+                then (onFulfilled) {
+                    return toThenable(onFulfilled)(result);
+                },
+                catch (_onRejected) {
+                    return this;
+                }
+            };
+        } catch (e) {
+            return {
+                then (_onFulfilled) {
+                    return this;
+                },
+                catch (onRejected) {
+                    return toThenable(onRejected)(e);
+                }
+            };
+        }
+    };
+const persistImpl = (config, baseOptions)=>(set, get, api)=>{
+        let options = {
+            storage: createJSONStorage(()=>window.localStorage),
+            partialize: (state)=>state,
+            version: 0,
+            merge: (persistedState, currentState)=>({
+                    ...currentState,
+                    ...persistedState
+                }),
+            ...baseOptions
+        };
+        let hasHydrated = false;
+        let hydrationVersion = 0;
+        const hydrationListeners = /* @__PURE__ */ new Set();
+        const finishHydrationListeners = /* @__PURE__ */ new Set();
+        let storage = options.storage;
+        if (!storage) {
+            return config((...args)=>{
+                console.warn(`[zustand persist middleware] Unable to update item '${options.name}', the given storage is currently unavailable.`);
+                set(...args);
+            }, get, api);
+        }
+        const setItem = ()=>{
+            const state = options.partialize({
+                ...get()
+            });
+            return storage.setItem(options.name, {
+                state,
+                version: options.version
+            });
+        };
+        const savedSetState = api.setState;
+        api.setState = (state, replace)=>{
+            savedSetState(state, replace);
+            return setItem();
+        };
+        const configResult = config((...args)=>{
+            set(...args);
+            return setItem();
+        }, get, api);
+        api.getInitialState = ()=>configResult;
+        let stateFromStorage;
+        const hydrate = ()=>{
+            var _a, _b;
+            if (!storage) return;
+            const currentVersion = ++hydrationVersion;
+            hasHydrated = false;
+            hydrationListeners.forEach((cb)=>{
+                var _a2;
+                return cb((_a2 = get()) != null ? _a2 : configResult);
+            });
+            const postRehydrationCallback = ((_b = options.onRehydrateStorage) == null ? void 0 : _b.call(options, (_a = get()) != null ? _a : configResult)) || void 0;
+            return toThenable(storage.getItem.bind(storage))(options.name).then((deserializedStorageValue)=>{
+                if (deserializedStorageValue) {
+                    if (typeof deserializedStorageValue.version === "number" && deserializedStorageValue.version !== options.version) {
+                        if (options.migrate) {
+                            const migration = options.migrate(deserializedStorageValue.state, deserializedStorageValue.version);
+                            if (migration instanceof Promise) {
+                                return migration.then((result)=>[
+                                        true,
+                                        result
+                                    ]);
+                            }
+                            return [
+                                true,
+                                migration
+                            ];
+                        }
+                        console.error(`State loaded from storage couldn't be migrated since no migrate function was provided`);
+                    } else {
+                        return [
+                            false,
+                            deserializedStorageValue.state
+                        ];
+                    }
+                }
+                return [
+                    false,
+                    void 0
+                ];
+            }).then((migrationResult)=>{
+                var _a2;
+                if (currentVersion !== hydrationVersion) {
+                    return;
+                }
+                const [migrated, migratedState] = migrationResult;
+                stateFromStorage = options.merge(migratedState, (_a2 = get()) != null ? _a2 : configResult);
+                set(stateFromStorage, true);
+                if (migrated) {
+                    return setItem();
+                }
+            }).then(()=>{
+                if (currentVersion !== hydrationVersion) {
+                    return;
+                }
+                postRehydrationCallback == null ? void 0 : postRehydrationCallback(get(), void 0);
+                stateFromStorage = get();
+                hasHydrated = true;
+                finishHydrationListeners.forEach((cb)=>cb(stateFromStorage));
+            }).catch((e)=>{
+                if (currentVersion !== hydrationVersion) {
+                    return;
+                }
+                postRehydrationCallback == null ? void 0 : postRehydrationCallback(void 0, e);
+            });
+        };
+        api.persist = {
+            setOptions: (newOptions)=>{
+                options = {
+                    ...options,
+                    ...newOptions
+                };
+                if (newOptions.storage) {
+                    storage = newOptions.storage;
+                }
+            },
+            clearStorage: ()=>{
+                ++hydrationVersion;
+                storage == null ? void 0 : storage.removeItem(options.name);
+            },
+            getOptions: ()=>options,
+            rehydrate: ()=>hydrate(),
+            hasHydrated: ()=>hasHydrated,
+            onHydrate: (cb)=>{
+                hydrationListeners.add(cb);
+                return ()=>{
+                    hydrationListeners.delete(cb);
+                };
+            },
+            onFinishHydration: (cb)=>{
+                finishHydrationListeners.add(cb);
+                return ()=>{
+                    finishHydrationListeners.delete(cb);
+                };
+            }
+        };
+        if (!options.skipHydration) {
+            hydrate();
+        }
+        return stateFromStorage || configResult;
+    };
+const persist = persistImpl;
+function ssrSafe(config, isSSR = typeof window === "undefined") {
+    return (set, get, api)=>{
+        if (!isSSR) {
+            return config(set, get, api);
+        }
+        const ssrSet = ()=>{
+            throw new Error("Cannot set state of Zustand store in SSR");
+        };
+        api.setState = ssrSet;
+        return config(ssrSet, get, api);
+    };
+}
+;
+}),
+"[project]/src/app/production/page.tsx [app-client] (ecmascript)", ((__turbopack_context__, module, exports) => {
+
+var e = new Error("Could not parse module '[project]/src/app/production/page.tsx'\n\nExpression expected");
+e.code = 'MODULE_UNPARSABLE';
+throw e;
+}),
+"[project]/src/stores/useProductionStore.ts [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "STAGES_LIST",
+    ()=>STAGES_LIST,
+    "useProductionStore",
+    ()=>useProductionStore
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$react$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/zustand/esm/react.mjs [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$middleware$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/zustand/esm/middleware.mjs [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2d$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/api-client.ts [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$file$2d$text$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__FileText$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/file-text.mjs [app-client] (ecmascript) <export default as FileText>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$image$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Image$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/image.mjs [app-client] (ecmascript) <export default as Image>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mic$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Mic$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/mic.mjs [app-client] (ecmascript) <export default as Mic>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$video$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Video$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/video.mjs [app-client] (ecmascript) <export default as Video>");
+;
+;
+;
+;
+const STAGES_LIST = [
+    {
+        key: "brief",
+        name: "1. Định hướng Sáng tạo (Brief)",
+        shortTitle: "Brief",
+        description: "Xác định mục tiêu, khán giả, thông điệp cốt lõi và phong cách",
+        icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$file$2d$text$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__FileText$3e$__["FileText"]
+    },
+    {
+        key: "script",
+        name: "2. Biên soạn Kịch bản (Script)",
+        shortTitle: "Kịch bản",
+        description: "Bảng phân cảnh chi tiết, thời lượng từng cảnh và lời thoại",
+        icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$file$2d$text$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__FileText$3e$__["FileText"]
+    },
+    {
+        key: "image",
+        name: "3. Tạo Visual & Ảnh AI (Images)",
+        shortTitle: "Visual & Ảnh",
+        description: "Tối ưu hóa visual prompt và sinh ảnh phân cảnh AI",
+        icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$image$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Image$3e$__["Image"]
+    },
+    {
+        key: "voice",
+        name: "4. Tổng hợp Giọng đọc (Voice)",
+        shortTitle: "Giọng đọc",
+        description: "Tạo file thuyết minh AI Neural Voice khớp thời lượng",
+        icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mic$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Mic$3e$__["Mic"]
+    },
+    {
+        key: "video",
+        name: "5. Dựng & Xuất Video (Render)",
+        shortTitle: "Xuất Video",
+        description: "Ghép nối video, khớp âm thanh, sub và hiệu ứng",
+        icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$video$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Video$3e$__["Video"]
+    }
+];
+let globalWs = null;
+const initialApproval = {
+    brief: "pending",
+    script: "pending",
+    image: "pending",
+    voice: "pending",
+    video: "pending"
+};
+const useProductionStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$react$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["create"])()((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$middleware$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["persist"])((set, get)=>({
+        idea: "",
+        provider: "Gemini",
+        modelName: "gemini-3.6-flash",
+        videoEngine: "hunyuan",
+        imageEngine: "gemini",
+        aspectRatio: "9:16",
+        channelProjects: [],
+        isLoadingProjects: false,
+        isWorkspaceMode: false,
+        currentStepIndex: 0,
+        projectId: null,
+        taskId: null,
+        isProcessing: false,
+        progressPercent: 0,
+        logs: [],
+        stageContents: {
+            brief: "",
+            script: "",
+            image: "",
+            voice: "",
+            video: ""
+        },
+        stageApproval: initialApproval,
+        mediaOutputs: {
+            image: [],
+            voice: [],
+            video: []
+        },
+        setIdea: (idea)=>set({
+                idea
+            }),
+        setProvider: (provider)=>{
+            if (provider === "Gemini") {
+                set({
+                    provider,
+                    modelName: "gemini-3.6-flash",
+                    imageEngine: "gemini"
+                });
+            } else {
+                set({
+                    provider,
+                    modelName: "gpt-4o-mini",
+                    imageEngine: "dalle"
+                });
+            }
+        },
+        setModelName: (modelName)=>set({
+                modelName
+            }),
+        setVideoEngine: (videoEngine)=>set({
+                videoEngine
+            }),
+        setImageEngine: (imageEngine)=>set({
+                imageEngine
+            }),
+        setAspectRatio: (aspectRatio)=>set({
+                aspectRatio
+            }),
+        setCurrentStepIndex: (currentStepIndex)=>set({
+                currentStepIndex
+            }),
+        setIsWorkspaceMode: (isWorkspaceMode)=>set({
+                isWorkspaceMode
+            }),
+        updateStageContent: (stageKey, content)=>set((state)=>({
+                    stageContents: {
+                        ...state.stageContents,
+                        [stageKey]: content
+                    }
+                })),
+        saveEngineConfigToDatabase: async ()=>{
+            const { provider, modelName, videoEngine, imageEngine } = get();
+            try {
+                await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2d$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["apiClient"].updateConfig({
+                    provider,
+                    model_name: modelName,
+                    video_engine: videoEngine,
+                    image_engine: imageEngine
+                });
+            } catch (err) {
+                console.error("Loi luu config vao DB:", err);
+            }
+        },
+        fetchChannelProjects: async (channelId)=>{
+            if (!channelId) return;
+            set({
+                isLoadingProjects: true
+            });
+            try {
+                const projs = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2d$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["apiClient"].getChannelProjects(channelId);
+                set({
+                    channelProjects: projs,
+                    isLoadingProjects: false
+                });
+            } catch (err) {
+                set({
+                    isLoadingProjects: false
+                });
+            }
+        },
+        loadExistingProject: async (projectId)=>{
+            if (!projectId) return;
+            set({
+                isProcessing: true,
+                logs: [
+                    `[INFO] Đang tải chi tiết dự án #${projectId}...`
+                ]
+            });
+            try {
+                const proj = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2d$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["apiClient"].getProjectDetail(projectId);
+                const newContents = {
+                    brief: "",
+                    script: "",
+                    image: "",
+                    voice: "",
+                    video: ""
+                };
+                const newApproval = {
+                    ...initialApproval
+                };
+                const newMedia = {
+                    image: [],
+                    voice: [],
+                    video: []
+                };
+                let lastCompletedIndex = 0;
+                if (proj.stages && proj.stages.length > 0) {
+                    proj.stages.forEach((st)=>{
+                        if (st.result_content) {
+                            newContents[st.stage_name] = st.result_content;
+                            newApproval[st.stage_name] = "approved";
+                            if (st.stage_name === "image") {
+                                const matches = st.result_content.match(/generated_images[/\\][^\s"']+\.(?:png|jpg|jpeg|webp)/gi) || [];
+                                newMedia.image = Array.from(new Set(matches));
+                            } else if (st.stage_name === "voice") {
+                                const matches = st.result_content.match(/generated_audio[/\\][^\s"']+\.(?:mp3|wav|ogg)/gi) || [];
+                                newMedia.voice = Array.from(new Set(matches));
+                            } else if (st.stage_name === "video") {
+                                const matches = st.result_content.match(/(?:generated_videos|exports)[/\\][^\s"']+\.(?:mp4|mov|webm)/gi) || [];
+                                newMedia.video = Array.from(new Set(matches));
+                            }
+                            const idx = STAGES_LIST.findIndex((s)=>s.key === st.stage_name);
+                            if (idx >= lastCompletedIndex) {
+                                lastCompletedIndex = idx;
+                            }
+                        }
+                    });
+                }
+                set({
+                    projectId: proj.id,
+                    idea: proj.idea,
+                    provider: proj.provider || "Gemini",
+                    modelName: proj.model_name || "gemini-3.6-flash",
+                    isWorkspaceMode: true,
+                    currentStepIndex: lastCompletedIndex,
+                    stageContents: newContents,
+                    stageApproval: newApproval,
+                    mediaOutputs: newMedia,
+                    isProcessing: false,
+                    logs: [
+                        `[SUCCESS] Đã nạp thành công dự án #${proj.id} vào Studio Workspace.`
+                    ]
+                });
+            } catch (err) {
+                set({
+                    isProcessing: false,
+                    logs: [
+                        ...get().logs,
+                        `[ERROR] Không thể tải dự án: ${err.message}`
+                    ]
+                });
+            }
+        },
+        startStepByStepWorkspace: async (channelId)=>{
+            const { idea } = get();
+            if (!channelId) throw new Error("Vui long chon kenh hop le");
+            if (!idea.trim()) throw new Error("Vui long nhap y tuong video");
+            // Luu cau hinh vao DB
+            get().saveEngineConfigToDatabase();
+            set({
+                isWorkspaceMode: true,
+                currentStepIndex: 0,
+                projectId: null,
+                taskId: null,
+                isProcessing: false,
+                progressPercent: 10,
+                logs: [
+                    "[INFO] Chuyen sang che do Step-by-Step Approval Workspace."
+                ],
+                stageApproval: {
+                    ...initialApproval,
+                    brief: "running"
+                },
+                stageContents: {
+                    brief: "",
+                    script: "",
+                    image: "",
+                    voice: "",
+                    video: ""
+                },
+                mediaOutputs: {
+                    image: [],
+                    voice: [],
+                    video: []
+                }
+            });
+            await get().runStageStep(0, channelId);
+            get().fetchChannelProjects(channelId);
+        },
+        runStageStep: async (stageIndex, channelId)=>{
+            const stageMeta = STAGES_LIST[stageIndex];
+            if (!stageMeta) return;
+            const { idea, provider, modelName, videoEngine, imageEngine, aspectRatio, projectId, stageContents } = get();
+            if (globalWs) {
+                try {
+                    globalWs.close();
+                } catch (e) {}
+                globalWs = null;
+            }
+            set((state)=>({
+                    isProcessing: true,
+                    currentStepIndex: stageIndex,
+                    stageApproval: {
+                        ...state.stageApproval,
+                        [stageMeta.key]: "running"
+                    },
+                    logs: [
+                        ...state.logs,
+                        `[START] Bat dau chay AI cho buoc: ${stageMeta.name}`
+                    ]
+                }));
+            try {
+                let customContent = "";
+                if (stageIndex > 0) {
+                    const prevKey = STAGES_LIST[stageIndex - 1].key;
+                    customContent = stageContents[prevKey] || "";
+                }
+                const payload = {
+                    project_id: projectId,
+                    channel_id: channelId,
+                    stage_name: stageMeta.key,
+                    idea,
+                    custom_content: customContent,
+                    provider,
+                    model_name: modelName,
+                    video_engine: videoEngine,
+                    image_engine: imageEngine,
+                    aspect_ratio: aspectRatio
+                };
+                const res = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2d$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["apiClient"].triggerSingleStage(payload);
+                set({
+                    projectId: res.project_id,
+                    taskId: res.task_id,
+                    logs: [
+                        ...get().logs,
+                        `[SUCCESS] Task ID: ${res.task_id}. Dang ket noi WebSocket Stream...`
+                    ]
+                });
+                const wsUrl = `ws://127.0.0.1:8000/ws/tasks/${res.task_id}`;
+                const ws = new WebSocket(wsUrl);
+                globalWs = ws;
+                ws.onmessage = (event)=>{
+                    try {
+                        const msg = JSON.parse(event.data);
+                        if (msg.message) {
+                            set((state)=>({
+                                    logs: [
+                                        ...state.logs,
+                                        `[STAGE] ${msg.message}`
+                                    ]
+                                }));
+                        }
+                        if (msg.event === "stage_complete" && msg.stage === stageMeta.key) {
+                            const rawContent = msg.result_content || msg.result_preview || "";
+                            const updatedMedia = {
+                                ...get().mediaOutputs
+                            };
+                            if (msg.stage === "image") {
+                                const matches = rawContent.match(/generated_images[/\\][^\s"']+\.(?:png|jpg|jpeg|webp)/gi) || [];
+                                updatedMedia.image = Array.from(new Set(matches));
+                            } else if (msg.stage === "voice") {
+                                const matches = rawContent.match(/generated_audio[/\\][^\s"']+\.(?:mp3|wav|ogg)/gi) || [];
+                                updatedMedia.voice = Array.from(new Set(matches));
+                            } else if (msg.stage === "video") {
+                                const matches = rawContent.match(/(?:generated_videos|exports)[/\\][^\s"']+\.(?:mp4|mov|webm)/gi) || [];
+                                updatedMedia.video = Array.from(new Set(matches));
+                            }
+                            set((state)=>({
+                                    isProcessing: false,
+                                    stageContents: {
+                                        ...state.stageContents,
+                                        [stageMeta.key]: rawContent
+                                    },
+                                    stageApproval: {
+                                        ...state.stageApproval,
+                                        [stageMeta.key]: "waiting_approval"
+                                    },
+                                    mediaOutputs: updatedMedia,
+                                    logs: [
+                                        ...state.logs,
+                                        `[WAIT] Giai doan ${stageMeta.name} da xong va dang cho ban DUYET de tiep tuc!`
+                                    ]
+                                }));
+                            ws.close();
+                            globalWs = null;
+                            get().fetchChannelProjects(channelId);
+                        } else if (msg.event === "error") {
+                            set((state)=>({
+                                    isProcessing: false,
+                                    stageApproval: {
+                                        ...state.stageApproval,
+                                        [stageMeta.key]: "error"
+                                    },
+                                    logs: [
+                                        ...state.logs,
+                                        `[ERROR] ${msg.message}`
+                                    ]
+                                }));
+                            ws.close();
+                            globalWs = null;
+                        }
+                    } catch (err) {
+                        console.error("Loi parse WS message:", err);
+                    }
+                };
+                ws.onerror = ()=>{
+                    set((state)=>({
+                            logs: [
+                                ...state.logs,
+                                `[WARN] WebSocket stream error.`
+                            ]
+                        }));
+                };
+            } catch (err) {
+                set((state)=>({
+                        isProcessing: false,
+                        stageApproval: {
+                            ...state.stageApproval,
+                            [stageMeta.key]: "error"
+                        },
+                        logs: [
+                            ...state.logs,
+                            `[ERROR] ${err.message}`
+                        ]
+                    }));
+                throw err;
+            }
+        },
+        approveAndNext: async (channelId)=>{
+            const { currentStepIndex } = get();
+            const curMeta = STAGES_LIST[currentStepIndex];
+            if (!curMeta) return;
+            set((state)=>({
+                    stageApproval: {
+                        ...state.stageApproval,
+                        [curMeta.key]: "approved"
+                    },
+                    logs: [
+                        ...state.logs,
+                        `[APPROVED] Ban da phe duyet ket qua cua buoc: ${curMeta.name}`
+                    ]
+                }));
+            if (currentStepIndex < STAGES_LIST.length - 1) {
+                const nextIndex = currentStepIndex + 1;
+                set({
+                    currentStepIndex: nextIndex
+                });
+                await get().runStageStep(nextIndex, channelId);
+            } else {
+                set((state)=>({
+                        logs: [
+                            ...state.logs,
+                            `[COMPLETED] Toan bo 5 giai doan da hoan thanh va duoc phe duyet 100%!`
+                        ]
+                    }));
+            }
+        },
+        regenerateStage: async (stageIndex, channelId)=>{
+            await get().runStageStep(stageIndex, channelId);
+        },
+        resetProduction: ()=>{
+            if (globalWs) {
+                try {
+                    globalWs.close();
+                } catch (e) {}
+                globalWs = null;
+            }
+            set({
+                isWorkspaceMode: false,
+                currentStepIndex: 0,
+                projectId: null,
+                taskId: null,
+                isProcessing: false,
+                progressPercent: 0,
+                logs: [],
+                stageContents: {
+                    brief: "",
+                    script: "",
+                    image: "",
+                    voice: "",
+                    video: ""
+                },
+                stageApproval: initialApproval,
+                mediaOutputs: {
+                    image: [],
+                    voice: [],
+                    video: []
+                }
+            });
+        }
+    }), {
+    name: "videocrew_engine_config",
+    partialize: (state)=>({
+            provider: state.provider,
+            modelName: state.modelName,
+            videoEngine: state.videoEngine,
+            imageEngine: state.imageEngine,
+            aspectRatio: state.aspectRatio
+        })
+}));
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
+}
+}),
+]);
+
+//# sourceMappingURL=_14w_tzg._.js.map
