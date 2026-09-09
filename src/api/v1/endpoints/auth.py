@@ -28,9 +28,18 @@ def verify_password(password: str, stored_hash: str) -> bool:
     except Exception:
         return False
 
+def _get_real_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip:
+        return real_ip.strip()
+    return request.client.host if request.client else "127.0.0.1"
+
 @router.post("/login", response_model=AuthResponse, summary="Dang nhap he thong bang User hoac Admin Secret Key")
 async def login(req: LoginRequest, request: Request, db: AsyncSession = Depends(get_async_db)):
-    client_ip = request.client.host if request.client else "127.0.0.1"
+    client_ip = _get_real_ip(request)
     admin_secret_key = config.ADMIN_SECRET_KEY or os.getenv("ADMIN_SECRET_KEY", "xR4q90gPLDGvU-VHra08adaK1BIqroR9qQ7l8boDNGw")
 
     input_user = req.username.strip()
@@ -136,11 +145,7 @@ async def login(req: LoginRequest, request: Request, db: AsyncSession = Depends(
 
 @router.post("/register", response_model=AuthResponse, summary="Dang ky tai khoan moi")
 async def register(req: RegisterRequest, request: Request, db: AsyncSession = Depends(get_async_db)):
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        client_ip = forwarded.split(",")[0].strip()
-    else:
-        client_ip = request.client.host if request.client else "127.0.0.1"
+    client_ip = _get_real_ip(request)
 
     username = req.username.strip().lower()
     if len(username) < 3:
