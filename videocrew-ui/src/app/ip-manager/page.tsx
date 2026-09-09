@@ -62,7 +62,7 @@ export default function IPManagerPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs min-w-[620px]">
             <thead>
               <tr className="border-b border-[var(--vc-border)] text-[var(--vc-muted)]">
                 <th className="py-3 px-3">Địa chỉ IP</th>

@@ -82,10 +82,10 @@ export default function ConfigPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300 max-w-4xl">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-extrabold flex items-center gap-2.5">
-          <Settings className="w-7 h-7 text-[#C2542D]" />
+        <h1 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2.5">
+          <Settings className="w-6 h-6 sm:w-7 sm:h-7 text-[#C2542D] shrink-0" />
           Cấu hình Hệ thống & AI Keys
         </h1>
         <p className="text-sm text-[var(--vc-muted)] mt-1">
@@ -104,7 +104,7 @@ export default function ConfigPage() {
           <div className="space-y-5">
             {/* Gemini Key */}
             <div className="space-y-2 p-4 rounded-xl bg-zinc-950/60 border border-[var(--vc-border)]">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-1">
                 <label className="text-xs font-semibold text-zinc-300">Google Gemini API Key (Khuyên dùng):</label>
                 {config?.has_gemini_key && (
                   <span className="text-[11px] text-emerald-400 font-mono">
@@ -118,16 +118,17 @@ export default function ConfigPage() {
                   value={geminiKey}
                   onChange={(e) => setGeminiKey(e.target.value)}
                   placeholder="Nhập khóa mới nếu muốn cập nhật (AI...)"
-                  className="flex-1 px-3.5 py-2 rounded-xl bg-black/40 border border-[var(--vc-border)] text-sm focus:outline-none focus:border-[#C2542D]"
+                  className="flex-1 min-w-0 px-3.5 py-2 rounded-xl bg-black/40 border border-[var(--vc-border)] text-sm focus:outline-none focus:border-[#C2542D]"
                 />
                 <button
                   type="button"
                   onClick={() => handleTestKey("Gemini")}
                   disabled={testingGemini}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-900 border border-zinc-700 text-zinc-200 hover:text-white hover:border-amber-500 transition flex items-center gap-1.5"
+                  className="shrink-0 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-900 border border-zinc-700 text-zinc-200 hover:text-white hover:border-amber-500 transition flex items-center gap-1.5"
                 >
                   {testingGemini ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />}
-                  Test Key
+                  <span className="hidden sm:inline">Test Key</span>
+                  <span className="sm:hidden">Test</span>
                 </button>
               </div>
               {geminiTestResult && (
@@ -142,7 +143,7 @@ export default function ConfigPage() {
 
             {/* OpenAI Key */}
             <div className="space-y-2 p-4 rounded-xl bg-zinc-950/60 border border-[var(--vc-border)]">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-1">
                 <label className="text-xs font-semibold text-zinc-300">OpenAI API Key (ChatGPT & DALL-E):</label>
                 {config?.has_openai_key && (
                   <span className="text-[11px] text-emerald-400 font-mono">
@@ -156,16 +157,17 @@ export default function ConfigPage() {
                   value={openaiKey}
                   onChange={(e) => setOpenaiKey(e.target.value)}
                   placeholder="Nhập khóa mới nếu muốn cập nhật (sk-...)"
-                  className="flex-1 px-3.5 py-2 rounded-xl bg-black/40 border border-[var(--vc-border)] text-sm focus:outline-none focus:border-[#C2542D]"
+                  className="flex-1 min-w-0 px-3.5 py-2 rounded-xl bg-black/40 border border-[var(--vc-border)] text-sm focus:outline-none focus:border-[#C2542D]"
                 />
                 <button
                   type="button"
                   onClick={() => handleTestKey("OpenAI")}
                   disabled={testingOpenai}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-900 border border-zinc-700 text-zinc-200 hover:text-white hover:border-amber-500 transition flex items-center gap-1.5"
+                  className="shrink-0 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-900 border border-zinc-700 text-zinc-200 hover:text-white hover:border-amber-500 transition flex items-center gap-1.5"
                 >
                   {testingOpenai ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />}
-                  Test Key
+                  <span className="hidden sm:inline">Test Key</span>
+                  <span className="sm:hidden">Test</span>
                 </button>
               </div>
               {openaiTestResult && (
@@ -263,7 +265,7 @@ export default function ConfigPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
           {isSaved ? (
             <div className="flex items-center gap-2 text-emerald-400 text-sm font-semibold animate-in fade-in">
               <Check className="w-4 h-4" />
@@ -275,7 +277,7 @@ export default function ConfigPage() {
           <button
             type="submit"
             disabled={saving}
-            className="gradient-btn px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer"
+            className="gradient-btn w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 cursor-pointer"
           >
             <Save className="w-4 h-4" />
             {saving ? "Đang lưu..." : "Lưu Cấu Hình"}

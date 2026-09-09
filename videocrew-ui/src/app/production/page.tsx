@@ -151,7 +151,7 @@ export default function ProductionPage() {
   const selectedChannel = channels.find((c) => c.id === selectedChannelId);
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6 animate-fadeIn">
+    <div className="space-y-6 animate-fadeIn">
       {/* Top Bar: Channel & Project Selector */}
       <div className="glass-panel p-4 rounded-2xl border border-[var(--vc-border)] bg-zinc-950/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-4">
@@ -541,7 +541,7 @@ export default function ProductionPage() {
         <div className="space-y-6">
           {/* Top Interactive Stepper Bar */}
           <div className="glass-panel p-3.5 rounded-2xl border border-[var(--vc-border)] bg-zinc-950/80">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            <div className="flex overflow-x-auto pb-1 gap-2.5 sm:grid sm:grid-cols-3 md:grid-cols-5">
               {STAGES_LIST.map((stage, idx) => {
                 const status = stageApproval[stage.key] || "pending";
                 const isCurrent = currentStepIndex === idx;
@@ -569,7 +569,7 @@ export default function ProductionPage() {
                     key={stage.key}
                     type="button"
                     onClick={() => setCurrentStepIndex(idx)}
-                    className={`p-3 rounded-xl border text-left transition relative flex flex-col justify-between gap-1.5 ${
+                    className={`p-3 rounded-xl border text-left transition relative flex flex-col justify-between gap-1.5 min-w-[155px] sm:min-w-0 flex-1 ${
                       isCurrent
                         ? "bg-zinc-900/90 border-amber-500/60 ring-1 ring-amber-500/30"
                         : "bg-zinc-950/40 border-[var(--vc-border)] hover:bg-zinc-900/40"
