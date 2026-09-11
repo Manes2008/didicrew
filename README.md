@@ -7,146 +7,146 @@
 [![Playwright](https://img.shields.io/badge/Playwright-Automation-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev)
 [![Docker Ready](https://img.shields.io/badge/Docker-Container_Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
 
-> **Tổ hợp Biên kịch, Đạo diễn & Tự động hóa Sản xuất Video Điện ảnh ứng dụng Trí tuệ Nhân tạo thế hệ mới.**
+> **An Autonomous Scriptwriting, Art Direction, and Media Production Orchestration Platform powered by Next-Gen Agentic Intelligence.**
 
-VideoCrew Studio không đơn thuần là một công cụ sinh video tự động; hệ thống đóng vai trò như một **Tổng đạo diễn AI (The AI Showrunner)**. Dự án giải quyết triệt để bài toán lớn nhất của việc sáng tạo video AI: **Thổi linh hồn nghệ thuật kể chuyện (Storytelling), ứng dụng tâm lý học giữ chân người xem (Retention Hooks) và tự động hóa kết nối 1-click vào Google Flow (Veo & Voiceover Studio)**.
-
----
-
-## 1. Dinh Vi & Su Menh Chuyen Doi
-
-Hầu hết các công cụ AI hiện nay chỉ tập trung vào việc render hình ảnh hoặc video thô, dẫn đến các kịch bản vô hồn, sáo rỗng và tỷ lệ thoát video cao sau 3 giây đầu. VideoCrew Studio định vị là **Bộ não Sáng tạo Cốt lõi**:
-
-* **Đạo diễn Điện ảnh & Tâm lý Khán giả**: Áp dụng các cấu trúc kịch bản đỉnh cao (Mô thức Hook nghịch lý, tương phản số liệu, vòng lặp tò mò), đo lường chính xác nhịp thở (~3.0 - 3.3 từ/giây) tương thích với âm thanh đọc TTS.
-* **Tích hợp Tri thức OpenSpace Cloud**: Nạp động 16 kỹ năng chuyên gia từ nền tảng OpenSpace của HKUDS, loại bỏ 100% văn phong sáo ngữ máy móc.
-* **Cộng sinh với Big Tech**: Không cố gắng tự render video nặng nề trên máy cá nhân; VideoCrew tạo ra bản thiết kế phân cảnh (Director Blueprint) chuẩn xác và dùng Playwright tự động đẩy trực tiếp vào các cỗ máy GPU của Google Flow (Veo & Imagen 3).
+VideoCrew Studio bridges the gap between human cinematic intuition and hyperscale AI rendering infrastructure. Operating as **The AI Showrunner**, the platform solves the foundational flaw of contemporary AI media generation: **transforming robotic, hollow scripts into emotionally gripping narratives with audience retention engineering, psychological triggers, and 1-click automated ingestion into Google Flow (Veo & Voiceover Studio)**.
 
 ---
 
-## 2. Bang So Sanh Nang Luc He Thong
+## 1. System Paradigm & Vision
 
-| Tieu Chi Danh Gia | Cong Cu AI Tong Quat / Flow Thuan Tuy | VideoCrew Studio Pipeline |
+Most existing AI video generators focus solely on pixel generation, producing generic, soulless videos with severe drop-offs within the first 3 seconds. VideoCrew Studio pivots entirely to the **Creative Director & Cognitive Core**:
+
+* **Cinematic Directing & Retention Engineering**: Implements Hollywood and top-tier creator frameworks (Paradoxical Hooks, statistical contrast, curiosity loops), calculating precise speech cadence (~3.0 - 3.3 words/second) synchronized with TTS audio constraints.
+* **OpenSpace Cloud Collective Intelligence**: Dynamically injects 16 specialized skills from HKUDS OpenSpace, eradicating formulaic AI cliches and enforcing strict production rubrics.
+* **Symbiosis with Big Tech Compute**: Instead of straining local hardware with heavy rendering, VideoCrew outputs pixel-perfect Director Blueprints and uses a headless Playwright bridge to drive Google Flow's enterprise Veo and Imagen 3 compute engines automatically.
+
+---
+
+## 2. Competitive Matrix
+
+| Evaluation Dimension | General AI Tools / Raw Flow Prompting | VideoCrew Studio Pipeline |
 | :--- | :--- | :--- |
-| **Tam ly hoc Hook 3 giay** | Khong co; mo dau cham rai, chung chung | Tu dong ap dung Mo thuc A/B chong drop-off |
-| **Nhip do loi thoai** | Thoai tho cung, de tran chu khi long tieng | Tinh toan chinh xac ~3.0 tu/giay chuan video ngan |
-| **Visual Prompt cho Video** | Mo ta so sai, de bi loi do tren Veo/Flow | Chuan hoa thuoc tinh camera 35mm, anh sang, goc quay |
-| **Kiem dinh chat luong** | Phai tu doc va danh gia bang tay | Agent Content Quality Auditor tu cham diem rubric |
-| **Thao tac voi Google Flow** | Copy-paste tung cau, chon giong thu cong | Playwright Automation Bridge tu dong hoa 1-click |
-| **Giao dien Van hanh** | Phuc tap, mang tinh chat lap trinh vien | Next.js 15 Media Studio hien dai, truc quan |
+| **First 3s Retention Hook** | Non-existent; generic, sluggish openings | Automated Pattern A/B Hook generation |
+| **Dialogue Speech Cadence** | Rigid pacing; overflow audio sync errors | Calibrated pacing (~3.0 words/s) for short-form video |
+| **Video Visual Prompting** | Basic text; frequent safety filter rejections | 35mm cinematic lens specs, lighting, camera blocking |
+| **Quality Audit & Verification** | Manual human review required | Autonomous Agent Content Quality Auditor rubric |
+| **Google Flow Execution** | Laborious manual copy-pasting of every scene | 1-Click Playwright Automation Bridge |
+| **Production Workspace** | Fragmented developer interfaces | Next.js 15 Dark Media Studio UI |
 
 ---
 
-## 3. Kien Truc Pipeline 8 Cong Doan
+## 3. The 8-Stage Production Pipeline
 
-Hệ thống điều phối luồng sản xuất tuần tự qua 8 công đoạn chuyên môn hóa:
+The architecture sequences production through 8 specialized stages:
 
 ```
-[ Ý TƯỞNG SƠ KHỞI ]
-        │
-        ▼
-[ Stage 1: Phân Tích & Chiến Lược ] ──► (OpenSpace: content-strategy & gap-analysis)
-        │
-        ▼
-[ Stage 2: Kịch Bản & Hook 3s ] ─────► (OpenSpace: cinematic-script-writer & viral-video)
-        │
-        ▼
-[ Stage 3: Thẩm Định Chất Lượng ] ───► (OpenSpace: content-quality-auditor)
-        │
-        ▼
-[ Stage 4: Storyboard 6 Cột ] ───────► (OpenSpace: storyboard & visual-vocabulary)
-        │
-        ▼
-[ Stage 5: Chỉ Đạo Nghệ Thuật ] ─────► (OpenSpace: visual-prompt-engine & style-cards)
-        │
-        ▼
-[ Stage 6: Lọc Sạch Dữ Liệu ] ───────► (Data Sanitizer: cat gon <120 ky tu, loc sach --ar)
-        │
-        ▼
-[ Stage 7: Automation Bridge ] ──────► (Playwright Engine: ket noi Google Flow)
-        │
-        ▼
-[ BẢN THIẾT KẾ HOÀN CHỈNH / VIDEO CLIP VEO ]
+[ RAW CREATIVE SEED ]
+         │
+         ▼
+[ Stage 1: Strategy & Ideation ] ────► (OpenSpace: content-strategy & gap-analysis)
+         │
+         ▼
+[ Stage 2: Script & 3s Hook ] ───────► (OpenSpace: cinematic-script-writer & viral-video)
+         │
+         ▼
+[ Stage 3: Content Audit ] ──────────► (OpenSpace: content-quality-auditor)
+         │
+         ▼
+[ Stage 4: 6-Column Storyboard ] ────► (OpenSpace: storyboard & visual-vocabulary)
+         │
+         ▼
+[ Stage 5: Art Direction & Camera ] ─► (OpenSpace: visual-prompt-engine & style-cards)
+         │
+         ▼
+[ Stage 6: Data Sanitizer ] ─────────► (Clean VO tags, enforce <120 chars, strip --ar)
+         │
+         ▼
+[ Stage 7: Playwright Automation ] ──► (Automated browser bridge into Google Flow)
+         │
+         ▼
+[ PRODUCTION BLUEPRINT & VEO VIDEO CLIPS ]
 ```
 
 ---
 
-## 4. Danh Muc 16 Ky Nang Chuyen Sau Tu OpenSpace
+## 4. Integrated 16 OpenSpace Studio Skills
 
-Hệ thống nạp trực tiếp tri thức từ thư mục `skills/` đã được đồng bộ hóa từ OpenSpace Cloud:
+The system loads expert instructions directly from the `skills/` directory synchronized from OpenSpace Cloud:
 
-### Nhom 1: Bien Kich & Chien Luoc Noi Dung
-- `cinematic-script-writer`: Viết kịch bản chuẩn điện ảnh, tối ưu nhịp thở và cấu trúc Hook 3s.
-- `storyboard`: Phân chia bảng phân cảnh 6 cột chi tiết (Visual, Voiceover, Text, SFX/BGM).
-- `content-quality-auditor`: Đánh giá, chấm điểm và tự động chỉnh sửa kịch bản theo rubric khắt khe.
-- `viral-video-analysis`: Phân tích xu hướng và tích hợp các yếu tố kích hoạt tương tác (CTA Trigger).
-- `content-strategy`: Định hình thông điệp cốt lõi và chân dung khán giả mục tiêu.
-- `content-gap-analysis`: Phát hiện khoảng trống thông tin để tạo sự khác biệt cạnh tranh.
-- `content-refresher`: Tái cấu trúc và nâng cấp các chủ đề cũ thành góc nhìn mới.
+### Category A: Screenwriting & Narrative Strategy
+- `cinematic-script-writer`: Crafts cinematic scripts calibrated for pacing, visual beats, and 3-second retention hooks.
+- `storyboard`: Structures exhaustive 6-column production storyboards (Visual, Voiceover, Text, SFX/BGM).
+- `content-quality-auditor`: Validates, scores, and auto-corrects narrative quality against strict retention rubrics.
+- `viral-video-analysis`: Decodes platform engagement algorithms and weaves behavioral call-to-action triggers.
+- `content-strategy`: Establishes core messaging pillars, audience personas, and positioning.
+- `content-gap-analysis`: Identifies untapped informational voids across existing competitor media.
+- `content-refresher`: Restructures legacy topics into novel, high-engagement angles.
 
-### Nhom 2: Thi Giac & Chi Dao Nghe Thuat
-- `visual-prompt-engine`: Chuyển hóa kịch bản thành câu lệnh prompt điện ảnh chuyên nghiệp.
-- `visual-concept`: Xây dựng bảng moodboard và phong cách thị giác đồng nhất.
-- `best-image-generation`: Tối ưu hóa chất lượng hình ảnh qua các tham số ánh sáng và chất liệu.
-- `blip-2-vision-language`: Phân tích và kiểm soát tính nhất quán của nhân vật qua các khung hình.
+### Category B: Visual Concept & Art Direction
+- `visual-prompt-engine`: Translates script beats into high-fidelity cinematic video generation prompts.
+- `visual-concept`: Constructs coherent moodboards, color palettes, and recurring visual motifs.
+- `best-image-generation`: Optimizes material textures, volumetric lighting, and aspect composition.
+- `blip-2-vision-language`: Maintains character consistency and subject recognition across scene cuts.
 
-### Nhom 3: Am Thanh & Long Tieng
-- `elevenlabs-tts`: Tối ưu hóa tham số biểu cảm giọng đọc và ngắt nghỉ tự nhiên.
-- `audio-conductor`: Điều phối âm lượng, nhạc nền (BGM) và hiệu ứng âm thanh (SFX).
-- `audiocraft-audio-generation`: Tạo âm thanh nền tùy biến theo nhịp điệu video.
-- `audio-processing`: Hậu kỳ, lọc tạp âm và cân bằng tần số âm thanh.
+### Category C: Audio Conductor & Voice AI
+- `elevenlabs-tts`: Calibrates expressive inflection, natural pauses, and conversational tone.
+- `audio-conductor`: Coordinates master gain, dynamic sound effects (SFX), and background music (BGM).
+- `audiocraft-audio-generation`: Generates rhythmic acoustic beds tailored to video cadence.
+- `audio-processing`: Handles post-production dynamic compression, noise filtering, and EQ balancing.
 
-### Nhom 4: Video & Chuyen Dong
-- `eachlabs-video-generation`: Tối ưu câu lệnh chuyển động camera cho AI Video Generators.
-- `hyperframes`: Kiểm soát chuyển cảnh mượt mà giữa các phân đoạn video.
-
----
-
-## 5. Co Che Tu Dong Hoa Google Flow (Playwright Bridge)
-
-VideoCrew Studio cung cấp cầu nối tự động hóa độc quyền với Google Flow:
-
-1. **Bộ lọc Dữ liệu Thông minh (Data Sanitizer)**:
-   - Tự động bóc tách các nhãn vai đọc `[NARRATOR]:`, `[DIALOGUE]:` và số lượng từ `*(11 từ)*` để tránh việc AI đọc nhầm thành tiếng.
-   - Tự động kiểm tra và chia nhỏ câu thoại không vượt quá 120 ký tự (giới hạn của Voiceover Studio).
-   - Tự động loại bỏ các cờ lệnh không tương thích như `--ar 9:16` trong Prompt Veo.
-   - Tự động ánh xạ giọng đọc thích hợp: **Alnilam** (trầm hùng lịch sử), **Charon** (công nghệ, đĩnh đạc), **Achird** (thân thiện, đời sống).
-
-2. **Dedicated Profile Trình duyệt (`.chrome_profile`)**:
-   - Sử dụng một profile Chrome riêng biệt, tránh hoàn toàn lỗi chiếm dụng file khi bạn đang mở Chrome cá nhân.
-   - Đăng nhập tài khoản Google Flow một lần duy nhất; bot tự động duy trì phiên làm việc cho các lần sản xuất tiếp theo.
-
-3. **Thao tác 1-Click trên Giao diện**:
-   - Nhấp nút **"Đẩy Sang Google Flow"** ngay trên trang Sản Xuất để mở modal kiểm tra phân cảnh.
-   - Bấm **"Bắt Đầu Đẩy Vào Flow"**, hệ thống sẽ tự mở dự án, nạp toàn bộ Veo prompts và tạo voiceover song song.
+### Category D: Video Motion & Camera Blocking
+- `eachlabs-video-generation`: Optimizes camera motion vectors for modern diffusion video models.
+- `hyperframes`: Controls frame transition continuity and visual momentum between cuts.
 
 ---
 
-## 6. Huong Dan Cai Dat & Van Hanh
+## 5. Google Flow Automation Bridge (Playwright)
 
-### Yeu Cau He Thong
-- **Hệ điều hành**: Windows 10/11, macOS, hoặc Linux
-- **Python**: Phiên bản 3.12 trở lên (Bắt buộc cho OpenSpace và Playwright)
-- **Node.js**: Phiên bản 18+ (Dành cho giao diện Next.js 15)
-- **Cơ sở dữ liệu**: PostgreSQL 16+
+VideoCrew Studio features a dedicated automation bridge connecting directly to Google Flow (`flow.google.com`):
 
-### Cach 1: Cai Dat & Chay Cuc Bo (Local Development)
+1. **Intelligent Data Sanitizer**:
+   - Strips speaker tags (`[NARRATOR]:`, `[DIALOGUE]:`) and word count metrics (`*(11 words)*`) to prevent speech synthesizers from uttering metadata.
+   - Enforces strict character limits: Automatically chunks dialogue into phrases under **120 characters** (hard limit of Google Flow Voiceover Studio).
+   - Strips legacy Midjourney flags (such as `--ar 9:16`) from Veo visual prompts.
+   - Maps acoustic profiles automatically: **Alnilam** (solemn historical/epic), **Charon** (analytical/tech), **Achird** (approachable/lifestyle).
 
-1. **Clone repository và thiết lập môi trường ảo**:
+2. **Isolated Chrome Profile Architecture (`.chrome_profile`)**:
+   - Operates on a dedicated, isolated Chromium instance, preventing lockfile collisions with personal browsing sessions.
+   - Google Flow credentials are authenticated once; the automation engine preserves authenticated cookies indefinitely.
+
+3. **1-Click Studio Workflow**:
+   - Click **"Push to Google Flow"** directly on the Production Studio page to inspect the sanitized payload preview.
+   - Trigger execution: Playwright navigates the project, injects scene prompts into the creation bar, and synthesizes matching voiceover clips in parallel.
+
+---
+
+## 6. Installation & Deployment Guide
+
+### Prerequisites
+- **Operating System**: Windows 10/11, macOS, or Linux
+- **Python**: Version 3.12 or higher (Strict requirement for OpenSpace and Playwright)
+- **Node.js**: Version 18+ (Required for Next.js 15 Frontend)
+- **Database**: PostgreSQL 16+
+
+### Method 1: Local Development Setup
+
+1. **Clone the repository and prepare virtual environment**:
 ```bash
 git clone https://github.com/Manes2008/didicrew.git
 cd didicrew
 python -m venv venv
-venv\Scripts\activate  # Tren Linux/macOS: source venv/bin/activate
+venv\Scripts\activate  # On Linux/macOS: source venv/bin/activate
 ```
 
-2. **Cài đặt các gói phụ thuộc Backend**:
+2. **Install Backend Dependencies**:
 ```bash
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 python -m playwright install --with-deps chromium
 ```
 
-3. **Cấu hình tệp môi trường (`.env`)**:
+3. **Configure Environment Variables (`.env`)**:
 ```env
 OPENAI_API_KEY=your_openai_key
 GEMINI_API_KEY=your_gemini_key
@@ -155,72 +155,72 @@ OPENSPACE_API_KEY=your_openspace_key
 GOOGLE_FLOW_PROJECT_URL=https://flow.google.com/project/your-project-id/tools
 ```
 
-4. **Khởi chạy Backend (FastAPI)**:
+4. **Launch FastAPI Backend**:
 ```bash
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-5. **Khởi chạy Giao diện Frontend (videocrew-ui)**:
+5. **Launch Next.js Studio Frontend**:
 ```bash
 cd videocrew-ui
 npm install
 npm run dev
 ```
-Truy cập giao diện tại: `http://localhost:3000`
+Open your browser at: `http://localhost:3000`
 
 ---
 
-### Cach 2: Trien Khai Tron Goi Bang Docker (Docker Deployment)
+### Method 2: Docker Container Deployment
 
-Hệ thống đã được đóng gói sẵn sàng cho Docker với môi trường chuẩn Python 3.12:
+The stack is containerized for production on an optimized Python 3.12 base:
 
 ```bash
-# Khởi động toàn bộ Database và Backend qua Docker Compose
+# Build and start all services via Docker Compose
 docker compose up -d --build
 
-# Hoặc sử dụng script Redeploy an toàn (tự động giữ nguyên Database)
+# Or run the safe redeploy script (preserves database volumes)
 scripts\redeploy.bat
 ```
 
 > [!TIP]
-> Để mở trình duyệt Chrome độc lập cho Google Flow và đăng nhập sẵn tài khoản, bạn chỉ cần chạy tệp:
+> To launch an independent Chrome window dedicated to Google Flow for one-time authentication, simply execute:
 > `scripts\start_flow_chrome.bat`
 
 ---
 
-## 7. Cau Truc Thu Muc Du An
+## 7. Repository Layout
 
 ```
 videocrew/
 ├── config/
-│   ├── agents.yaml             # Thiết lập vai trò & mục tiêu của các AI Agent
-│   └── tasks.yaml              # Định nghĩa quy chuẩn nhiệm vụ và kết quả đầu ra
-├── skills/                     # Kho 16 kỹ năng Studio gốc từ OpenSpace Cloud
-│   ├── mass-media/             # Chiến lược kịch bản, SEO, phân tích viral
-│   └── technology/             # Đạo diễn thị giác, prompt Veo, TTS, xử lý âm thanh
+│   ├── agents.yaml             # AI Agent roles, goals, and backstories
+│   └── tasks.yaml              # Production stage specifications and expected outputs
+├── skills/                     # 16 native studio skills imported from OpenSpace Cloud
+│   ├── mass-media/             # Narrative strategy, SEO, viral video mechanics
+│   └── technology/             # Art direction, Veo visual prompts, TTS, audio design
 ├── src/
-│   ├── api/v1/endpoints/       # Các API endpoints FastAPI (Production, Config, Channels)
+│   ├── api/v1/endpoints/       # FastAPI route controllers (Production, Config, Channels)
 │   ├── core/
-│   │   ├── engine.py           # WorkflowEngine điều phối tiêm kỹ năng OpenSpace động
-│   │   ├── llm_provider.py     # Hỗ trợ Gemini 3.8 Flash, OpenAI o3-mini
-│   │   └── skill_loader.py     # Bộ nạp kỹ năng đệ quy kèm in-memory cache
+│   │   ├── engine.py           # WorkflowEngine orchestrating dynamic skill injection
+│   │   ├── llm_provider.py     # Provider supporting Gemini 3.8 Flash, OpenAI o3-mini
+│   │   └── skill_loader.py     # Recursive skill loader with in-memory caching
 │   └── tools/
-│       ├── google_flow_sanitizer.py # Bộ lọc làm sạch dữ liệu thoại và Veo prompt
-│       ├── google_flow_bridge.py    # Trình điều khiển tự động hóa Playwright
-│       └── image_tool.py            # Công cụ sinh ảnh dự phòng (Flux Realism, Gemini)
-├── videocrew-ui/               # Giao diện Studio hiện đại (Next.js 15, TailwindCSS)
+│       ├── google_flow_sanitizer.py # Data cleaner for dialogue and Veo prompts
+│       ├── google_flow_bridge.py    # Playwright headless/headful automation engine
+│       └── image_tool.py            # Local & cloud image engine (Flux Realism, Gemini)
+├── videocrew-ui/               # Next.js 15 Dark Studio Interface (TailwindCSS)
 ├── scripts/
-│   ├── redeploy.bat            # Script build lại Docker an toàn dữ liệu
-│   ├── start_flow_chrome.bat   # Mở Chrome Dedicated Profile cho Google Flow
-│   └── sync_openspace.py       # Script đồng bộ kỹ năng từ OpenSpace Cloud
-├── Dockerfile                  # Cấu hình container Python 3.12 + Playwright
-├── docker-compose.yml          # Điều phối dịch vụ App và PostgreSQL
-└── requirements.txt            # Danh sách gói phụ thuộc chuẩn Python 3.12+
+│   ├── redeploy.bat            # Safe Docker container recreation script
+│   ├── start_flow_chrome.bat   # Dedicated Chrome browser launcher for Google Flow
+│   └── sync_openspace.py       # Cloud synchronization utility for OpenSpace skills
+├── Dockerfile                  # Production Python 3.12 container with Playwright deps
+├── docker-compose.yml          # Service orchestration (Backend + PostgreSQL 16)
+└── requirements.txt            # System dependencies pinned for Python 3.12+
 ```
 
 ---
 
-## 8. Ban Quyen & Giay Phep
+## 8. License & Intellectual Property
 
-Dự án được phát triển và phát hành dưới giấy phép **MIT License**.
-Bản quyền thuộc về **(c) 2026 Manes2008/didicrew**.
+This project is licensed under the terms of the **MIT License**.
+Copyright (c) **2026 Manes2008/didicrew**. All rights reserved.
