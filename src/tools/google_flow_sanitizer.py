@@ -145,11 +145,29 @@ def parse_script_to_flow_payload(script_markdown: str) -> Dict[str, Any]:
             "suggested_voice": suggest_flow_voice(script_markdown[:500])
         })
 
+    # 3. Trich xuat danh sach nhan vat (Characters & Consistency)
+    characters = []
+    char_matches = re.findall(
+        r"(?:[-*•]|\d+\.)\s*(?:\*\*)?(?:Nhân vật|Character|Diễn viên)?\s*([A-Za-zÀ-ỹ0-9\s_-]+)(?:\*\*)?\s*:\s*([^\n]+)",
+        script_markdown,
+        re.IGNORECASE
+    )
+    for c_name, c_desc in char_matches:
+        name_clean = c_name.strip().strip("*")
+        if len(name_clean) > 2 and not name_clean.lower().startswith("visual") and not name_clean.lower().startswith("voiceover"):
+            characters.append({
+                "name": name_clean,
+                "description": c_desc.strip(),
+                "flow_prompt": f"Character consistency: {name_clean}. {c_desc.strip()}"
+            })
+
     return {
         "title": "Google Flow Production Payload",
         "suggested_voice": suggest_flow_voice(script_markdown[:500]),
         "total_scenes": len(scenes),
         "total_veo_blocks": len(veo_blocks),
+        "total_characters": len(characters),
+        "characters": characters,
         "veo_blocks": veo_blocks,
         "scenes": scenes
     }

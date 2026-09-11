@@ -105,6 +105,21 @@ export default function ProductionPage() {
   const [isFlowPushing, setIsFlowPushing] = useState(false);
   const [flowPushResult, setFlowPushResult] = useState<string | null>(null);
   const [showExtensionGuide, setShowExtensionGuide] = useState(false);
+  const [isExtensionDetected, setIsExtensionDetected] = useState(false);
+
+  useEffect(() => {
+    const handleMsg = (e: MessageEvent) => {
+      if (e.data && e.data.type === "VIDEOCREW_EXTENSION_INSTALLED") {
+        setIsExtensionDetected(true);
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("message", handleMsg);
+      // Phat tin hieu ping hoi tien ich
+      window.postMessage({ type: "VIDEOCREW_PING_EXTENSION" }, "*");
+      return () => window.removeEventListener("message", handleMsg);
+    }
+  }, []);
 
   const handleOpenFlowModal = async () => {
     const savedUrl = typeof window !== "undefined" ? localStorage.getItem("google_flow_project_url") || "" : "";
@@ -124,6 +139,8 @@ export default function ProductionPage() {
           suggested_voice: "Charon",
           total_scenes: 0,
           total_veo_blocks: 0,
+          total_characters: 0,
+          characters: [],
           veo_blocks: [],
           scenes: []
         });
@@ -151,6 +168,12 @@ export default function ProductionPage() {
     }
 
     if (typeof window !== "undefined") {
+      // 1. Luu vao localStorage
+      try {
+        localStorage.setItem("videocrew_active_payload", JSON.stringify(flowPayload));
+      } catch (e) {}
+
+      // 2. Ban su kien postMessage cho extension
       window.postMessage(
         {
           type: "VIDEOCREW_PUSH_TO_FLOW",
@@ -160,15 +183,15 @@ export default function ProductionPage() {
         "*"
       );
 
+      // 3. Sao chep JSON vao bo nho tam Clipboard
       try {
         navigator.clipboard.writeText(JSON.stringify(flowPayload, null, 2));
-      } catch (e) {
-        // Ignore clipboard write error
-      }
+      } catch (e) {}
 
+      // 4. Mo tab Flow
       window.open(cleanUrl, "_blank");
       setFlowPushResult(
-        "Đã mở tab Google Flow và sao chép kịch bản vào bộ nhớ tạm! Tiện ích Chrome sẽ tự động điền prompt trên tab vừa mở."
+        "Đã mở tab Google Flow và kích hoạt Director Dock! Nếu tab Flow chưa tự nhận, bấm 'Đọc Từ Clipboard' trên bảng điều khiển nổi."
       );
     }
   };
@@ -1246,7 +1269,21 @@ export default function ProductionPage() {
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-2 text-zinc-200">
                   <span className="font-bold text-cyan-300">Tiện Ích Trình Duyệt:</span>
-                  <span className="text-[11px] text-zinc-400">Dành cho người dùng bên ngoài hoặc tự động hóa trên Chrome cá nhân</span>
+                  {isExtensionDetected ? (
+                    <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                      Đã Kết Nối
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-zinc-400">
+                      Chưa phát hiện tiện ích (Cài đặt để nạp tự động vào tab Flow cá nhân)
+                    </span>
+                  )}
+                  {flowPayload?.characters && flowPayload.characters.length > 0 && (
+                    <span className="text-[11px] text-purple-300 font-semibold bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/30">
+                      {flowPayload.characters.length} Nhân Vật
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <a
