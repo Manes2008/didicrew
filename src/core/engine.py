@@ -8,6 +8,7 @@ import time
 from crewai import Task, Crew
 from src.agents.factory import AgentFactory
 from src.core.models import get_db_session, PromptOptimizationLog, VideoAnalysisLog
+from src.core.skill_loader import SkillLoader
 import src.core.token_tracker as token_tracker
 
 class StepContext:
@@ -120,10 +121,23 @@ class WorkflowEngine:
             
         self.agent_factory = AgentFactory(agents_config_path)
         
+        # Ánh xạ kỹ năng động (Open-Space Dynamic Skills) cho từng stage Studio
+        self.stage_skill_mapping = {
+            "brief": "content-strategy",
+            "script": "storyboard",
+            "audit": "content-quality-auditor",
+            "analysis": "content-gap-analysis",
+            "visual": "visual-prompt-engine",
+            "image": "best-image-generation",
+            "voice": "elevenlabs-tts",
+            "video": "hyperframes"
+        }
+        
         # Ánh xạ từ tên stage sang agent_id và task_id trong file cấu hình
         self.stage_mapping = {
             "brief": ("brief_director", "brief_task"),
             "script": ("script_writer", "script_task"),
+            "audit": ("content_quality_auditor", "audit_script_task"),
             "visual": ("visual_prompt_engineer", "visual_task"),
             "image": ("image_generation_specialist", "image_task"),
             "voice": ("voiceover_specialist", "voice_task"),
@@ -562,6 +576,16 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
             if viral_blueprint_hint:
                 format_kwargs["idea"] = format_kwargs["idea"] + viral_blueprint_hint
             
+            # Nap dong chi dan ky nang (Dynamic Skill Injection) neu stage hoac template yeu cau
+            skill_name = self.stage_skill_mapping.get(stage_name)
+            if skill_name and "{skill_instructions}" in description_template:
+                try:
+                    format_kwargs["skill_instructions"] = SkillLoader.load_skill(skill_name)
+                except Exception as ex_skill:
+                    format_kwargs["skill_instructions"] = ""
+            elif "skill_instructions" not in format_kwargs:
+                format_kwargs["skill_instructions"] = ""
+
             formatted_description = self._safe_format(description_template, **format_kwargs)
             
             # Khởi tạo Task

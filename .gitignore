@@ -107,3 +107,4 @@ venv.bak/
 
 # Project specific generated files
 generated_images/
+scratch/

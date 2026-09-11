@@ -209,3 +209,14 @@ editor_task:
 
     {markdown_template}
   expected_output: "Hướng dẫn dựng video tinh gọn trên CapCut theo quy trình Audio-First và clip Veo3."
+
+audit_script_task:
+  description: |
+    Dựa trên kịch bản chi tiết đã tạo: "{previous_result}"
+    Và mục tiêu thời lượng: {target_duration} giây.
+
+    {skill_instructions}
+
+    Hãy thẩm định kịch bản trên theo đúng Rubric và chấm điểm từ 1 đến 100.
+    Nếu điểm tổng dưới 80, hãy liệt kê chi tiết các phân cảnh cần khắc phục.
+  expected_output: "Báo cáo thẩm định kịch bản định dạng JSON hoặc Markdown kèm điểm số và danh sách góp ý chi tiết."

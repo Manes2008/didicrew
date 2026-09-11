@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "baef62a8-95fd-4d38-b8d3-a51a20a8250f",
+  "current_package_id": "9d98a506-942d-501c-859a-2167392051cf",
+  "current_package_path": "academic disciplines/design studies/visual concept design",
+  "last_pulled_at": "2026-09-11T07:31:17.863460Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:e7a740edec2dbe394c21d53eb6885d8d2c74630d6054a330cc467c44da89bc8b",
+  "local_skill_id": "visual-concept__imp_80cc3cbe",
+  "manifest_hash": "478b93b593a4d219070797d546c4ae11fdc010598263744398455207e2fb78f2",
+  "package_id_at_pull": "9d98a506-942d-501c-859a-2167392051cf",
+  "package_path_at_pull": "academic disciplines/design studies/visual concept design",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}

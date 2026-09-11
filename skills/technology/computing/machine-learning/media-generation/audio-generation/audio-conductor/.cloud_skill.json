@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "77382fbd-0f81-4268-ac6c-adbaef333bdb",
+  "current_package_id": "03a86b6e-2f40-51bf-bf78-59433f6dd6b4",
+  "current_package_path": "technology/computing/machine learning/media generation/audio generation",
+  "last_pulled_at": "2026-09-11T07:31:27.385141Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:252fe615f83c384bb073436465d53320abbc2b77fd3de075797df89cd1f693dc",
+  "local_skill_id": "audio-conductor__imp_01f7ab7e",
+  "manifest_hash": "d884d4e39106abe33991390c3820a2a535416f55a81f4000097939e8a6733cd4",
+  "package_id_at_pull": "03a86b6e-2f40-51bf-bf78-59433f6dd6b4",
+  "package_path_at_pull": "technology/computing/machine learning/media generation/audio generation",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}

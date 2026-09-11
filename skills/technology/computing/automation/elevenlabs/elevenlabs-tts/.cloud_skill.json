@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "3d86d7d9-f2d6-4f3f-957c-ca911632440f",
+  "current_package_id": "efd5bb0d-90ff-56c6-953d-1013415f8d69",
+  "current_package_path": "technology/computing/automation/elevenlabs",
+  "last_pulled_at": "2026-09-11T07:31:24.608672Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:bd115fa1e4ec9da2e4afa7f0613a888bb11fab0b1b63c10edb5fce7bf41885eb",
+  "local_skill_id": "elevenlabs-tts__imp_88a4d0bd",
+  "manifest_hash": "0c836ba415d7e5a99dde621136cba2c56875c5ec91b7414f4a10f6c517e74432",
+  "package_id_at_pull": "efd5bb0d-90ff-56c6-953d-1013415f8d69",
+  "package_path_at_pull": "technology/computing/automation/elevenlabs",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}

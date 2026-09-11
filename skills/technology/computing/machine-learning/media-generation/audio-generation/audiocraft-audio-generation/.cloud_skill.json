@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "c0c22a81-1a14-4e02-abc9-fa31a0c814e8",
+  "current_package_id": "03a86b6e-2f40-51bf-bf78-59433f6dd6b4",
+  "current_package_path": "technology/computing/machine learning/media generation/audio generation",
+  "last_pulled_at": "2026-09-11T07:31:25.690541Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:df1b82a1480ce0fb23abc087570a6d09448b23ad0665fd5b14996d94b65a9687",
+  "local_skill_id": "audiocraft-audio-generation__imp_0e6c63c2",
+  "manifest_hash": "6020ad4d87e5ea44db24603725f266033727e3467af96e3324393d652a6f308f",
+  "package_id_at_pull": "03a86b6e-2f40-51bf-bf78-59433f6dd6b4",
+  "package_path_at_pull": "technology/computing/machine learning/media generation/audio generation",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}

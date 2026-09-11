@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "b51c916f-6d99-4359-b09c-040346e5a950",
+  "current_package_id": "4dde462e-c2d4-540b-8b8e-2dbee78c8724",
+  "current_package_path": "mass media/marketing/content marketing",
+  "last_pulled_at": "2026-09-11T07:25:59.569867Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:f5631641166f309e41f21f5cbb19cf816dc2d8f5e1057a8fc8eeaec11b48341d",
+  "local_skill_id": "content-strategy__imp_177375b5",
+  "manifest_hash": "29c2725add173e3871d070be48948998cf64276aafafb3025900894d7424bd73",
+  "package_id_at_pull": "4dde462e-c2d4-540b-8b8e-2dbee78c8724",
+  "package_path_at_pull": "mass media/marketing/content marketing",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}

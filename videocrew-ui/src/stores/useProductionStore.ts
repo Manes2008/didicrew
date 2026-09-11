@@ -84,7 +84,7 @@ export const useProductionStore = create<ProductionState>()(
     (set, get) => ({
       idea: "",
       provider: "Gemini",
-      modelName: "gemini-3.6-flash",
+      modelName: "gemini-3.8-flash",
       videoEngine: "hunyuan",
       imageEngine: "gemini",
       aspectRatio: "9:16",
@@ -117,7 +117,7 @@ export const useProductionStore = create<ProductionState>()(
       setIdea: (idea) => set({ idea }),
       setProvider: (provider) => {
         if (provider === "Gemini") {
-          set({ provider, modelName: "gemini-3.6-flash", imageEngine: "gemini" });
+          set({ provider, modelName: "gemini-3.8-flash", imageEngine: "gemini" });
         } else {
           set({ provider, modelName: "gpt-4o-mini", imageEngine: "dalle" });
         }

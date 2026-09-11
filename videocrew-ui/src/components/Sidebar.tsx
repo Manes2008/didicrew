@@ -61,20 +61,20 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
   };
 
   const navItems = [
-    { href: "/", label: "Tổng quan (Dashboard)", icon: BarChart3 },
-    { href: "/production", label: "Sản xuất Video AI", icon: Film, badge: "Live" },
-    { href: "/channels", label: "Quản lý Kênh", icon: Layers },
-    { href: "/config", label: "Cấu hình AI & Engine", icon: Settings },
-    { href: "/analytics", label: "Phân tích Hiệu quả", icon: BarChart3 },
-    { href: "/ip-manager", label: "Quản lý IP Admin", icon: ShieldCheck },
-    { href: "/rustdesk", label: "Cấu hình RustDesk", icon: Monitor },
+    { href: "/", label: "Tổng Quan Studio", icon: BarChart3 },
+    { href: "/production", label: "Sản Xuất Video", icon: Film, badge: "Live" },
+    { href: "/channels", label: "Kênh Phân Phối", icon: Layers },
+    { href: "/config", label: "Thiết Lập Studio & Model AI", icon: Settings },
+    { href: "/analytics", label: "Hiệu Suất Nội Dung", icon: BarChart3 },
+    { href: "/ip-manager", label: "Bảo Mật & Phân Quyền", icon: ShieldCheck },
+    { href: "/rustdesk", label: "Trạm Dựng Phim Từ Xa", icon: Monitor },
   ];
 
   const renderNavContent = (collapsed: boolean, isMobile: boolean = false) => (
     <>
       <div>
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--vc-border)]">
-          <div className="flex items-center gap-3 overflow-hidden">
+        <div className={`flex ${collapsed && !isMobile ? "flex-col items-center gap-2.5" : "items-center justify-between"} pb-4 mb-4 border-b border-[var(--vc-border)]`}>
+          <div className={`flex items-center ${collapsed && !isMobile ? "justify-center" : "gap-3"} overflow-hidden`}>
             <div className="w-10 h-10 min-w-[40px] rounded-xl flex items-center justify-center bg-gradient-to-br from-[#C2542D] to-[#C99A45] shadow-lg shadow-[#C2542D]/20">
               <MonitorPlay className="w-5 h-5 text-white" />
             </div>
@@ -83,7 +83,7 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
                 <h1 className="font-extrabold text-base leading-tight gradient-text truncate">
                   VideoCrew
                 </h1>
-                <span className="text-[11px] text-[var(--vc-muted)] font-medium">Studio v2.0 Next.js</span>
+                <span className="text-[11px] text-[var(--vc-muted)] font-medium">Studio v2.0</span>
               </div>
             )}
           </div>
@@ -101,7 +101,9 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
               type="button"
               onClick={toggleCollapse}
               title={collapsed ? "Mở rộng Sidebar" : "Thu gọn Sidebar"}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition"
+              className={`p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition ${
+                collapsed && !isMobile ? "mt-1 w-8 h-8 flex items-center justify-center bg-white/[0.04]" : ""
+              }`}
             >
               {collapsed ? <PanelLeft className="w-4 h-4 text-amber-400" /> : <PanelLeftClose className="w-4 h-4 text-zinc-400" />}
             </button>
@@ -153,21 +155,17 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
           <div className={`flex items-center ${collapsed && !isMobile ? "justify-center" : "justify-between"} mb-1`}>
             <span className="text-[11px] font-semibold text-zinc-300 flex items-center gap-1.5">
               <Radio className="w-3 h-3 text-emerald-400 animate-ping" />
-              {(!collapsed || isMobile) && "DidicrewStudio"}
+              {(!collapsed || isMobile) && "Trạm Làm Phim"}
             </span>
-            {(!collapsed || isMobile) && <span className="vc-badge text-[9px] py-0 px-1.5">Online</span>}
+            {(!collapsed || isMobile) && <span className="vc-badge text-[9px] py-0 px-1.5 text-emerald-400 border-emerald-500/20 bg-emerald-500/10">Sẵn Sàng</span>}
           </div>
           {(!collapsed || isMobile) && (
             <div className="text-[10px] text-[var(--vc-muted)] space-y-0.5 border-t border-[var(--vc-border)] pt-1.5 mt-1">
-              <div className="flex justify-between">
-                <span>Người dùng:</span>
+              <div className="flex justify-between items-center">
+                <span>Nhà sáng tạo:</span>
                 <span className="font-semibold text-zinc-200 truncate ml-1">
-                  {currentUser?.username || "Didicrew07"}
+                  {currentUser?.username || "Studio Creator"}
                 </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Client IP:</span>
-                <span className="font-mono text-zinc-300">{currentUser?.client_ip || "127.0.0.1"}</span>
               </div>
             </div>
           )}

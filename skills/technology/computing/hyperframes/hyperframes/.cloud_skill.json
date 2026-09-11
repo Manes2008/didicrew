@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "41051059-7bf4-4d51-865e-b95dedf41291",
+  "current_package_id": "0c049c9b-c5a3-424e-a261-54dd480f1ff5",
+  "current_package_path": "technology/computing/hyperframes",
+  "last_pulled_at": "2026-09-11T07:31:30.870671Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:0ece8da6eea0b0797bbd1eec4c7d5ce8f3d4b40f98a91d53a0709b4bdc6ed116",
+  "local_skill_id": "hyperframes__imp_eb4539c6",
+  "manifest_hash": "10472405c263b714ed06ab12d25b3594a0ca02607e3a381bae8178b666496001",
+  "package_id_at_pull": "0c049c9b-c5a3-424e-a261-54dd480f1ff5",
+  "package_path_at_pull": "technology/computing/hyperframes",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}
