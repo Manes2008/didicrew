@@ -255,6 +255,7 @@ def generate_gemini_imagen_func(script_text: str, aspect_ratio: str = "9:16", mo
         file_path = f"generated_images/scene_{s_num}_{int(time.time())}.png"
 
         # 1. Thu goi Google Gemini GenAI SDK voi model da chon neu khong phai Flux truc tiep
+        target_gemini_model = model_name if model_name else "imagen-3.0-generate-002"
         if api_key and not model_name.startswith("flux"):
             try:
                 from google import genai
@@ -265,6 +266,7 @@ def generate_gemini_imagen_func(script_text: str, aspect_ratio: str = "9:16", mo
                     contents=f"Generate a high quality, photorealistic, cinematic image of: {clean_p}",
                     config=types.GenerateContentConfig(response_modalities=["IMAGE"])
                 )
+
                 if response.candidates and response.candidates[0].content.parts:
                     for part in response.candidates[0].content.parts:
                         if hasattr(part, "inline_data") and part.inline_data:
