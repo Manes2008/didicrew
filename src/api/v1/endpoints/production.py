@@ -106,3 +106,77 @@ async def export_project_bundle(
         media_type="application/zip",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
+
+@router.get("/projects/{project_id}/flow-payload", summary="Trich xuat du lieu kich ban chuan hoa cho Google Flow")
+async def get_project_flow_payload(
+    project_id: int,
+    db: AsyncSession = Depends(get_async_db)
+):
+    from fastapi import HTTPException
+    from src.tools.google_flow_sanitizer import parse_script_to_flow_payload
+    
+    repo = ProjectRepository(db)
+    project = await repo.get_project_with_stages(project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail=f"Khong tim thay du an #{project_id}")
+
+    script_text = ""
+    for stage in (project.stages or []):
+        if stage.stage_name in ["script", "storyboard"] and stage.result_content:
+            script_text = stage.result_content
+            break
+
+    if not script_text:
+        for stage in (project.stages or []):
+            if stage.result_content and len(stage.result_content) > len(script_text):
+                script_text = stage.result_content
+
+    payload = parse_script_to_flow_payload(script_text)
+    payload["project_id"] = project.id
+    payload["project_idea"] = project.idea
+    return payload
+
+@router.post("/projects/{project_id}/push-to-flow", summary="Tu dong day phan canh sang Google Flow qua Playwright")
+async def push_project_to_flow(
+    project_id: int,
+    flow_url: str = None,
+    auto_voice: bool = True,
+    db: AsyncSession = Depends(get_async_db)
+):
+    import os
+    from fastapi import HTTPException
+    from src.tools.google_flow_sanitizer import parse_script_to_flow_payload
+    from src.tools.google_flow_bridge import GoogleFlowBridge
+
+    repo = ProjectRepository(db)
+    project = await repo.get_project_with_stages(project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail=f"Khong tim thay du an #{project_id}")
+
+    script_text = ""
+    for stage in (project.stages or []):
+        if stage.stage_name in ["script", "storyboard"] and stage.result_content:
+            script_text = stage.result_content
+            break
+
+    if not script_text:
+        raise HTTPException(status_code=400, detail="Du an chua co kich ban de day sang Google Flow")
+
+    payload = parse_script_to_flow_payload(script_text)
+    target_url = flow_url or os.getenv("GOOGLE_FLOW_PROJECT_URL")
+    if not target_url:
+        raise HTTPException(status_code=400, detail="Vui long cung cap URL du an Google Flow hoac cau hinh trong trang Cau Hinh")
+
+    bridge = GoogleFlowBridge(project_url=target_url)
+    try:
+        res = await bridge.batch_sync(payload, auto_voice=auto_voice)
+        await bridge.close()
+        return {
+            "status": "success",
+            "message": f"Da day {res['success_prompts']} prompt video va {res['success_voiceovers']} doan thoai vao Google Flow",
+            "details": res
+        }
+    except Exception as e:
+        await bridge.close()
+        raise HTTPException(status_code=500, detail=f"Loi khi dong bo voi Google Flow: {str(e)}")
+

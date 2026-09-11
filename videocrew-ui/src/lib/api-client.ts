@@ -305,4 +305,30 @@ export const apiClient = {
     if (!res.ok) throw new Error("Khong the cap nhat RustDesk");
     return res.json();
   },
+
+  // Google Flow Automation Bridge
+  async getFlowPayload(projectId: number): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/production/projects/${projectId}/flow-payload`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "Khong the trich xuat du lieu Google Flow");
+    }
+    return res.json();
+  },
+
+  async pushToFlow(projectId: number, flowUrl?: string, autoVoice: boolean = true): Promise<any> {
+    const query = new URLSearchParams();
+    if (flowUrl) query.append("flow_url", flowUrl);
+    query.append("auto_voice", String(autoVoice));
+
+    const res = await fetch(`${API_BASE_URL}/production/projects/${projectId}/push-to-flow?${query.toString()}`, {
+      method: "POST",
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "Loi khi tu dong day sang Google Flow");
+    }
+    return res.json();
+  },
 };
+
