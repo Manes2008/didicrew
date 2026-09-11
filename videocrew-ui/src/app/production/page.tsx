@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useChannelStore } from "@/stores/useChannelStore";
 import { useProductionStore, STAGES_LIST } from "@/stores/useProductionStore";
+import { apiClient } from "@/lib/api-client";
 import { 
+
   Play, 
   Sparkles, 
   Terminal, 
@@ -94,7 +96,67 @@ export default function ProductionPage() {
   const [savedFeedback, setSavedFeedback] = useState(false);
   const [contentViewMode, setContentViewMode] = useState<"raw" | "preview">("preview");
 
+  // Google Flow Modal States
+  const [isFlowModalOpen, setIsFlowModalOpen] = useState(false);
+  const [flowPayload, setFlowPayload] = useState<any>(null);
+  const [flowTargetUrl, setFlowTargetUrl] = useState("");
+  const [flowAutoVoice, setFlowAutoVoice] = useState(true);
+  const [isFlowLoading, setIsFlowLoading] = useState(false);
+  const [isFlowPushing, setIsFlowPushing] = useState(false);
+  const [flowPushResult, setFlowPushResult] = useState<string | null>(null);
+
+  const handleOpenFlowModal = async () => {
+    const savedUrl = typeof window !== "undefined" ? localStorage.getItem("google_flow_project_url") || "" : "";
+    const savedVoice = typeof window !== "undefined" ? localStorage.getItem("google_flow_auto_voice") : null;
+    setFlowTargetUrl(savedUrl);
+    if (savedVoice !== null) setFlowAutoVoice(savedVoice === "true");
+    setFlowPushResult(null);
+    setIsFlowModalOpen(true);
+    setIsFlowLoading(true);
+
+    try {
+      if (projectId) {
+        const payload = await apiClient.getFlowPayload(projectId);
+        setFlowPayload(payload);
+      } else {
+        setFlowPayload({
+          suggested_voice: "Charon",
+          total_scenes: 0,
+          total_veo_blocks: 0,
+          veo_blocks: [],
+          scenes: []
+        });
+      }
+    } catch (err: any) {
+      console.warn("Khong the tai payload tu server:", err.message);
+    } finally {
+      setIsFlowLoading(false);
+    }
+  };
+
+  const handleExecutePushToFlow = async () => {
+    if (!flowTargetUrl.trim()) {
+      alert("Vui lòng nhập hoặc cấu hình URL dự án Google Flow trước khi đẩy!");
+      return;
+    }
+    setIsFlowPushing(true);
+    setFlowPushResult(null);
+    try {
+      if (!projectId) {
+        alert("Vui lòng lưu hoặc hoàn tất kịch bản của Dự Án trước khi đẩy sang Google Flow!");
+        return;
+      }
+      const res = await apiClient.pushToFlow(projectId, flowTargetUrl.trim(), flowAutoVoice);
+      setFlowPushResult(res.message || "Đã đẩy thành công vào Google Flow!");
+    } catch (err: any) {
+      setFlowPushResult("Lỗi: " + err.message);
+    } finally {
+      setIsFlowPushing(false);
+    }
+  };
+
   const handleSaveDefaultConfig = async () => {
+
     await saveEngineConfigToDatabase();
     setSavedFeedback(true);
     setTimeout(() => setSavedFeedback(false), 2500);
@@ -718,8 +780,20 @@ export default function ProductionPage() {
                           Raw
                         </button>
                       </div>
+
+                      {/* Nut Day Sang Google Flow */}
+                      <button
+                        type="button"
+                        onClick={handleOpenFlowModal}
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-cyan-600/30 to-blue-600/30 border border-cyan-500/40 text-[11px] font-bold text-cyan-300 hover:from-cyan-600/50 hover:to-blue-600/50 transition cursor-pointer shadow-sm ml-1"
+                        title="Tự động hóa bóc tách và đẩy Veo prompt & Voiceover vào dự án Google Flow"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                        Đẩy Sang Google Flow
+                      </button>
                     </div>
                   </div>
+
 
                   {/* RAW: Editable Textarea */}
                   {contentViewMode === "raw" ? (
@@ -1033,6 +1107,141 @@ export default function ProductionPage() {
           </div>
         </div>
       )}
+
+      {/* GOOGLE FLOW AUTOMATION MODAL */}
+      {isFlowModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in"
+          onClick={() => !isFlowPushing && setIsFlowModalOpen(false)}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-3xl w-full max-h-[88vh] flex flex-col glass-panel rounded-2xl border border-cyan-500/30 bg-zinc-950/95 p-5 sm:p-6 space-y-4 overflow-hidden shadow-2xl"
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-5 h-5 text-cyan-400" />
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    Google Flow Automation Bridge
+                    <span className="px-2 py-0.5 rounded-md bg-cyan-500/20 border border-cyan-500/30 text-[10px] font-bold text-cyan-300">
+                      Playwright Engine
+                    </span>
+                  </h3>
+                  <p className="text-[11px] text-zinc-400">
+                    Tự động hóa bóc tách kịch bản, làm sạch lời thoại và nạp Veo Prompts trực tiếp vào dự án Google Flow.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                disabled={isFlowPushing}
+                onClick={() => setIsFlowModalOpen(false)}
+                className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Target URL & Settings */}
+            <div className="space-y-3 bg-black/40 p-3.5 rounded-xl border border-[var(--vc-border)]">
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-zinc-300">URL Dự Án Google Flow Mục Tiêu:</label>
+                <input
+                  type="text"
+                  value={flowTargetUrl}
+                  onChange={(e) => setFlowTargetUrl(e.target.value)}
+                  placeholder="https://flow.google.com/project/6396d7ba-763b-4967-bf19-804cf1702ea8/tools"
+                  className="w-full px-3 py-2 rounded-lg bg-zinc-900/90 border border-zinc-700 text-xs font-mono text-cyan-200 placeholder:text-zinc-600 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
+                <label className="flex items-center gap-2 text-zinc-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={flowAutoVoice}
+                    onChange={(e) => setFlowAutoVoice(e.target.checked)}
+                    className="w-3.5 h-3.5 rounded bg-black/40 border-zinc-700 text-cyan-500"
+                  />
+                  <span>Tự động tạo Voiceover Studio (Giọng AI gợi ý: <strong className="text-cyan-400">{flowPayload?.suggested_voice || "Alnilam / Charon"}</strong>)</span>
+                </label>
+                <span className="text-[11px] text-zinc-500">
+                  {flowPayload?.veo_blocks?.length || flowPayload?.scenes?.length || 0} phân cảnh sẵn sàng
+                </span>
+              </div>
+            </div>
+
+            {/* Preview Payload List */}
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 max-h-[42vh]">
+              {isFlowLoading ? (
+                <div className="py-8 text-center text-xs text-zinc-400">Đang chuẩn hóa và làm sạch kịch bản...</div>
+              ) : flowPayload?.veo_blocks && flowPayload.veo_blocks.length > 0 ? (
+                flowPayload.veo_blocks.map((block: any, idx: number) => (
+                  <div key={idx} className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between font-bold text-zinc-300">
+                      <span className="text-cyan-400">Phân cảnh Veo #{block.block_num || idx + 1}</span>
+                      <span className="text-[10px] text-zinc-500 uppercase font-mono">Đã lọc sạch --ar</span>
+                    </div>
+                    <p className="text-[11px] font-mono text-zinc-300 bg-black/50 p-2 rounded-lg leading-relaxed line-clamp-3">
+                      {block.visual_prompt || "Không có visual prompt"}
+                    </p>
+                    {block.voiceover_clean && (
+                      <div className="text-[11px] text-zinc-400 bg-zinc-950/60 p-2 rounded-lg border border-zinc-800">
+                        <strong className="text-amber-400 font-semibold">Lời thoại sạch (Voiceover): </strong>
+                        {block.voiceover_clean}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="py-6 text-center text-xs text-zinc-400">
+                  Chưa có phân cảnh nào được phân tích. Bạn có thể mở dự án đã lưu kịch bản để đồng bộ.
+                </div>
+              )}
+            </div>
+
+            {/* Notification / Feedback */}
+            {flowPushResult && (
+              <div className={`p-3 rounded-xl text-xs font-semibold ${
+                flowPushResult.startsWith("Lỗi")
+                  ? "bg-rose-500/10 border border-rose-500/30 text-rose-300"
+                  : "bg-emerald-500/10 border border-emerald-500/30 text-emerald-300"
+              }`}>
+                {flowPushResult}
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between border-t border-zinc-800 pt-3">
+              <span className="text-[10px] text-zinc-500">
+                Sử dụng profile .chrome_profile để không ảnh hưởng Chrome cá nhân
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={isFlowPushing}
+                  onClick={() => setIsFlowModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition cursor-pointer"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="button"
+                  disabled={isFlowPushing}
+                  onClick={handleExecutePushToFlow}
+                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 transition shadow-lg shadow-cyan-600/20 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
+                  {isFlowPushing ? "Đang đẩy vào Google Flow..." : "Bắt Đầu Đẩy Vào Flow"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

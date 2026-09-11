@@ -23,12 +23,23 @@ export default function ConfigPage() {
   const [testingOpenai, setTestingOpenai] = useState(false);
   const [openaiTestResult, setOpenaiTestResult] = useState<{ is_valid: boolean; message: string } | null>(null);
 
+  // Google Flow States
+  const [flowProjectUrl, setFlowProjectUrl] = useState("");
+  const [flowAutoVoice, setFlowAutoVoice] = useState(true);
+
   useEffect(() => {
     if (config) {
       setProvider(config.provider || "Gemini");
       setModelName(config.model_name || "gemini-3.6-flash");
       setVideoEngine(config.video_engine || "hunyuan");
       setImageEngine(config.image_engine || "flux-realism");
+    }
+    // Nap Google Flow tu localStorage
+    if (typeof window !== "undefined") {
+      const savedUrl = localStorage.getItem("google_flow_project_url");
+      const savedVoice = localStorage.getItem("google_flow_auto_voice");
+      if (savedUrl) setFlowProjectUrl(savedUrl);
+      if (savedVoice !== null) setFlowAutoVoice(savedVoice === "true");
     }
   }, [config]);
 
@@ -70,6 +81,13 @@ export default function ConfigPage() {
         video_engine: videoEngine,
         image_engine: imageEngine,
       });
+
+      // Luu Google Flow config vao localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("google_flow_project_url", flowProjectUrl.trim());
+        localStorage.setItem("google_flow_auto_voice", String(flowAutoVoice));
+      }
+
       setOpenaiKey("");
       setGeminiKey("");
       setIsSaved(true);
@@ -80,6 +98,7 @@ export default function ConfigPage() {
       setSaving(false);
     }
   };
+
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300 max-w-4xl">
@@ -265,6 +284,42 @@ export default function ConfigPage() {
             </div>
           </div>
         </div>
+
+        {/* GOOGLE FLOW AUTOMATION CONFIG */}
+        <div className="glass-card p-5 sm:p-6 rounded-2xl space-y-4 border border-cyan-500/20 bg-gradient-to-b from-cyan-950/10 to-transparent">
+          <div className="flex items-center gap-2.5 pb-2 border-b border-[var(--vc-border)]">
+            <Sparkles className="w-5 h-5 text-cyan-400" />
+            <h2 className="text-base font-bold text-white tracking-wide">Tự Động Hóa Google Flow (Playwright Studio)</h2>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Kết nối trực tiếp kịch bản VideoCrew với dự án Google Flow của bạn để tự động đẩy Veo Video Prompts và Voiceover Studio mà không cần copy-paste thủ công.
+          </p>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">URL Dự Án Google Flow:</label>
+              <input
+                type="text"
+                value={flowProjectUrl}
+                onChange={(e) => setFlowProjectUrl(e.target.value)}
+                placeholder="https://flow.google.com/project/6396d7ba-763b-4967-bf19-804cf1702ea8/tools"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-[var(--vc-border)] text-sm font-mono text-cyan-200 placeholder:text-zinc-600 focus:outline-none focus:border-cyan-500"
+              />
+            </div>
+            <div className="flex items-center gap-3 pt-1">
+              <input
+                type="checkbox"
+                id="flowAutoVoice"
+                checked={flowAutoVoice}
+                onChange={(e) => setFlowAutoVoice(e.target.checked)}
+                className="w-4 h-4 rounded bg-black/40 border-[var(--vc-border)] text-cyan-500 focus:ring-0 cursor-pointer"
+              />
+              <label htmlFor="flowAutoVoice" className="text-xs font-medium text-zinc-300 cursor-pointer">
+                Tự động tạo Voiceover Studio song song với Prompt Veo (gợi ý giọng đọc phù hợp)
+              </label>
+            </div>
+          </div>
+        </div>
+
 
         <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
           {isSaved ? (

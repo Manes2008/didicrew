@@ -12,3 +12,8 @@ generated_videos/
 exports/
 .codegraph/
 .qodo/
+videocrew-ui/
+scratch/
+.chrome_profile/
+tests/
+
