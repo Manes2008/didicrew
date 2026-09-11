@@ -1,172 +1,226 @@
-# VideoCrew Studio — AI Video Production Platform
+# VideoCrew Studio — AI Creative Director & Media Automation Engine
 
-> **Nền tảng tự động hóa sản xuất nội dung video ngắn (TikTok/Reels) bằng trí tuệ nhân tạo (AI) — từ ý tưởng sơ khởi đến sản phẩm video hoàn chỉnh.**
+[![Python Version](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Next.js](https://img.shields.io/badge/Next.js-15.0-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![OpenSpace Ecosystem](https://img.shields.io/badge/OpenSpace-Cloud_v2-8A2BE2?style=for-the-badge)](https://github.com/HKUDS/OpenSpace)
+[![Playwright](https://img.shields.io/badge/Playwright-Automation-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev)
+[![Docker Ready](https://img.shields.io/badge/Docker-Container_Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
 
-Được xây dựng trên sự kết hợp mạnh mẽ giữa **CrewAI** + **OpenAI/Gemini** + **Streamlit**, hệ thống điều phối 5 AI Agent chuyên biệt chạy tuần tự theo mô hình Pipeline (kết quả của bước trước làm đầu vào cho bước sau). Toàn bộ dự án và dữ liệu media (ảnh, video dưới dạng nhị phân) được lưu trữ trực tiếp vào cơ sở dữ liệu **PostgreSQL**, đảm bảo an toàn dữ liệu và khả năng khôi phục/tiếp tục làm việc linh hoạt trên mọi môi trường.
+> **Tổ hợp Biên kịch, Đạo diễn & Tự động hóa Sản xuất Video Điện ảnh ứng dụng Trí tuệ Nhân tạo thế hệ mới.**
 
----
-
-## 🚀 Các Tính Năng Vượt Trội Mới Cập Nhật
-
-### 1. ⚙️ Tự Động Hóa Nạp Veo3 (Qua Mark-L Engine)
-* **Xuất dữ liệu một click**: Hệ thống tự động đóng gói toàn bộ kịch bản, âm thanh lồng tiếng, hình ảnh phân cảnh từ dự án và nạp trực tiếp vào phần mềm Veo3.
-* **Tự trị hoàn toàn (Self-contained)**: Module tự động hóa `computer_control` đã được tích hợp trực tiếp vào nhân dự án (không phụ thuộc repo ngoài).
-* **Quét cửa sổ thực tế (PowerShell)**: Trước khi kích hoạt phím tắt giả lập, hệ thống quét tiến trình Windows bằng PowerShell để định vị chính xác cửa sổ phần mềm `Veo3` đang mở, ngăn chặn tình trạng phím tắt "ảo" khi phần mềm đích chưa chạy.
-
-### 2. 🛡️ Cổng Xác Thực Auth Gate & Single-page App
-* **Bảo mật tuyệt đối**: Loại bỏ chế độ khách tự điền API Key tùy tiện, thay thế bằng luồng **Đăng nhập & Đăng ký** đồng bộ hóa qua DB Postgres. Mật khẩu người dùng được mã hóa bằng thuật toán PBKDF2 sha256.
-* **Đăng nhập Admin thông minh**: Quản trị viên chỉ cần nhập mã cấu hình `ADMIN_SECRET_KEY` (từ file `.env`) vào ô mật khẩu của form đăng nhập chuẩn.
-* **Che dấu mã khoá Admin**: Tự động gán nhãn bảo mật dạng `Didicrew01`, `Didicrew02`... cho các thiết bị Admin và che dấu hoàn toàn chuỗi key thô trong DB và trên giao diện.
-* **Giao diện không sidebar trống**: Hệ thống chuyển đổi hoàn chỉnh sang mô hình Single-page App (SPA), ẩn hoàn toàn thanh sidebar màu xám bên trái khi chưa đăng nhập, đem lại trải nghiệm sang trọng và tập trung.
-
-### 3. 💾 Lưu Trữ Nhị Phân DB (Postgres LargeBinary)
-* **Không mất dữ liệu vật lý**: Lưu trữ trực tiếp bytes dữ liệu của ảnh và video vào trường `file_data` trong bảng `MediaFile`.
-* **Sẵn sàng cho Docker/Cloud**: Hỗ trợ deploy Docker mượt mà, client từ xa xem được ảnh/video stream trực tiếp từ database mà không gặp lỗi thiếu file vật lý local trên máy chủ.
-* **Tự động Fallback**: Giao diện Streamlit ưu tiên stream binary từ DB, tự động fallback về file local nếu phát hiện dữ liệu cũ chưa migrate.
-
-### 4. 🧠 Đa Dạng Hóa Engine Vẽ Ảnh & Sinh Video Local
-* **Stable Diffusion v1.5 Local**: Hỗ trợ sinh ảnh trực tiếp trên thiết bị (CPU/GPU) của người dùng thay vì phụ thuộc hoàn toàn vào OpenAI DALL-E Cloud API.
-* **Tránh tràn VRAM (CUDA OOM)**: Tối ưu hóa bộ nhớ khi dùng GPU (VAE float16, bật chế độ `expandable_segments` trong PyTorch).
+VideoCrew Studio không đơn thuần là một công cụ sinh video tự động; hệ thống đóng vai trò như một **Tổng đạo diễn AI (The AI Showrunner)**. Dự án giải quyết triệt để bài toán lớn nhất của việc sáng tạo video AI: **Thổi linh hồn nghệ thuật kể chuyện (Storytelling), ứng dụng tâm lý học giữ chân người xem (Retention Hooks) và tự động hóa kết nối 1-click vào Google Flow (Veo & Voiceover Studio)**.
 
 ---
 
-## 🛠️ Pipeline 5 Stage Tự Động
+## 1. Dinh Vi & Su Menh Chuyen Doi
 
-| Bước | Tên Bước | AI Agent | Vai Trò & Hành Động |
-| :---: | :--- | :--- | :--- |
-| **1** | **Viết Kịch Bản** | Senior Script Writer | Nhận ý tưởng gốc → Tạo kịch bản TikTok/Reels 25-30s đầy đủ (tiêu đề, lời thoại, timing). |
-| **2** | **Mô Tả Hình Ảnh** | Visual Prompt Engineer | Phân tích kịch bản → Biên soạn mô tả visual chi tiết từng phân cảnh cho AI vẽ. |
-| **3** | **Tạo Hình Ảnh** | Image Generation | Bypass Agent chạy trực tiếp: Gọi API DALL-E 3 hoặc chạy Stable Diffusion v1.5 Local (CPU/GPU) → Lưu DB binary. |
-| **4** | **Tạo Giọng Đọc** | Voiceover Specialist | Trích xuất lời thoại → Chuyển văn bản thành giọng đọc truyền cảm (TTS). |
-| **5** | **Xuất Video** | Video Editor | Ghép nhạc nền, âm thanh lồng tiếng và chuỗi phân cảnh ảnh → Gọi Pollo AI (Minimax Hailuo 02) / Wan 2.1 Local để dựng video hoàn chỉnh. |
+Hầu hết các công cụ AI hiện nay chỉ tập trung vào việc render hình ảnh hoặc video thô, dẫn đến các kịch bản vô hồn, sáo rỗng và tỷ lệ thoát video cao sau 3 giây đầu. VideoCrew Studio định vị là **Bộ não Sáng tạo Cốt lõi**:
+
+* **Đạo diễn Điện ảnh & Tâm lý Khán giả**: Áp dụng các cấu trúc kịch bản đỉnh cao (Mô thức Hook nghịch lý, tương phản số liệu, vòng lặp tò mò), đo lường chính xác nhịp thở (~3.0 - 3.3 từ/giây) tương thích với âm thanh đọc TTS.
+* **Tích hợp Tri thức OpenSpace Cloud**: Nạp động 16 kỹ năng chuyên gia từ nền tảng OpenSpace của HKUDS, loại bỏ 100% văn phong sáo ngữ máy móc.
+* **Cộng sinh với Big Tech**: Không cố gắng tự render video nặng nề trên máy cá nhân; VideoCrew tạo ra bản thiết kế phân cảnh (Director Blueprint) chuẩn xác và dùng Playwright tự động đẩy trực tiếp vào các cỗ máy GPU của Google Flow (Veo & Imagen 3).
 
 ---
 
-## 📁 Cấu Trúc Mã Nguồn Dự Án
+## 2. Bang So Sanh Nang Luc He Thong
+
+| Tieu Chi Danh Gia | Cong Cu AI Tong Quat / Flow Thuan Tuy | VideoCrew Studio Pipeline |
+| :--- | :--- | :--- |
+| **Tam ly hoc Hook 3 giay** | Khong co; mo dau cham rai, chung chung | Tu dong ap dung Mo thuc A/B chong drop-off |
+| **Nhip do loi thoai** | Thoai tho cung, de tran chu khi long tieng | Tinh toan chinh xac ~3.0 tu/giay chuan video ngan |
+| **Visual Prompt cho Video** | Mo ta so sai, de bi loi do tren Veo/Flow | Chuan hoa thuoc tinh camera 35mm, anh sang, goc quay |
+| **Kiem dinh chat luong** | Phai tu doc va danh gia bang tay | Agent Content Quality Auditor tu cham diem rubric |
+| **Thao tac voi Google Flow** | Copy-paste tung cau, chon giong thu cong | Playwright Automation Bridge tu dong hoa 1-click |
+| **Giao dien Van hanh** | Phuc tap, mang tinh chat lap trinh vien | Next.js 15 Media Studio hien dai, truc quan |
+
+---
+
+## 3. Kien Truc Pipeline 8 Cong Doan
+
+Hệ thống điều phối luồng sản xuất tuần tự qua 8 công đoạn chuyên môn hóa:
+
+```
+[ Ý TƯỞNG SƠ KHỞI ]
+        │
+        ▼
+[ Stage 1: Phân Tích & Chiến Lược ] ──► (OpenSpace: content-strategy & gap-analysis)
+        │
+        ▼
+[ Stage 2: Kịch Bản & Hook 3s ] ─────► (OpenSpace: cinematic-script-writer & viral-video)
+        │
+        ▼
+[ Stage 3: Thẩm Định Chất Lượng ] ───► (OpenSpace: content-quality-auditor)
+        │
+        ▼
+[ Stage 4: Storyboard 6 Cột ] ───────► (OpenSpace: storyboard & visual-vocabulary)
+        │
+        ▼
+[ Stage 5: Chỉ Đạo Nghệ Thuật ] ─────► (OpenSpace: visual-prompt-engine & style-cards)
+        │
+        ▼
+[ Stage 6: Lọc Sạch Dữ Liệu ] ───────► (Data Sanitizer: cat gon <120 ky tu, loc sach --ar)
+        │
+        ▼
+[ Stage 7: Automation Bridge ] ──────► (Playwright Engine: ket noi Google Flow)
+        │
+        ▼
+[ BẢN THIẾT KẾ HOÀN CHỈNH / VIDEO CLIP VEO ]
+```
+
+---
+
+## 4. Danh Muc 16 Ky Nang Chuyen Sau Tu OpenSpace
+
+Hệ thống nạp trực tiếp tri thức từ thư mục `skills/` đã được đồng bộ hóa từ OpenSpace Cloud:
+
+### Nhom 1: Bien Kich & Chien Luoc Noi Dung
+- `cinematic-script-writer`: Viết kịch bản chuẩn điện ảnh, tối ưu nhịp thở và cấu trúc Hook 3s.
+- `storyboard`: Phân chia bảng phân cảnh 6 cột chi tiết (Visual, Voiceover, Text, SFX/BGM).
+- `content-quality-auditor`: Đánh giá, chấm điểm và tự động chỉnh sửa kịch bản theo rubric khắt khe.
+- `viral-video-analysis`: Phân tích xu hướng và tích hợp các yếu tố kích hoạt tương tác (CTA Trigger).
+- `content-strategy`: Định hình thông điệp cốt lõi và chân dung khán giả mục tiêu.
+- `content-gap-analysis`: Phát hiện khoảng trống thông tin để tạo sự khác biệt cạnh tranh.
+- `content-refresher`: Tái cấu trúc và nâng cấp các chủ đề cũ thành góc nhìn mới.
+
+### Nhom 2: Thi Giac & Chi Dao Nghe Thuat
+- `visual-prompt-engine`: Chuyển hóa kịch bản thành câu lệnh prompt điện ảnh chuyên nghiệp.
+- `visual-concept`: Xây dựng bảng moodboard và phong cách thị giác đồng nhất.
+- `best-image-generation`: Tối ưu hóa chất lượng hình ảnh qua các tham số ánh sáng và chất liệu.
+- `blip-2-vision-language`: Phân tích và kiểm soát tính nhất quán của nhân vật qua các khung hình.
+
+### Nhom 3: Am Thanh & Long Tieng
+- `elevenlabs-tts`: Tối ưu hóa tham số biểu cảm giọng đọc và ngắt nghỉ tự nhiên.
+- `audio-conductor`: Điều phối âm lượng, nhạc nền (BGM) và hiệu ứng âm thanh (SFX).
+- `audiocraft-audio-generation`: Tạo âm thanh nền tùy biến theo nhịp điệu video.
+- `audio-processing`: Hậu kỳ, lọc tạp âm và cân bằng tần số âm thanh.
+
+### Nhom 4: Video & Chuyen Dong
+- `eachlabs-video-generation`: Tối ưu câu lệnh chuyển động camera cho AI Video Generators.
+- `hyperframes`: Kiểm soát chuyển cảnh mượt mà giữa các phân đoạn video.
+
+---
+
+## 5. Co Che Tu Dong Hoa Google Flow (Playwright Bridge)
+
+VideoCrew Studio cung cấp cầu nối tự động hóa độc quyền với Google Flow:
+
+1. **Bộ lọc Dữ liệu Thông minh (Data Sanitizer)**:
+   - Tự động bóc tách các nhãn vai đọc `[NARRATOR]:`, `[DIALOGUE]:` và số lượng từ `*(11 từ)*` để tránh việc AI đọc nhầm thành tiếng.
+   - Tự động kiểm tra và chia nhỏ câu thoại không vượt quá 120 ký tự (giới hạn của Voiceover Studio).
+   - Tự động loại bỏ các cờ lệnh không tương thích như `--ar 9:16` trong Prompt Veo.
+   - Tự động ánh xạ giọng đọc thích hợp: **Alnilam** (trầm hùng lịch sử), **Charon** (công nghệ, đĩnh đạc), **Achird** (thân thiện, đời sống).
+
+2. **Dedicated Profile Trình duyệt (`.chrome_profile`)**:
+   - Sử dụng một profile Chrome riêng biệt, tránh hoàn toàn lỗi chiếm dụng file khi bạn đang mở Chrome cá nhân.
+   - Đăng nhập tài khoản Google Flow một lần duy nhất; bot tự động duy trì phiên làm việc cho các lần sản xuất tiếp theo.
+
+3. **Thao tác 1-Click trên Giao diện**:
+   - Nhấp nút **"Đẩy Sang Google Flow"** ngay trên trang Sản Xuất để mở modal kiểm tra phân cảnh.
+   - Bấm **"Bắt Đầu Đẩy Vào Flow"**, hệ thống sẽ tự mở dự án, nạp toàn bộ Veo prompts và tạo voiceover song song.
+
+---
+
+## 6. Huong Dan Cai Dat & Van Hanh
+
+### Yeu Cau He Thong
+- **Hệ điều hành**: Windows 10/11, macOS, hoặc Linux
+- **Python**: Phiên bản 3.12 trở lên (Bắt buộc cho OpenSpace và Playwright)
+- **Node.js**: Phiên bản 18+ (Dành cho giao diện Next.js 15)
+- **Cơ sở dữ liệu**: PostgreSQL 16+
+
+### Cach 1: Cai Dat & Chay Cuc Bo (Local Development)
+
+1. **Clone repository và thiết lập môi trường ảo**:
+```bash
+git clone https://github.com/Manes2008/didicrew.git
+cd didicrew
+python -m venv venv
+venv\Scripts\activate  # Tren Linux/macOS: source venv/bin/activate
+```
+
+2. **Cài đặt các gói phụ thuộc Backend**:
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python -m playwright install --with-deps chromium
+```
+
+3. **Cấu hình tệp môi trường (`.env`)**:
+```env
+OPENAI_API_KEY=your_openai_key
+GEMINI_API_KEY=your_gemini_key
+DATABASE_URL=postgresql+psycopg2://postgres:123456@localhost:5432/didicrew
+OPENSPACE_API_KEY=your_openspace_key
+GOOGLE_FLOW_PROJECT_URL=https://flow.google.com/project/your-project-id/tools
+```
+
+4. **Khởi chạy Backend (FastAPI)**:
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+5. **Khởi chạy Giao diện Frontend (videocrew-ui)**:
+```bash
+cd videocrew-ui
+npm install
+npm run dev
+```
+Truy cập giao diện tại: `http://localhost:3000`
+
+---
+
+### Cach 2: Trien Khai Tron Goi Bang Docker (Docker Deployment)
+
+Hệ thống đã được đóng gói sẵn sàng cho Docker với môi trường chuẩn Python 3.12:
+
+```bash
+# Khởi động toàn bộ Database và Backend qua Docker Compose
+docker compose up -d --build
+
+# Hoặc sử dụng script Redeploy an toàn (tự động giữ nguyên Database)
+scripts\redeploy.bat
+```
+
+> [!TIP]
+> Để mở trình duyệt Chrome độc lập cho Google Flow và đăng nhập sẵn tài khoản, bạn chỉ cần chạy tệp:
+> `scripts\start_flow_chrome.bat`
+
+---
+
+## 7. Cau Truc Thu Muc Du An
 
 ```
 videocrew/
 ├── config/
-│   ├── agents.yaml          # Định nghĩa vai trò, mục tiêu, lịch sử cho AI Agent
-│   └── tasks.yaml           # Định nghĩa các task và đầu ra kỳ vọng cho từng bước
+│   ├── agents.yaml             # Thiết lập vai trò & mục tiêu của các AI Agent
+│   └── tasks.yaml              # Định nghĩa quy chuẩn nhiệm vụ và kết quả đầu ra
+├── skills/                     # Kho 16 kỹ năng Studio gốc từ OpenSpace Cloud
+│   ├── mass-media/             # Chiến lược kịch bản, SEO, phân tích viral
+│   └── technology/             # Đạo diễn thị giác, prompt Veo, TTS, xử lý âm thanh
 ├── src/
-│   ├── agents/
-│   │   └── factory.py       # Khởi tạo CrewAI Agent động từ file YAML cấu hình
-│   ├── tools/
-│   │   ├── image_tool.py    # Sinh ảnh: OpenAI DALL-E hoặc Stable Diffusion v1.5 Local
-│   │   ├── video_tool.py    # Sinh video: Pollo AI (Minimax), Wan 2.1 Local, ghép nhạc
-│   │   └── computer_control.py # Tự động hóa Mark-L giả lập phím chuột xuất Veo3
+│   ├── api/v1/endpoints/       # Các API endpoints FastAPI (Production, Config, Channels)
 │   ├── core/
-│   │   ├── engine.py        # WorkflowEngine điều phối quy trình 5 bước chạy tuần tự
-│   │   ├── llm_provider.py  # Khởi tạo mô hình LLM linh hoạt (OpenAI / Google Gemini)
-│   │   └── models.py        # Định nghĩa các ORM model SQLAlchemy (Postgres)
-│   └── ui/
-│       ├── styles.py        # Inject CSS tùy biến làm đẹp và responsive giao diện
-│       ├── auth.py          # Xử lý Cổng đăng nhập & đăng ký kết nối DB
-│       ├── sidebar.py       # Sidebar điều hướng tinh giản, hiển thị tài khoản gọn gàng
-│       └── pages/
-│           ├── production.py # Giao diện quy trình sản xuất video 5 bước chính
-│           ├── channels.py  # Quản lý kênh nội dung & chỉnh sửa vai trò AI
-│           ├── config.py    # Quản lý cấu hình API Keys, AI Models, Render Engines
-│           └── ip_manager.py # Quản lý phê duyệt IP thiết bị & tài khoản của Admin
-├── exports/                 # Nơi xuất dữ liệu phân cảnh tạm thời để nạp vào Veo3
-├── generated_images/        # Thư mục lưu ảnh phân cảnh local
-├── generated_videos/        # Thư mục lưu video thành phẩm local
-├── migrations/              # Lịch sử các file migration của Alembic
-├── .env                     # File chứa API Keys bảo mật & DATABASE_URL
-├── alembic.ini              # Cấu hình công cụ quản lý DB migration
-├── app.py                   # Điểm khởi chạy chính của Streamlit App (Routing, SPA)
-├── config.py                # Xử lý môi trường và cấu hình
-├── requirements.txt         # Danh sách thư viện phụ thuộc của dự án
-└── run.bat                  # Script khởi động nhanh một chạm cho Windows
+│   │   ├── engine.py           # WorkflowEngine điều phối tiêm kỹ năng OpenSpace động
+│   │   ├── llm_provider.py     # Hỗ trợ Gemini 3.8 Flash, OpenAI o3-mini
+│   │   └── skill_loader.py     # Bộ nạp kỹ năng đệ quy kèm in-memory cache
+│   └── tools/
+│       ├── google_flow_sanitizer.py # Bộ lọc làm sạch dữ liệu thoại và Veo prompt
+│       ├── google_flow_bridge.py    # Trình điều khiển tự động hóa Playwright
+│       └── image_tool.py            # Công cụ sinh ảnh dự phòng (Flux Realism, Gemini)
+├── videocrew-ui/               # Giao diện Studio hiện đại (Next.js 15, TailwindCSS)
+├── scripts/
+│   ├── redeploy.bat            # Script build lại Docker an toàn dữ liệu
+│   ├── start_flow_chrome.bat   # Mở Chrome Dedicated Profile cho Google Flow
+│   └── sync_openspace.py       # Script đồng bộ kỹ năng từ OpenSpace Cloud
+├── Dockerfile                  # Cấu hình container Python 3.12 + Playwright
+├── docker-compose.yml          # Điều phối dịch vụ App và PostgreSQL
+└── requirements.txt            # Danh sách gói phụ thuộc chuẩn Python 3.12+
 ```
 
 ---
 
-## 💾 Sơ Đồ Cơ Sở Dữ Liệu (Postgres ERD)
+## 8. Ban Quyen & Giay Phep
 
-```
-channels (Kênh nội dung)
-├── id (PK)
-├── name (UNIQUE, NOT NULL)
-├── description
-├── goal (NOT NULL)
-│
-├──< channel_stage_configs (Cấu hình vai trò AI từng kênh)
-│    ├── id (PK)
-│    ├── channel_id (FK)
-│    ├── stage_name            # script | visual | image | voice | video
-│    ├── role / goal / backstory
-│    └── markdown_template
-│
-└──< projects (Dự án sản xuất)
-     ├── id (PK)
-     ├── channel_id (FK)
-     ├── idea (NOT NULL)
-     ├── provider / model_name
-     ├── current_stage
-     ├── status                # pending | running | completed
-     │
-     └──< project_stages (Các bước thực thi)
-          ├── id (PK)
-          ├── project_id (FK)
-          ├── stage_name
-          ├── result_content (TEXT)
-          ├── media_path        # Đường dẫn file local
-          ├── status            # pending | completed | failed
-          │
-          └──< media_files (Dữ liệu đa phương tiện nhị phân)
-               ├── id (PK)
-               ├── project_stage_id (FK)
-               ├── file_name / file_path
-               ├── file_data (LargeBinary - Lưu trữ bytes nhị phân trực tiếp)
-               ├── mime_type    # image/png | video/mp4
-               ├── file_size (BIGINT)
-               └── created_at
-```
-
----
-
-## ⚡ Hướng Dẫn Cài Đặt & Khởi Chạy
-
-### Yêu Cầu Hệ Thống
-* Python 3.10+
-* PostgreSQL Database
-* Cài đặt phần mềm FFmpeg (nếu chạy local để ghép nhạc và video)
-
-### Cài Đặt Các Bước
-1. **Clone dự án về máy:**
-   ```bash
-   git clone https://github.com/Manes2008/didicrew.git
-   cd didicrew
-   ```
-2. **Khởi tạo môi trường ảo:**
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-3. **Cấu hình môi trường (`.env`):**
-   Tạo file `.env` tại thư mục gốc và điền các khóa cần thiết:
-   ```env
-   OPENAI_API_KEY=sk-proj-...
-   GEMINI_API_KEY=AIzaSy...
-   POLLO_API_KEY=pollo_...
-   DATABASE_URL=postgresql+psycopg2://postgres:123456@localhost:5432/didicrew
-   ADMIN_SECRET_KEY=xR4q90gPLDGvU-VHra08adaK1BIqroR9qQ7l8boDNGw
-   ```
-
-### Khởi Chạy
-* **Windows (Chạy nhanh một chạm):**
-  ```powershell
-  .\run.bat
-  ```
-* **Chạy thủ công bằng Streamlit:**
-  ```bash
-  streamlit run app.py
-  ```
-
----
-
-## 🤝 Bản Quyền (License)
-Dự án được phân phối dưới giấy phép **MIT License**. Bản quyền thuộc về © 2026 Manes2008/didicrew.
+Dự án được phát triển và phát hành dưới giấy phép **MIT License**.
+Bản quyền thuộc về **(c) 2026 Manes2008/didicrew**.
