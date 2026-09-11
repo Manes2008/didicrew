@@ -22,6 +22,9 @@ openai>=1.50.0
 google-genai>=1.0.0
 google-generativeai>=0.8.0
 langchain-google-genai>=2.0.0
+openspace @ git+https://github.com/HKUDS/OpenSpace.git; python_version >= "3.12"
+
+
 
 # Image & Video Processing
 Pillow>=10.4.0

@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "7e5f2e58-025e-4627-9aae-f7980d5b128f",
+  "current_package_id": "8cdc0b95-da4c-51b5-b0b5-3a67dea76bd3",
+  "current_package_path": "technology/computing/machine learning/voice ai",
+  "last_pulled_at": "2026-09-11T07:31:28.475636Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:388cd4ff5d20e64500a4be704069d7d7e4bd79ff01869d2f8fae5cc982562fc8",
+  "local_skill_id": "audio-processing__imp_d59c9d7b",
+  "manifest_hash": "a93c8a5d61a1049a5f1160df0b0c431557422f95f5a04aeb28f8fc90a6e0fead",
+  "package_id_at_pull": "8cdc0b95-da4c-51b5-b0b5-3a67dea76bd3",
+  "package_path_at_pull": "technology/computing/machine learning/voice ai",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}

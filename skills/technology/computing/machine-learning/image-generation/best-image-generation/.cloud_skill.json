@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "eb5ae2ad-9525-46ed-a58d-3f0e18ec2423",
+  "current_package_id": "6515b2da-1d51-5609-9fc6-430c23c2003d",
+  "current_package_path": "technology/computing/machine learning/image generation",
+  "last_pulled_at": "2026-09-11T07:31:18.973539Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:f262408bffee73fdb1e583c3b58000472008e6355262c6cc4f887e40096c1d8a",
+  "local_skill_id": "best-image-generation__imp_6cb9ae4b",
+  "manifest_hash": "546e2da5dc4a16c2dc668a1adf7246d87160839d2f825ab1d4fee0a535e021c7",
+  "package_id_at_pull": "6515b2da-1d51-5609-9fc6-430c23c2003d",
+  "package_path_at_pull": "technology/computing/machine learning/image generation",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}

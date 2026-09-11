@@ -7,7 +7,9 @@ echo  [VideoCrew Ngrok] Khoi dong Ngrok Tunnel cho Backend FastAPI (8000)
 echo =====================================================================
 
 set "NGROK_BIN=ngrok"
-if exist "%~dp0..\ngrok.exe" (
+if exist "D:\Dev\Projects\Server\ngrok.exe" (
+    set "NGROK_BIN=D:\Dev\Projects\Server\ngrok.exe"
+) else if exist "%~dp0..\ngrok.exe" (
     set "NGROK_BIN=%~dp0..\ngrok.exe"
 ) else if exist "%~dp0ngrok.exe" (
     set "NGROK_BIN=%~dp0ngrok.exe"

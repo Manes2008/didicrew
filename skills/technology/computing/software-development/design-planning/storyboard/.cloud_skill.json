@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "ce9754e6-7c77-462e-8fdf-dd4ee3f12788",
+  "current_package_id": "48d66b90-c3ac-54e8-b7b5-6c9127acf564",
+  "current_package_path": "technology/computing/software development/design planning",
+  "last_pulled_at": "2026-09-11T07:31:11.274221Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:796653818bf6fc9d32e440cececf8abc18cd4da4711d1ec493849863341d5767",
+  "local_skill_id": "storyboard__imp_886ce491",
+  "manifest_hash": "7c06c315ebae4e16c20519ed4445bcf6b93d64c21ed488ebfc2f6196fe380f28",
+  "package_id_at_pull": "48d66b90-c3ac-54e8-b7b5-6c9127acf564",
+  "package_path_at_pull": "technology/computing/software development/design planning",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}

@@ -23,12 +23,12 @@ def get_llm(provider: str, model_name: str, api_key: str = None, temperature: fl
         if key:
             os.environ["GEMINI_API_KEY"] = key
             
-        clean_model = model_name if "gemini" in m_lower else "gemini-3.6-flash"
+        clean_model = model_name if "gemini" in m_lower else "gemini-3.8-flash"
         clean_model = clean_model.replace("gemini/", "")
         
         # Chuyen cac model cu / deprecated sang phien ban moi nhat cua Google
-        if clean_model in ("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"):
-            clean_model = "gemini-3.6-flash"
+        if clean_model in ("gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"):
+            clean_model = "gemini-3.8-flash"
         elif clean_model in ("gemini-1.5-pro", "gemini-2.0-pro"):
             clean_model = "gemini-3.1-pro-preview"
             
@@ -44,7 +44,7 @@ def get_llm(provider: str, model_name: str, api_key: str = None, temperature: fl
         if key:
             os.environ["OPENAI_API_KEY"] = key
             
-        clean_model = model_name if ("gpt" in m_lower or "o1" in m_lower) else "gpt-4o-mini"
+        clean_model = model_name if ("gpt" in m_lower or "o1" in m_lower or "o3" in m_lower) else "gpt-4o-mini"
         clean_model = clean_model.replace("openai/", "")
         model_str = f"openai/{clean_model}"
         

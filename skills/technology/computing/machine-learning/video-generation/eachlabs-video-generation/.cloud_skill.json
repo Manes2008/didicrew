@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "799ac745-cef5-4d18-84ad-011c29c0ff8f",
+  "current_package_id": "be4ec4bc-848f-5cfa-9ae8-f641fe91345b",
+  "current_package_path": "technology/computing/machine learning/video generation",
+  "last_pulled_at": "2026-09-11T07:31:29.638132Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:bd35b267650ab1cf26ea727d1cdc8a91f2e69c16330e9218d4ddb6542efedab4",
+  "local_skill_id": "eachlabs-video-generation__imp_e2c0dae9",
+  "manifest_hash": "7d11513809c6db2ecd46011f6231316c3ab347a10a146ee18faf782ff95f2522",
+  "package_id_at_pull": "be4ec4bc-848f-5cfa-9ae8-f641fe91345b",
+  "package_path_at_pull": "technology/computing/machine learning/video generation",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}

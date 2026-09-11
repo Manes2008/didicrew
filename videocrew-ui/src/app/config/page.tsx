@@ -198,7 +198,7 @@ export default function ConfigPage() {
                   const p = e.target.value;
                   setProvider(p);
                   if (p === "Gemini") {
-                    setModelName("gemini-3.6-flash");
+                    setModelName("gemini-3.8-flash");
                     setImageEngine("flux-realism");
                   } else {
                     setModelName("gpt-4o-mini");
@@ -221,13 +221,14 @@ export default function ConfigPage() {
               >
                 {provider === "Gemini" ? (
                   <>
-                    <option value="gemini-3.6-flash">Gemini 3.6 Flash (Khuyên dùng)</option>
-                    <option value="gemini-3.7-flash">Gemini 3.7 Flash (Mới nhất)</option>
-                    <option value="gemini-flash-latest">Gemini Flash Latest</option>
+                    <option value="gemini-3.8-flash">Gemini 3.8 Flash (Mới nhất & Khuyên dùng)</option>
+                    <option value="gemini-3.6-flash">Gemini 3.6 Flash (Ổn định)</option>
+                    <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
                     <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
                   </>
                 ) : (
                   <>
+                    <option value="o3-mini">OpenAI o3-mini (Suy luận mới nhất)</option>
                     <option value="gpt-4o-mini">GPT-4o Mini (Tối ưu chi phí)</option>
                     <option value="gpt-4o">GPT-4o (Chất lượng cao)</option>
                   </>

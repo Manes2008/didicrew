@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "06a24b49-d1ba-4958-9c5a-7b5a89a14644",
+  "current_package_id": "9fe02f34-0a19-577d-8603-31c359822bd3",
+  "current_package_path": "technology/computing/computer vision/vision language models",
+  "last_pulled_at": "2026-09-11T07:31:21.655134Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:16dcc8f2980ed2828f0374dcf60bf5714393182ffa54b022c0f9512afb18878f",
+  "local_skill_id": "blip-2-vision-language__imp_fb5624e1",
+  "manifest_hash": "26de1a627bbecfd456e5a827a2c36948c10d9694be5e435a7b324e274cf2b8a7",
+  "package_id_at_pull": "9fe02f34-0a19-577d-8603-31c359822bd3",
+  "package_path_at_pull": "technology/computing/computer vision/vision language models",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}

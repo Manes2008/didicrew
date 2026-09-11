@@ -1,0 +1,17 @@
+{
+  "api_version": "v2",
+  "cloud_skill_id": "4739694f-84f8-4dd3-b655-5033251352e1",
+  "current_package_id": "b209f00d-b91f-54f3-8b90-039be023b6f7",
+  "current_package_path": "mass media/marketing/search engine optimization",
+  "last_pulled_at": "2026-09-11T07:26:03.347370Z",
+  "last_pushed_at": null,
+  "local_content_hash": "sha256:6708a971c2b55a592f4932ff0d619ccdb7a413efdfc3f4a5720eb9ed3bdf5c89",
+  "local_skill_id": "content-gap-analysis__imp_0cc570d2",
+  "manifest_hash": "6c61fdc4ce4c5316f13c06bb2eafa7a953fdbc808441b294fc0d8507bbf27026",
+  "package_id_at_pull": "b209f00d-b91f-54f3-8b90-039be023b6f7",
+  "package_path_at_pull": "mass media/marketing/search engine optimization",
+  "package_snapshot_version_at_pull": null,
+  "schema_version": 1,
+  "source_cloud_skill_id": null,
+  "sync_state": "clean"
+}
