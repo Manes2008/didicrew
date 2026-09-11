@@ -1,7 +1,7 @@
 # MIT License
 # Copyright (c) 2026 Manes2008/didicrew
 
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -29,8 +29,10 @@ RUN mkdir -p /usr/local/lib/docker/cli-plugins /usr/lib/docker/cli-plugins /usr/
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m playwright install --with-deps chromium
 
 COPY . .
+
 
 EXPOSE 8000
 
