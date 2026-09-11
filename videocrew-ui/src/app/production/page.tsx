@@ -104,6 +104,7 @@ export default function ProductionPage() {
   const [isFlowLoading, setIsFlowLoading] = useState(false);
   const [isFlowPushing, setIsFlowPushing] = useState(false);
   const [flowPushResult, setFlowPushResult] = useState<string | null>(null);
+  const [showExtensionGuide, setShowExtensionGuide] = useState(false);
 
   const handleOpenFlowModal = async () => {
     const savedUrl = typeof window !== "undefined" ? localStorage.getItem("google_flow_project_url") || "" : "";
@@ -131,6 +132,44 @@ export default function ProductionPage() {
       console.warn("Khong the tai payload tu server:", err.message);
     } finally {
       setIsFlowLoading(false);
+    }
+  };
+
+  const handlePushViaExtension = () => {
+    const cleanUrl = flowTargetUrl.trim();
+    if (!cleanUrl) {
+      alert("Vui lòng nhập URL dự án Google Flow!");
+      return;
+    }
+    if (!cleanUrl.startsWith("https://flow.google.com/project/")) {
+      alert("Định dạng URL Google Flow không hợp lệ! Phải bắt đầu bằng: https://flow.google.com/project/...");
+      return;
+    }
+    if (!flowPayload || (!flowPayload.veo_blocks?.length && !flowPayload.scenes?.length)) {
+      alert("Chưa có dữ liệu phân cảnh kịch bản để nạp!");
+      return;
+    }
+
+    if (typeof window !== "undefined") {
+      window.postMessage(
+        {
+          type: "VIDEOCREW_PUSH_TO_FLOW",
+          payload: flowPayload,
+          targetUrl: cleanUrl,
+        },
+        "*"
+      );
+
+      try {
+        navigator.clipboard.writeText(JSON.stringify(flowPayload, null, 2));
+      } catch (e) {
+        // Ignore clipboard write error
+      }
+
+      window.open(cleanUrl, "_blank");
+      setFlowPushResult(
+        "Đã mở tab Google Flow và sao chép kịch bản vào bộ nhớ tạm! Tiện ích Chrome sẽ tự động điền prompt trên tab vừa mở."
+      );
     }
   };
 
@@ -1202,6 +1241,40 @@ export default function ProductionPage() {
               )}
             </div>
 
+            {/* Client Extension Banner (Multi-user) */}
+            <div className="p-3 rounded-xl bg-gradient-to-r from-blue-950/40 via-cyan-950/20 to-zinc-900 border border-cyan-500/20 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2 text-zinc-200">
+                  <span className="font-bold text-cyan-300">Tiện Ích Trình Duyệt:</span>
+                  <span className="text-[11px] text-zinc-400">Dành cho người dùng bên ngoài hoặc tự động hóa trên Chrome cá nhân</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={apiClient.getExtensionDownloadUrl()}
+                    download="videocrew-flow-assistant.zip"
+                    className="px-2.5 py-1 rounded-lg bg-cyan-600/30 border border-cyan-500/40 text-cyan-200 hover:bg-cyan-600/50 transition text-[11px] font-semibold"
+                  >
+                    Tải Tiện Ích (.ZIP)
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setShowExtensionGuide(!showExtensionGuide)}
+                    className="text-[11px] text-zinc-400 underline hover:text-cyan-300 cursor-pointer"
+                  >
+                    {showExtensionGuide ? "Ẩn hướng dẫn" : "Hướng dẫn cài (3 bước)"}
+                  </button>
+                </div>
+              </div>
+
+              {showExtensionGuide && (
+                <div className="text-[11px] text-zinc-300 bg-black/60 p-2.5 rounded-lg border border-zinc-800 space-y-1 leading-relaxed font-mono">
+                  <p>1. Tải và giải nén file <strong className="text-cyan-300">videocrew-flow-assistant.zip</strong> ra máy tính.</p>
+                  <p>2. Mở Google Chrome, vào địa chỉ: <span className="text-amber-300">chrome://extensions</span> và bật <strong className="text-cyan-300">Chế độ cho nhà phát triển</strong> (Developer mode).</p>
+                  <p>3. Bấm nút <strong className="text-cyan-300">Tải tiện ích đã giải nén</strong> (Load unpacked) và chọn thư mục vừa giải nén.</p>
+                </div>
+              )}
+            </div>
+
             {/* Notification / Feedback */}
             {flowPushResult && (
               <div className={`p-3 rounded-xl text-xs font-semibold ${
@@ -1214,11 +1287,11 @@ export default function ProductionPage() {
             )}
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-between border-t border-zinc-800 pt-3">
+            <div className="flex flex-wrap items-center justify-between border-t border-zinc-800 pt-3 gap-2">
               <span className="text-[10px] text-zinc-500">
-                Sử dụng profile .chrome_profile để không ảnh hưởng Chrome cá nhân
+                Lựa chọn phương thức đồng bộ phù hợp với hạ tầng của bạn
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   disabled={isFlowPushing}
@@ -1230,11 +1303,22 @@ export default function ProductionPage() {
                 <button
                   type="button"
                   disabled={isFlowPushing}
-                  onClick={handleExecutePushToFlow}
-                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 transition shadow-lg shadow-cyan-600/20 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  onClick={handlePushViaExtension}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-cyan-200 bg-cyan-950/80 border border-cyan-500/50 hover:bg-cyan-900 transition flex items-center gap-1.5 cursor-pointer"
+                  title="Mở tab Google Flow trên chính trình duyệt của bạn để tiện ích Chrome tự động điền prompt"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
-                  {isFlowPushing ? "Đang đẩy vào Google Flow..." : "Bắt Đầu Đẩy Vào Flow"}
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
+                  Đẩy Qua Tiện Ích Chrome
+                </button>
+                <button
+                  type="button"
+                  disabled={isFlowPushing}
+                  onClick={handleExecutePushToFlow}
+                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 transition shadow-lg shadow-blue-600/20 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  title="Chạy tự động hóa ngầm phía máy chủ thông qua Playwright headless / CDP"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-blue-200" />
+                  {isFlowPushing ? "Đang đẩy vào Google Flow..." : "Đẩy Qua Máy Chủ (Playwright)"}
                 </button>
               </div>
             </div>

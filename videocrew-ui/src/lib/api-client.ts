@@ -330,5 +330,9 @@ export const apiClient = {
     }
     return res.json();
   },
+
+  getExtensionDownloadUrl(): string {
+    return `${API_BASE_URL}/production/extension/download`;
+  },
 };
 

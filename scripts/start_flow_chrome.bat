@@ -3,7 +3,8 @@ title VideoCrew - Google Flow Dedicated Browser
 echo [INFO] Dang khoi dong Google Chrome cho Google Flow...
 echo [INFO] Profile duoc luu tru tai thu muc .chrome_profile
 
-start "" chrome.exe --remote-debugging-port=9222 --user-data-dir="%~dp0..\.chrome_profile" "https://flow.google.com"
+start "" chrome.exe --remote-debugging-port=9222 --remote-debugging-address=0.0.0.0 --user-data-dir="%~dp0..\.chrome_profile" "https://flow.google.com"
+
 
 if %ERRORLEVEL% NEQ 0 (
     echo [WARN] Khong tim thay chrome.exe mac dinh trong PATH. Thu khoi chay Chromium qua Python venv...
