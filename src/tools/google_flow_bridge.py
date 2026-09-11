@@ -23,41 +23,55 @@ class GoogleFlowBridge:
         self.context = None
         self.page = None
 
-    async def connect(self, headless: bool = False):
+    async def connect(self, headless: Optional[bool] = None):
         """Khoi tao ket noi toi trinh duyet."""
         from playwright.async_api import async_playwright
         self.pw = await async_playwright().start()
 
-        # 1. Thu ket noi qua CDP port truoc (neu user da mo chrome voi cong debug)
-        try:
-            cdp_url = f"http://localhost:{self.debug_port}"
-            self.browser = await self.pw.chromium.connect_over_cdp(cdp_url, timeout=3000)
-            if self.browser.contexts:
-                self.context = self.browser.contexts[0]
-                if self.context.pages:
-                    self.page = self.context.pages[0]
+        # Tu dong phat hien headless neu dang chay trong Docker Linux khong co $DISPLAY
+        if headless is None:
+            headless = bool(os.name != "nt" and "DISPLAY" not in os.environ)
+
+        # 1. Thu ket noi qua CDP port (localhost hoac host.docker.internal)
+        cdp_hosts = ["127.0.0.1", "localhost", "host.docker.internal"]
+        for h in cdp_hosts:
+            try:
+                cdp_url = f"http://{h}:{self.debug_port}"
+                self.browser = await self.pw.chromium.connect_over_cdp(cdp_url, timeout=1500)
+                if self.browser.contexts:
+                    self.context = self.browser.contexts[0]
+                    if self.context.pages:
+                        self.page = self.context.pages[0]
+                    else:
+                        self.page = await self.context.new_page()
                 else:
+                    self.context = await self.browser.new_context()
                     self.page = await self.context.new_page()
-            else:
-                self.context = await self.browser.new_context()
-                self.page = await self.context.new_page()
-            print(f"[INFO] Da ket noi thanh cong qua Chrome Debugging Port {self.debug_port}")
-            return True
-        except Exception:
-            # 2. Neu khong co CDP port, mo Chromium voi profile rieng
-            print(f"[INFO] Khong tim thay Chrome port {self.debug_port}. Khoi chay Dedicated Profile tai {self.profile_dir}")
-            self.profile_dir.mkdir(parents=True, exist_ok=True)
-            self.context = await self.pw.chromium.launch_persistent_context(
-                user_data_dir=str(self.profile_dir),
-                headless=headless,
-                viewport={"width": 1440, "height": 900},
-                args=["--disable-blink-features=AutomationControlled"]
-            )
-            if self.context.pages:
-                self.page = self.context.pages[0]
-            else:
-                self.page = await self.context.new_page()
-            return True
+                print(f"[INFO] Da ket noi thanh cong vao Chrome Host tai {cdp_url}")
+                return True
+            except Exception:
+                continue
+
+        # 2. Neu khong co CDP port, mo Chromium voi profile rieng
+        print(f"[INFO] Khong tim thay Chrome CDP port {self.debug_port}. Khoi chay Dedicated Profile (headless={headless}) tai {self.profile_dir}")
+        self.profile_dir.mkdir(parents=True, exist_ok=True)
+        self.context = await self.pw.chromium.launch_persistent_context(
+            user_data_dir=str(self.profile_dir),
+            headless=headless,
+            viewport={"width": 1440, "height": 900},
+            args=[
+                "--disable-blink-features=AutomationControlled",
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage"
+            ]
+        )
+        if self.context.pages:
+            self.page = self.context.pages[0]
+        else:
+            self.page = await self.context.new_page()
+        return True
+
 
     async def open_project(self, target_url: Optional[str] = None):
         """Mo du an Google Flow tren trinh duyet."""
