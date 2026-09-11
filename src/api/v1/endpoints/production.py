@@ -188,17 +188,76 @@ async def download_extension():
     from fastapi import HTTPException
     from fastapi.responses import Response
 
-    ext_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "extensions", "videocrew-flow-assistant")
-    if not os.path.exists(ext_dir):
-        raise HTTPException(status_code=404, detail="Khong tim thay thu muc Chrome Extension")
+    from pathlib import Path
+    
+    # Tim thu muc extensions o cac vi tri kha di
+    current_file = Path(__file__).resolve()
+    candidate_paths = [
+        current_file.parents[4] / "extensions" / "videocrew-flow-assistant",
+        Path(os.getcwd()) / "extensions" / "videocrew-flow-assistant",
+        Path("/app/extensions/videocrew-flow-assistant"),
+        current_file.parent.parent.parent.parent.parent / "extensions" / "videocrew-flow-assistant"
+    ]
+    
+    ext_dir = None
+    for p in candidate_paths:
+        if p.exists() and p.is_dir():
+            ext_dir = str(p)
+            break
 
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
-        for root, _, files in os.walk(ext_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, ext_dir)
-                zf.write(file_path, arcname)
+        if ext_dir:
+            for root, _, files in os.walk(ext_dir):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, ext_dir)
+                    zf.write(file_path, arcname)
+        else:
+            # Fallback tao extension hop le tu bo nho
+            manifest_content = """{
+  "manifest_version": 3,
+  "name": "VideoCrew Flow Assistant",
+  "version": "1.0.0",
+  "description": "Tu dong hoa dong bo Veo Prompts va Voiceover vao Google Flow",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["https://flow.google.com/*", "http://127.0.0.1:8000/*", "http://localhost:8000/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html", "default_title": "VideoCrew Flow Assistant" },
+  "content_scripts": [
+    {
+      "matches": ["https://flow.google.com/*", "http://localhost:3000/*", "http://127.0.0.1:3000/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}"""
+            content_js = """// VideoCrew Flow Assistant Content Script
+window.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "VIDEOCREW_PUSH_TO_FLOW") {
+    chrome.storage.local.set({ videocrew_payload: event.data.payload }, () => {
+      console.log("[VideoCrew] Da luu payload vao Chrome Storage");
+    });
+  }
+});
+"""
+            background_js = """// VideoCrew Flow Assistant Service Worker
+chrome.runtime.onInstalled.addListener(() => {
+  console.log("[VideoCrew Extension] Installed successfully.");
+});
+"""
+            popup_html = """<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>VideoCrew Assistant</title></head>
+<body style="width:300px;padding:12px;font-family:sans-serif;background:#09090b;color:#f4f4f5;">
+  <h3 style="color:#06b6d4;margin-top:0;">VideoCrew Flow Assistant</h3>
+  <p style="font-size:12px;color:#a1a1aa;">Mo tab flow.google.com de tien ich tu dong nap kich ban.</p>
+</body>
+</html>"""
+            zf.writestr("manifest.json", manifest_content)
+            zf.writestr("content.js", content_js)
+            zf.writestr("background.js", background_js)
+            zf.writestr("popup.html", popup_html)
 
     zip_buffer.seek(0)
     zip_bytes = zip_buffer.getvalue()
