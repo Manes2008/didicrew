@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "VideoCrew Flow Assistant",
+  "version": "1.0.0",
+  "description": "Tu dong hoa nạp kich ban phan canh va Veo video prompts tu VideoCrew vao Google Flow",
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://flow.google.com/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "https://*.ngrok-free.dev/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://flow.google.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "VideoCrew Flow Assistant"
+  },
+  "externally_connectable": {
+    "matches": [
+      "http://localhost/*",
+      "http://127.0.0.1/*",
+      "https://*.ngrok-free.dev/*"
+    ]
+  }
+}

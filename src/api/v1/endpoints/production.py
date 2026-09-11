@@ -180,3 +180,34 @@ async def push_project_to_flow(
         await bridge.close()
         raise HTTPException(status_code=500, detail=f"Loi khi dong bo voi Google Flow: {str(e)}")
 
+@router.get("/extension/download", summary="Tai ve goi tien ich Chrome Extension VideoCrew Flow Assistant")
+async def download_extension():
+    import os
+    import io
+    import zipfile
+    from fastapi import HTTPException
+    from fastapi.responses import Response
+
+    ext_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "extensions", "videocrew-flow-assistant")
+    if not os.path.exists(ext_dir):
+        raise HTTPException(status_code=404, detail="Khong tim thay thu muc Chrome Extension")
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        for root, _, files in os.walk(ext_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, ext_dir)
+                zf.write(file_path, arcname)
+
+    zip_buffer.seek(0)
+    zip_bytes = zip_buffer.getvalue()
+    filename = "videocrew-flow-assistant.zip"
+
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
