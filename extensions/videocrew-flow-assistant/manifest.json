@@ -19,7 +19,14 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://flow.google.com/*"],
+      "matches": [
+        "https://flow.google.com/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "http://localhost:*/*",
+        "http://127.0.0.1:*/*",
+        "https://*.ngrok-free.dev/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_idle"
     }
