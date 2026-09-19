@@ -244,8 +244,10 @@ def generate_gemini_imagen_func(script_text: str, aspect_ratio: str = "9:16", mo
         w, h = 896, 1536
 
     def generate_single_scene(s_num: int, prompt: str) -> tuple[int, str]:
+        from src.tools.google_flow_sanitizer import sanitize_prompt_safety
         clean_p = prompt.replace("\n", " ").strip()
         clean_p = re.sub(r"(?:Phân cảnh|Cảnh|Lời thoại|Voiceover|SFX|BGM|Veo3 Detail)\s*[:\-–\.]+", "", clean_p, flags=re.IGNORECASE)
+        clean_p = sanitize_prompt_safety(clean_p, max_chars=400)
         clean_p = re.sub(r"[^\x00-\x7F]+", " ", clean_p)
         clean_p = re.sub(r"\s+", " ", clean_p).strip()
 

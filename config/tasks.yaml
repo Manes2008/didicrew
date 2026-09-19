@@ -47,6 +47,17 @@ script_task:
     Hãy viết kịch bản video ngắn hoàn chỉnh tối ưu cho công cụ sinh video AI thế hệ mới (Google Veo 3 / Runway Gen-3 / Kling).
     Tổng thời lượng mục tiêu: {target_duration} giây.
 
+    **[QUY TẮC LỌC CỨNG AN TOÀN LỚP 1 - STRICT ZERO-TOLERANCE HARD SAFETY GUARDRAIL]**
+    BẤT KỂ Ý TƯỞNG THÔ ĐẦU VÀO LÀ GÌ (dù là chiến tranh khốc liệt, súng đạn, tai nạn, thương vong), BẠN BẮT BUỘC PHẢI LỌC CỨNG NGAY TỪ LỚP 1 VÀ CHUYỂN HÓA 100% SANG HÌNH TƯỢNG ĐIỆN ẢNH ẨN DỤ AN TOÀN:
+    1. DANH SÁCH ĐEN CẤM TUYỆT ĐỐI (STRICT BLACKLIST): Cấm xuất hiện các từ ngữ sau trong cả Visual Description (Phần 2) và Combined Visual Prompt (Phần 3):
+       - Vũ khí & Cháy nổ: DK75, RPG, AK47, bomb, shell, artillery, mortar, missile, rocket, gun, rifle, bullet, explosion, blast, detonation, shrapnel, warfare, combat violence.
+       - Máu me & Thương tích: blood, bloody, bleed, wound, wounded, casualty, paralyzed, unmoving legs, crawl in mud, fall into mud, scarred, shivering face, scream, horror, gory, gore, trauma.
+    2. QUY CHUẨN CHUYỂN HÓA ẨN DỤ ĐIỆN ẢNH BẮT BUỘC:
+       - Cháy nổ, bom đạn -> Chùm tia sáng hoàng hôn, hiệu ứng ngược sáng rực rỡ, bụi ánh sáng điện ảnh (dramatic burst of golden backlight, volumetric rim light flare, radiant lens flare, high contrast silhouette, floating dust particles).
+       - Chiến sự, bùn lầy -> Di chuyển điềm tĩnh qua làn sương mờ rừng nhiệt đới (moves focused through atmospheric misty tropical greenery, dramatic low-angle steadycam).
+       - Thương tật, mất mát -> Nốt lặng cảm xúc, ánh nhìn trầm ngâm hướng về bầu trời, đôi bàn tay sạm màu thời gian, nụ cười kiêu hãnh gột rửa quá khứ (contemplative silence, solemn gaze toward bright sky, weathered mature hands, dignified heroic expression, gentle honorable smile).
+    3. ĐẢM BẢO 100% prompt sinh ra hoàn toàn sạch, không bao giờ bị nghẽn (timeout) hoặc bị chặn (safety block) trên Google Gemini, Imagen 3, Veo 3 và OpenAI.
+
     **[CẤU TRÚC PHÂN BỔ THỜI LƯỢNG & ĐỘ DÀY LỜI THOẠI]**
     - Tổng thời lượng: {target_duration} giây.
     - Chia video thành các cảnh linh hoạt từ 3-5 giây để giữ trọn nhịp điệu cảm xúc và hình ảnh chuyển động điện ảnh.
@@ -72,22 +83,28 @@ script_task:
     | Cảnh 1 | 3s | [Prompt mô tả hành động, camera, ánh sáng] | [NARRATOR]: Lời thoại dày dặn 14-22 từ... | [TỪ KHÓA ĐẬP MẮT 2-5 TỪ] | Âm thanh mở màn kịch tính |
     | Cảnh 2 | 4s | ... | ... | ... | ... |
 
-    **[PHẦN 3 - TRÍCH XUẤT PROMPT VEO3 CHI TIẾT TỪNG CẢNH (QUAN TRỌNG)]**
-    Với mỗi cảnh, trích xuất đoạn Prompt tiếng Anh chuẩn cho Veo 3 (Text-to-Video hoặc Image-to-Video với Reference Frame) theo định dạng:
+    **[PHẦN 3 - TRÍCH XUẤT PROMPT]**
+    Với mỗi cảnh trong Storyboard (Phần 2), trích xuất đoạn Prompt tiếng Anh chuẩn cho AI Video (Veo / Runway / Kling / Wan2.1) theo từng phân cảnh độc lập.
+    QUY TẮC BẮT BUỘC:
+    1. TUYỆT ĐỐI KHÔNG GOM/TÍCH HỢP NHIỀU CẢNH LÀM MỘT. Mỗi cảnh trong Storyboard tương ứng với chính xác 1 Phân cảnh độc lập (Phân cảnh 1, Phân cảnh 2, Phân cảnh 3...) để các workflow và tool tự động xử lý theo từng shot riêng biệt (thời lượng 3s - 5s).
+    2. BỘ LỌC AN TOÀN TỪ VỰNG ĐIỆN ẢNH (CHỐNG CHẶN & NGHẼN GEMINI/IMAGEN/VEO3):
+       - TUYỆT ĐỐI CẤM các từ ngữ chiến sự trực diện, cháy nổ, vũ khí, máu me hoặc thương tật: "DK75", "shell", "bomb", "explosion", "blast", "crawl in mud", "paralyzed", "wound", "blood", "shiver", "violence".
+       - BẮT BUỘC CHUYỂN HÓA SANG ẨN DỤ ĐIỆN ẢNH AN TOÀN (Cinematic Metaphor): Thay vì nổ bom hãy dùng "sudden dramatic burst of golden-orange backlight, high contrast silhouette, volumetric dust particles, atmospheric lens flare"; thay vì ngã xuống bùn / liệt chân hãy dùng "a weary soldier sitting in contemplative silence against a mossy tree trunk, gazing at the distant horizon with solemn determination"; thay vì tay thương tật hãy dùng "weathered mature hands, deep emotional eyes reflecting dignity".
 
-    - **Phân cảnh Veo3 1 (0s - 3s)**:
-      * **Combined Visual (EN)**: [Prompt tiếng Anh hoàn chỉnh 4-6 câu kết hợp: Master Art Style + Character Profile + Dynamic Camera Movement (ví dụ: cinematic slow dolly in, steadycam tracking, eye-level shot) + Action & Micro-expressions + Lighting Transition + Environment details].
+    Định dạng từng phân cảnh:
+    - **Phân cảnh 1 (0s - 3s)**:
+      * **Combined Visual (EN)**: [Prompt tiếng Anh chuẩn điện ảnh an toàn 3-5 câu: Master Art Style + Character Profile + Dynamic Camera Movement + Action & Emotion + Lighting + Environment details, không chứa từ cấm].
       * **Voiceover / Dialogue (VI)**: [Đoạn thoại dày dặn của cảnh này, 14-22 từ].
-      * **On-Screen Flash Text (VI)**: [Từ khóa in hoa giật màn hình 0.5s - 1s, ví dụ: 27 TRẬN TỬ CHIẾN].
+      * **On-Screen Flash Text (VI)**: [Từ khóa in hoa giật màn hình 0.5s - 1s].
       * **SFX/BGM**: [Hiệu ứng âm thanh và sắc thái nhạc nền].
 
-    - **Phân cảnh Veo3 2 (3s - 7s)**:
-      * **Combined Visual (EN)**: [Prompt tiếng Anh chi tiết cho cảnh 2, nối tiếp chuyển động từ cảnh 1].
+    - **Phân cảnh 2 (3s - 7s)**:
+      * **Combined Visual (EN)**: [Prompt tiếng Anh an toàn cho cảnh 2, nối tiếp không gian và chuyển động từ cảnh 1].
       * **Voiceover / Dialogue (VI)**: [...]
       * **On-Screen Flash Text (VI)**: [...]
       * **SFX/BGM**: [...]
 
-    (Lặp lại đầy đủ cho tất cả các cảnh đến hết thời lượng {target_duration}s. Cảnh chứa CÂU THOẠI VÀNG - GOLDEN QUOTE phải được đánh dấu rõ bằng chỉ dẫn [CÂU THOẠI VÀNG]).
+    (Lặp lại độc lập cho từng cảnh từ Cảnh 1 đến hết thời lượng {target_duration}s. Cảnh chứa CÂU THOẠI VÀNG - GOLDEN QUOTE phải được đánh dấu rõ bằng chỉ dẫn [CÂU THOẠI VÀNG]).
 
     **[PHẦN 4 - LỜI KÊU GỌI HÀNH ĐỘNG TƯƠNG TÁC (INTERACTIVE EMOTIONAL CTA)]**
     - Lời kêu gọi hành động ở cảnh cuối cùng chạm vào lòng tự hào hoặc tình cảm cá nhân của khán giả, kích hoạt bình luận.
@@ -106,12 +123,15 @@ script_task:
       | Broad Reach | #Storytelling #ViralVideo ... | Tiếp cận khán giả đại chúng |
 
     {markdown_template}
-  expected_output: "Kịch bản hoàn chỉnh dạng Markdown gồm: Hook 3s số liệu, Bảng phân cảnh 6 cột có On-Screen Text, Danh sách Prompt Veo3 từng cảnh, Interactive CTA và Bộ đóng gói Caption/Hashtag."
+  expected_output: "Kịch bản hoàn chỉnh dạng Markdown gồm: Hook 3s số liệu, Bảng phân cảnh 6 cột có On-Screen Text, Danh sách Trích xuất Prompt từng cảnh độc lập chuẩn an toàn, Interactive CTA và Bộ đóng gói Caption/Hashtag."
 
 visual_task:
   description: |
     Dựa trên CREATIVE BRIEF và KỊCH BẢN: "{previous_result}".
     Bạn là Visual Prompt Engineer chuyên gia về độ nhất quán nhân vật (Character Consistency).
+
+    **BỘ LỌC CỨNG AN TOÀN TUYỆT ĐỐI (ZERO-TOLERANCE HARD SAFETY GUARDRAIL)**:
+    Mọi prompt tiếng Anh tạo ảnh và video sinh ra BẮT BUỘC 100% không chứa từ khóa thuộc blacklist (vũ khí, súng đạn, bom nổ, máu me, thương tật, tai nạn). Chuyển hóa toàn bộ sang kỹ thuật ánh sáng điện ảnh, góc quay camera và biểu cảm nội tâm để đảm bảo an toàn tuyệt đối cho Imagen 3, Veo 3 và DALL-E.
 
     **CHIẾN LƯỢC TỐI ƯU CHI PHÍ & NHẤT QUÁN DỮ LIỆU**:
     Thay vì tạo hàng chục ảnh lẻ gây biến dạng mặt và tốn kém chi phí, bạn sẽ tạo:
