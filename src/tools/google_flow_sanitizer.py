@@ -52,19 +52,75 @@ def clean_voiceover_text(raw_text: str, max_chars: int = 120) -> List[str]:
 
     return chunks if chunks else [text[:max_chars]]
 
-def clean_veo_prompt(raw_prompt: str) -> str:
+# Bo tu dien chuyen doi an toan dien anh (Safety & Cinematic Metaphor Map)
+SAFETY_REPLACEMENT_MAP = [
+    # Vu khi & Chay no
+    (r"\b(?:violent\s+)?(?:orange\s+)?explosion\s+of\s+a\s+DK75\s+shell\b", "dramatic sudden burst of golden-orange cinematic backlight"),
+    (r"\bDK75(?:\s+shell)?\b", "cinematic flash"),
+    (r"\b(?:artillery|mortar|missile|rocket|grenade|bomb|bullet|shrapnel)\b", "cinematic light ray"),
+    (r"\b(?:violent\s+)?explosion\b", "sudden burst of warm rim light"),
+    (r"\b(?:blast|detonation)\b", "radiant light flare"),
+    (r"\b(?:gun|rifle|weapon|pistol|firearm|AK47)\b", "vintage gear"),
+    # Hanh dong bao luc & Thuong tat
+    (r"\bcrawls?\s+(?:forward\s+)?through\s+(?:dark\s+)?mud\b", "moves low through atmospheric jungle mist"),
+    (r"\bfalls?\s+sideways\s+into\s+dark\s+mud\b", "rests in quiet reflection amidst lush foliage"),
+    (r"\bshivering\s+face\b", "deeply focused heroic expression"),
+    (r"\bunmoving\s+legs\b", "sitting in contemplative silence"),
+    (r"\bparalyzed\s+legs\b", "gentle resting posture"),
+    (r"\bscarred\s+hands\b", "weathered mature hands"),
+    (r"\b(?:blood|bleeding|bloody|gore|gory)\b", "warm golden dust"),
+    (r"\b(?:wound|wounded|injury|injured|casualty)\b", "solemn remembrance"),
+    (r"\b(?:trauma|past\s+trauma)\b", "emotional journey"),
+    # Boi canh xung dot
+    (r"\b(?:historical\s+)?war\s+documentary\s+style\b", "historical epic cinematic drama style"),
+    (r"\b(?:battlefield|warzone|combat)\b", "historic outdoor environment")
+]
+
+def sanitize_prompt_safety(raw_prompt: str, max_chars: int = 500) -> str:
     """
-    Lam sach prompt cho video Veo:
-    - Loai bo cac tham so thua cua Midjourney nhu --ar 9:16, --v 6
-    - Chuan hoa khoang trang
+    Bo loc an toan chong nghẽn va bi chan tren Google Gemini, Imagen 3, Veo 3:
+    - Chuyen doi cac tu khoa vu khi, chay no, bao luc, thuong tat sang an du dien anh an toan.
+    - Kiem tra tinh hop le va gioi han do dai (Validation).
     """
     if not raw_prompt:
         return ""
 
-    # Loai bo --ar, --v, --stylize, --s
+    prompt = raw_prompt.strip()
+
+    # 1. Ap dung tu dien thay the an toan
+    for pattern, replacement in SAFETY_REPLACEMENT_MAP:
+        prompt = re.sub(pattern, replacement, prompt, flags=re.IGNORECASE)
+
+    # 2. Don dep cac khoang trang thua
+    prompt = re.sub(r"\s+", " ", prompt).strip()
+
+    # 3. Validation gioi han do dai cho AI Model
+    if max_chars and len(prompt) > max_chars:
+        # Cat gon den dau cau hoac dau phay gan nhat de khong bi cut cau
+        cut_point = prompt.rfind(",", 0, max_chars)
+        if cut_point > int(max_chars * 0.7):
+            prompt = prompt[:cut_point].strip()
+        else:
+            prompt = prompt[:max_chars].strip()
+
+    return prompt
+
+def clean_veo_prompt(raw_prompt: str, max_chars: int = 500) -> str:
+    """
+    Lam sach va thanh loc an toan cho prompt video:
+    - Loai bo cac tham so Midjourney nhu --ar 9:16, --v 6
+    - Chay qua bo loc an toan sanitize_prompt_safety
+    - Validation do dai toi da
+    """
+    if not raw_prompt:
+        return ""
+
+    # Loai bo cac flag tham so
     prompt = re.sub(r"--[a-zA-Z0-9_\-:]+(?:\s+[^\s]+)?", "", raw_prompt)
     prompt = prompt.replace("`", "").strip()
-    prompt = re.sub(r"\s+", " ", prompt).strip()
+
+    # Ap dung bo loc an toan dien anh
+    prompt = sanitize_prompt_safety(prompt, max_chars=max_chars)
     return prompt
 
 def suggest_flow_voice(content_context: str = "") -> str:
@@ -89,15 +145,15 @@ def suggest_flow_voice(content_context: str = "") -> str:
 
 def parse_script_to_flow_payload(script_markdown: str) -> Dict[str, Any]:
     """
-    Phan tich toan bo van ban Markdown kich ban thanh danh sach phan canh (Scenes)
-    va khoi gom cum Veo (Veo Blocks) da duoc loc sach san sang day vao Google Flow.
+    Phan tich toan bo van ban Markdown kich ban thanh danh sach phan canh doc lap (Scenes)
+    va khoi prompt da duoc loc an toan san sang day vao Google Flow, ComfyUI, API Veo/Imagen.
     """
     scenes = []
     veo_blocks = []
 
-    # 1. Trich xuat cac khoi Veo gop (Phan 3)
+    # 1. Trich xuat cac khoi Phân cảnh doc lap (Phan 3) - khong gop cum
     veo_sections = re.findall(
-        r"###?\s*Phân cảnh Veo3?\s*(\d+)?[^\n]*\n([\s\S]*?)(?=###?\s*Phân cảnh Veo3?|PHẦN \d+:|$)",
+        r"###?\s*(?:Phân cảnh|Phân cảnh Veo3?|Cảnh)\s*(\d+)[^\n]*\n([\s\S]*?)(?=###?\s*(?:Phân cảnh|Phân cảnh Veo3?|Cảnh)\s*\d+|PHẦN \d+:|$)",
         script_markdown,
         re.IGNORECASE
     )
@@ -105,9 +161,9 @@ def parse_script_to_flow_payload(script_markdown: str) -> Dict[str, Any]:
     for idx, (b_num, b_content) in enumerate(veo_sections, 1):
         num = b_num if b_num else str(idx)
         
-        # Lay prompt tieng Anh
-        v_match = re.search(r"\*?\s*(?:Combined Visual|Visual Description|Prompt)[^:]*:\s*[`\"]?([^`\"\n]+(?:\n[^`\"\n]+)*)[`\"]?", b_content, re.IGNORECASE)
-        visual_prompt = clean_veo_prompt(v_match.group(1)) if v_match else ""
+        # Lay prompt tieng Anh da duoc thanh loc an toan
+        v_match = re.search(r"\*?\s*(?:Combined Visual|Visual Description|Visual|Prompt)[^:]*:\s*[`\"]?(.*?)(?=(?:\n\s*\*|\Z))", b_content, re.IGNORECASE | re.DOTALL)
+        visual_prompt = clean_veo_prompt(v_match.group(1).strip().strip("`\"")) if v_match else ""
 
         # Lay voiceover
         vo_match = re.search(r"\*?\s*(?:Voiceover|Dialogue)[^:]*:\s*([^\n]+)", b_content, re.IGNORECASE)

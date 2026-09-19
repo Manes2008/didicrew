@@ -227,7 +227,8 @@ def extract_scene_prompts(prompt_text: str, num_scenes: int) -> list:
     Trích xuất prompt chi tiết cho từng phân cảnh dựa trên cấu trúc Scene từ Bước 2.
     """
     import re
-    pattern = r"(?:Scene|Cảnh)\s*(\d+)[\s*:\-–\.]+(.*?)(?=(?:Scene|Cảnh)\s*\d+[\s*:\-–\.]+|\Z)"
+    from src.tools.google_flow_sanitizer import sanitize_prompt_safety
+    pattern = r"(?:Phân\s*cảnh|Scene|Cảnh)\s*(\d+)[\s*:\-–\.]+(.*?)(?=(?:Phân\s*cảnh|Scene|Cảnh)\s*\d+[\s*:\-–\.]+|\Z)"
     matches = re.findall(pattern, prompt_text, re.DOTALL | re.IGNORECASE)
     
     prompts = []
@@ -236,17 +237,18 @@ def extract_scene_prompts(prompt_text: str, num_scenes: int) -> list:
         for _, content in sorted_matches:
             clean_content = content.strip().replace("\n", " ")
             if clean_content:
+                clean_content = sanitize_prompt_safety(clean_content, max_chars=450)
                 prompts.append(clean_content)
     
     if not prompts:
         lines = [line.strip() for line in prompt_text.split("\n") if line.strip() and not line.strip().startswith("#")]
-        prompts = [l for l in lines if len(l) > 10]
+        prompts = [sanitize_prompt_safety(l, max_chars=450) for l in lines if len(l) > 10]
         
     if not prompts:
-        prompts = [s.strip() for s in prompt_text.split(".") if s.strip() and len(s.strip()) > 5]
+        prompts = [sanitize_prompt_safety(s.strip(), max_chars=450) for s in prompt_text.split(".") if s.strip() and len(s.strip()) > 5]
         
     if not prompts:
-        prompts = [prompt_text]
+        prompts = [sanitize_prompt_safety(prompt_text, max_chars=450)]
         
     while len(prompts) < num_scenes:
         prompts.append(prompts[-1])
