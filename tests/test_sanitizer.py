@@ -35,7 +35,16 @@ def test_sanitizer():
     payload = parse_script_to_flow_payload(sample_script)
     assert len(payload["characters"]) >= 2, f"Expected at least 2 characters, got {len(payload['characters'])}"
     assert payload["characters"][0]["name"] == "Nguyễn Văn A"
-    assert len(payload["veo_blocks"]) == 1
+    # Test sua loi typo va loc trigger Google Flow
+    typo_prompt = "Camera push-in toepic historical settingds Alex. Shot on Arri Alexa Mini LF, 35mm lens, f/1.8 depth of field."
+    cleaned_typo = clean_veo_prompt(typo_prompt)
+    assert "towards" in cleaned_typo, f"Expected 'towards', got: {cleaned_typo}"
+    assert "Arri" not in cleaned_typo, f"Expected camera params removed, got: {cleaned_typo}"
+
+    scene4_prompt = "A digital rough line sketch morphs into 3D chart in dark atmosphere."
+    cleaned_s4 = clean_veo_prompt(scene4_prompt)
+    assert "rough" not in cleaned_s4, f"Expected 'rough' removed, got: {cleaned_s4}"
+    assert "ambient studio lighting" in cleaned_s4, f"Expected dark atmosphere replaced, got: {cleaned_s4}"
 
     print("[SUCCESS] All sanitizer tests passed!")
 

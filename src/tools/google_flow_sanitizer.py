@@ -54,6 +54,8 @@ def clean_voiceover_text(raw_text: str, max_chars: int = 120) -> List[str]:
 
 # Bo tu dien chuyen doi an toan dien anh (Safety & Cinematic Metaphor Map)
 SAFETY_REPLACEMENT_MAP = [
+    # Sua cac loi bien dang tu ngu da xay ra
+    (r"\btoepic historical settingds\b", "towards"),
     # Vu khi & Chay no
     (r"\b(?:violent\s+)?(?:orange\s+)?explosion\s+of\s+a\s+DK75\s+shell\b", "dramatic sudden burst of golden-orange cinematic backlight"),
     (r"\bDK75(?:\s+shell)?\b", "cinematic flash"),
@@ -73,13 +75,39 @@ SAFETY_REPLACEMENT_MAP = [
     (r"\b(?:trauma|past\s+trauma)\b", "emotional journey"),
     # Boi canh xung dot
     (r"\b(?:historical\s+)?war\s+documentary\s+style\b", "historical epic cinematic drama style"),
-    (r"\b(?:battlefield|warzone|combat)\b", "historic outdoor environment")
+    (r"\b(?:battlefield|warzone|combat)\b", "historic outdoor environment"),
+    # Bo loc trigger dac thu cho Google Veo / Google Flow (Cong nghe & Doi thuong)
+    (r"\brough\s+(?:line\s+)?sketch\b", "clean 2D line sketch"),
+    (r"\brough\s+sketch\b", "draft outline sketch"),
+    (r"\brough\b", "minimalist"),
+    (r"\brapid\s+typing\s+action\s+of\s+male\s+hands\b", "hands typing smoothly"),
+    (r"\brapid\s+typing\s+action\b", "smooth typing motion"),
+    (r"\bshocked\s+expression\b", "surprised expression"),
+    (r"\bshocked\b", "surprised"),
+    (r"\bdark\s+atmosphere\b", "ambient studio lighting"),
+    # Phu rong hon: dark concrete wall, dark concrete background, dark concrete + moi bien the
+    (r"\bdark\s+concrete\s+(?:wall|background|studio|room)?\b", "clean studio background"),
+    (r"\b(?:violent|violence)\b", "dramatic"),
+    (r"\b(?:attack|strike)\b", "impact"),
+    (r"\b(?:dead|death|kill(?:ed|ing)?)\b", "legacy"),
+    # Cac tu phu bo sung chua duoc phu
+    (r"\bintense\s+(?:stare|look|gaze|expression|focus)\b", "deeply focused expression"),
+    (r"\bhigh\s+contrast\b", "cinematic contrast"),
+    (r"\bsingle\s+black\s+matte\s+earbud\b", "wireless earbud")
 ]
 
-def sanitize_prompt_safety(raw_prompt: str, max_chars: int = 500) -> str:
+# Mau regex loai bo thong so may anh Midjourney thua thiet gay nhieu cho Veo
+CAMERA_PARAM_PATTERNS = [
+    r"\bshot\s+on\s+[^,.]*(?:Arri|Alexa|LF|RED|Sony|Canon)[^,.]*[,.]?\s*",
+    r"\b\d+mm\s+lens[,.]?\s*",
+    r"\bf/\d+(?:\.\d+)?\s+(?:depth\s+of\s+field|aperture)[,.]?\s*"
+]
+
+def sanitize_prompt_safety(raw_prompt: str, max_chars: int = 400) -> str:
     """
-    Bo loc an toan chong nghẽn va bi chan tren Google Gemini, Imagen 3, Veo 3:
+    Bo loc an toan chong nghen va bi chan tren Google Gemini, Imagen 3, Veo 3:
     - Chuyen doi cac tu khoa vu khi, chay no, bao luc, thuong tat sang an du dien anh an toan.
+    - Loc bo cac tu trigger dac thu cua Google Flow (rough, dark atmosphere, typing action).
     - Kiem tra tinh hop le va gioi han do dai (Validation).
     """
     if not raw_prompt:
@@ -91,26 +119,40 @@ def sanitize_prompt_safety(raw_prompt: str, max_chars: int = 500) -> str:
     for pattern, replacement in SAFETY_REPLACEMENT_MAP:
         prompt = re.sub(pattern, replacement, prompt, flags=re.IGNORECASE)
 
-    # 2. Don dep cac khoang trang thua
+    # 2. Don dep cac thong so may anh thua thiet gay nhieu tren Veo
+    for cam_pat in CAMERA_PARAM_PATTERNS:
+        prompt = re.sub(cam_pat, "", prompt, flags=re.IGNORECASE)
+
+    # 3. Don dep dau phay thua va khoang trang
+    prompt = re.sub(r",\s*,+", ",", prompt)
+    prompt = re.sub(r"^\s*,\s*", "", prompt)
     prompt = re.sub(r"\s+", " ", prompt).strip()
 
-    # 3. Validation gioi han do dai cho AI Model
+    # 4. Validation gioi han do dai cho Google Flow / Veo (cat tron ven tai dau cau hoac khoang trang)
     if max_chars and len(prompt) > max_chars:
-        # Cat gon den dau cau hoac dau phay gan nhat de khong bi cut cau
-        cut_point = prompt.rfind(",", 0, max_chars)
-        if cut_point > int(max_chars * 0.7):
+        p_dot = prompt.rfind(".", 0, max_chars)
+        p_comma = prompt.rfind(",", 0, max_chars)
+        cut_point = max(p_dot, p_comma)
+        if cut_point > int(max_chars * 0.6):
             prompt = prompt[:cut_point].strip()
         else:
-            prompt = prompt[:max_chars].strip()
+            space_cut = prompt.rfind(" ", 0, max_chars)
+            if space_cut > int(max_chars * 0.6):
+                prompt = prompt[:space_cut].strip()
+            else:
+                prompt = prompt[:max_chars].strip()
+
+    # Xoa dau phay o cuoi cau neu co sau khi cat
+    prompt = re.sub(r"[,;:\-]\s*$", "", prompt).strip()
 
     return prompt
 
-def clean_veo_prompt(raw_prompt: str, max_chars: int = 500) -> str:
+def clean_veo_prompt(raw_prompt: str, max_chars: int = 400) -> str:
     """
-    Lam sach va thanh loc an toan cho prompt video:
+    Lam sach va thanh loc an toan cho prompt video Google Flow (Veo/Omni):
     - Loai bo cac tham so Midjourney nhu --ar 9:16, --v 6
     - Chay qua bo loc an toan sanitize_prompt_safety
-    - Validation do dai toi da
+    - Validation do dai toi da mac dinh 400 ky tu cho Google Flow
     """
     if not raw_prompt:
         return ""
