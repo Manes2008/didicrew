@@ -4,12 +4,43 @@
 import os
 import yaml
 import json
+import re
 import time
 from crewai import Task, Crew
 from src.agents.factory import AgentFactory
 from src.core.models import get_db_session, PromptOptimizationLog, VideoAnalysisLog
 from src.core.skill_loader import SkillLoader
+from src.tools.google_flow_sanitizer import sanitize_prompt_safety, clean_veo_prompt
 import src.core.token_tracker as token_tracker
+
+
+def _sanitize_stage_output(raw_output: str, stage_name: str) -> str:
+    """
+    Lap tuc loc an toan toan bo dau ra cua Agent truoc khi luu vao DB va tra ve:
+    - Stage brief/script/visual: Quet va thay the cac Combined Visual Prompt ben trong van ban Markdown.
+    - Cac stage khac: Tra nguyen ban khong doi.
+    """
+    if not raw_output or stage_name not in ("brief", "script", "visual"):
+        return raw_output
+
+    import re as _re
+
+    # Regex nhan dien cac dong Combined Visual (EN) hoac Visual Description (EN) trong Markdown
+    visual_line_pattern = _re.compile(
+        r"(\*?\s*(?:Combined Visual|Visual Description|Visual|Veo3? Dynamic Prompt)[^:]*:\s*\`?)([^\n]+)(\`?)",
+        _re.IGNORECASE
+    )
+
+    def _replace_visual(match):
+        prefix = match.group(1)
+        raw_prompt = match.group(2).strip().strip("`\"")
+        suffix = match.group(3)
+        cleaned = clean_veo_prompt(raw_prompt)
+        return f"{prefix}{cleaned}{suffix}"
+
+    sanitized = visual_line_pattern.sub(_replace_visual, raw_output)
+    print(f"[SANITIZER] Stage '{stage_name}': Da loc an toan cac Combined Visual Prompt thanh cong.")
+    return sanitized
 
 class StepContext:
     """
@@ -608,6 +639,9 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
             script_result_raw = _crew_raw
             script_output = str(script_result_raw)
 
+            # Loc an toan ngay sau khi nhan duoc raw output tu Crew (Lop 2 Hard Filter)
+            script_output = _sanitize_stage_output(script_output, stage_name)
+
             # B2: Đánh giá transition_score và thực hiện Self-Correction Loop cho kịch bản chi tiết
             if stage_name == "script" and llm:
                 target_dur = context.get("target_duration", "30") if context else "30"
@@ -746,7 +780,9 @@ Hãy viết lại kịch bản trên để sửa chữa các lỗi này. Yêu c�
                         print(f"[WARN] Khong the ghi log DB buoc 2: {ex_db2}")
                     finally:
                         db.close()
-                
+
+                # Loc an toan lan cuoi truoc khi tra ve ket qua script
+                final_script = _sanitize_stage_output(final_script, stage_name)
                 return final_script
 
             # B3: Đánh giá chỉ số chất lượng Visual Prompt & Độ đồng nhất nhân vật
@@ -816,6 +852,8 @@ Bắt buộc phải trả về kết quả dưới dạng chuỗi JSON nguyên b
                     finally:
                         db.close()
 
+            # Loc an toan lan cuoi truoc khi tra ve (stage brief, visual va cac stage khac)
+            script_output = _sanitize_stage_output(script_output, stage_name)
             return script_output
             
         except Exception as e:

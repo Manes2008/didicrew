@@ -87,13 +87,17 @@ script_task:
     Với mỗi cảnh trong Storyboard (Phần 2), trích xuất đoạn Prompt tiếng Anh chuẩn cho AI Video (Veo / Runway / Kling / Wan2.1) theo từng phân cảnh độc lập.
     QUY TẮC BẮT BUỘC:
     1. TUYỆT ĐỐI KHÔNG GOM/TÍCH HỢP NHIỀU CẢNH LÀM MỘT. Mỗi cảnh trong Storyboard tương ứng với chính xác 1 Phân cảnh độc lập (Phân cảnh 1, Phân cảnh 2, Phân cảnh 3...) để các workflow và tool tự động xử lý theo từng shot riêng biệt (thời lượng 3s - 5s).
-    2. BỘ LỌC AN TOÀN TỪ VỰNG ĐIỆN ẢNH (CHỐNG CHẶN & NGHẼN GEMINI/IMAGEN/VEO3):
+    2. BỘ LỌC AN TOÀN TỪ VỰNG ĐIỆN ẢNH & QUY CHUẨN GOOGLE FLOW NATIVE (CHỐNG CHẶN VEO / OMNI):
        - TUYỆT ĐỐI CẤM các từ ngữ chiến sự trực diện, cháy nổ, vũ khí, máu me hoặc thương tật: "DK75", "shell", "bomb", "explosion", "blast", "crawl in mud", "paralyzed", "wound", "blood", "shiver", "violence".
        - BẮT BUỘC CHUYỂN HÓA SANG ẨN DỤ ĐIỆN ẢNH AN TOÀN (Cinematic Metaphor): Thay vì nổ bom hãy dùng "sudden dramatic burst of golden-orange backlight, high contrast silhouette, volumetric dust particles, atmospheric lens flare"; thay vì ngã xuống bùn / liệt chân hãy dùng "a weary soldier sitting in contemplative silence against a mossy tree trunk, gazing at the distant horizon with solemn determination"; thay vì tay thương tật hãy dùng "weathered mature hands, deep emotional eyes reflecting dignity".
+       - QUY CHUẨN GOOGLE FLOW & VEO NATIVE:
+         * TỐI ƯU ĐỘ DÀI: Mỗi Combined Visual Prompt chỉ nên dài từ 25-45 từ (dưới 350 ký tự), tập trung vào [Chủ thể] + [Hành động cụ thể] + [Chuyển động camera] + [Ánh sáng & Bối cảnh].
+         * KHÔNG NHỒI NHÉT THÔNG SỐ MÁY ẢNH: Tuyệt đối không thêm các cụm như "shot on Arri Alexa Mini LF, 35mm lens, f/1.8 depth of field" vì gây nhiễu cho mô hình Veo và làm tràn giới hạn ký tự.
+         * LOẠI BỎ TỪ KHÓA DỄ KÍCH HOẠT SAFETY FILTER: Không dùng các từ "rough", "shocked", "dark atmosphere", "male hands rapid action", "dead", "strike". Thay bằng: "clean outline sketch", "surprised expression", "ambient studio lighting", "hands typing smoothly".
 
     Định dạng từng phân cảnh:
     - **Phân cảnh 1 (0s - 3s)**:
-      * **Combined Visual (EN)**: [Prompt tiếng Anh chuẩn điện ảnh an toàn 3-5 câu: Master Art Style + Character Profile + Dynamic Camera Movement + Action & Emotion + Lighting + Environment details, không chứa từ cấm].
+      * **Combined Visual (EN)**: [Prompt tiếng Anh chuẩn điện ảnh Veo-native ngắn gọn 25-45 từ: Subject + Action + Camera Movement + Lighting & Atmosphere, không chứa từ cấm và không chứa thông số máy ảnh thừa].
       * **Voiceover / Dialogue (VI)**: [Đoạn thoại dày dặn của cảnh này, 14-22 từ].
       * **On-Screen Flash Text (VI)**: [Từ khóa in hoa giật màn hình 0.5s - 1s].
       * **SFX/BGM**: [Hiệu ứng âm thanh và sắc thái nhạc nền].
